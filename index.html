@@ -244,7 +244,7 @@
   .closer .real { display: flex; align-items: center; gap: .32em; font-family: "Inter Tight", sans-serif; font-weight: 700; font-size: clamp(48px, 7.4vw, 112px); line-height: 1.02; letter-spacing: -.045em; color: var(--ink); }
   .closer .real b { color: var(--brand); font-weight: 700; }
   .closer .step-in { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
-  .closer.open .step-in { opacity: 1; transform: none; }
+  .closer .step-in.shown { opacity: 1; transform: none; }
   .closer .sign { display: flex; align-items: center; gap: 16px; font-family: "Inter Tight", sans-serif; font-weight: 600; font-size: clamp(22px, 2.4vw, 34px); letter-spacing: -.02em; color: var(--muted); }
   .closer .sign strong { color: var(--brand); font-weight: 700; font-size: 1.5em; letter-spacing: -.04em; }
   @media (prefers-reduced-motion: reduce) { .closer .step-in { transition: none; } }
@@ -443,13 +443,13 @@
 
 <div id="closer" class="closer" role="dialog" aria-label="Why Verimate" aria-hidden="true">
   <div class="flex flex-col gap-10 px-10" style="max-width:1200px">
-    <p class="lead step-in" style="transition-delay:.1s">Subleasing needs</p>
+    <p class="lead step-in">Subleasing needs</p>
     <div class="flex flex-col gap-3">
-      <p class="real step-in" style="transition-delay:.55s"><span data-badge-lg="#3B82F6"></span>Real <b>students.</b></p>
-      <p class="real step-in" style="transition-delay:1.05s"><span data-badge-lg="#16A34A"></span>Real <b>faces.</b></p>
-      <p class="real step-in" style="transition-delay:1.55s"><span data-badge-lg="#D81E28"></span>Real <b>information.</b></p>
+      <p class="real step-in"><span data-badge-lg="#3B82F6"></span>Real <b>students.</b></p>
+      <p class="real step-in"><span data-badge-lg="#16A34A"></span>Real <b>faces.</b></p>
+      <p class="real step-in"><span data-badge-lg="#D81E28"></span>Real <b>information.</b></p>
     </div>
-    <div class="sign step-in" style="transition-delay:2.3s">
+    <div class="sign step-in">
       <span>And we give you all of it, on</span>
       <span class="logo-mark" style="width:56px;height:56px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg></span>
       <strong>Verimate</strong>
@@ -1292,10 +1292,23 @@ if (location.hash === '#dates') { pill.click(); }
 /* Closing line: the logo opens it, any click or Esc closes it. */
 document.querySelectorAll('[data-badge-lg]').forEach(el => { el.outerHTML = ICON.badge(el.dataset.badgeLg, 0).replace('width="0" height="0"', 'width="0.78em" height="0.78em"'); });
 const closer = $('#closer');
-const setCloser = (on) => { closer.classList.toggle('open', on); closer.setAttribute('aria-hidden', !on); };
+// Presenter-paced: each Page Down / Right / Space / click reveals the next line, Page Up steps back, Esc closes.
+const steps = [...closer.querySelectorAll('.step-in')];
+let shown = 0;
+const paint = () => steps.forEach((el, i) => el.classList.toggle('shown', i < shown));
+const setCloser = (on) => {
+  closer.classList.toggle('open', on); closer.setAttribute('aria-hidden', !on);
+  shown = on ? 1 : 0; paint();
+};
+const advance = () => { if (shown < steps.length) { shown++; paint(); } else setCloser(false); };
 $('#logoBtn').addEventListener('click', () => setCloser(true));
-closer.addEventListener('click', () => setCloser(false));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') setCloser(false); });
+closer.addEventListener('click', advance);
+document.addEventListener('keydown', e => {
+  if (!closer.classList.contains('open')) return;
+  if (['PageDown', 'ArrowRight', 'ArrowDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); advance(); }
+  else if (['PageUp', 'ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); if (shown > 1) { shown--; paint(); } }
+  else if (e.key === 'Escape') setCloser(false);
+});
 if (location.hash === '#closing') setTimeout(() => setCloser(true), 300);
 </script>
 </body>
