@@ -252,11 +252,16 @@
 
   /* ---------- Agent drawer ---------- */
   .drawer {
-    position: absolute; top: 0; right: 8px; bottom: 8px; width: 420px; z-index: 40; background: #fff;
-    border-radius: 20px; box-shadow: 0 12px 50px rgba(0,0,0,.16);
+    position: absolute; top: 10px; right: 10px; bottom: 10px; width: max(55%, 640px); max-width: calc(100% - 20px); z-index: 40; background: #fff;
+    border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.30), 0 0 0 1px rgba(0,0,0,.04); overflow: hidden;
     transform: translateX(110%); transition: transform .38s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column;
   }
   .drawer.open { transform: translateX(0); }
+  .drawer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--brand); z-index: 1; }
+  .scrim { position: absolute; inset: 0; z-index: 39; background: rgba(17,17,17,.38); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  .scrim.open { opacity: 1; pointer-events: auto; cursor: pointer; }
+  .drawer #thread > *, .drawer #subject { max-width: 820px; }
+  .drawer .a-bubble p, .drawer .src-card q { font-size: 15.5px; }
   .mini-orb { width: 28px; height: 28px; border-radius: 999px; flex: none; background: var(--brand); display: grid; place-items: center; color: #fff; }
   .subject { background: var(--soft); border-radius: 20px; color: var(--ink); }
   .u-bubble { align-self: flex-end; max-width: 85%; background: var(--brand); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; display: inline-flex; gap: 8px; align-items: center; }
@@ -415,6 +420,7 @@
       </aside>
 
       <!-- ============ AGENT DRAWER ============ -->
+      <div id="scrim" class="scrim" aria-hidden="true"></div>
       <section id="drawer" class="drawer" aria-label="Verimate agent" aria-hidden="true">
         <div class="h-16 flex-none flex items-center gap-3 px-5">
           <div class="mini-orb" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg></div>
@@ -1091,8 +1097,9 @@ $('#feed').addEventListener('click', e => {
    ===================================================================== */
 const drawer = $('#drawer'), thread = $('#thread');
 let runId = 0;
-function openAgent() { drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); }
-function closeAgent() { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
+function openAgent() { drawer.classList.add('open'); $('#scrim').classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); }
+function closeAgent() { drawer.classList.remove('open'); $('#scrim').classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
+$('#scrim').addEventListener('click', () => closeAgent());
 $('#orb').addEventListener('click', () => { if (drawer.classList.contains('open')) return closeAgent(); openAgent(); runReputation('euclid'); });
 $('#drawerClose').addEventListener('click', closeAgent);
 
