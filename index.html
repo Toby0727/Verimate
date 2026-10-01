@@ -127,7 +127,7 @@
   .feed-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; flex: 1; }
 
   .lcard { cursor: pointer; border-radius: 16px; }
-  .property-address { color: inherit; text-decoration: none; }
+  .property-address { display: inline-block; color: inherit; text-decoration: none; }
   .property-address:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
   .lcard .photo { position: relative; border-radius: 16px; overflow: hidden; background: #EFEFEF; }
   .lcard .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -704,7 +704,7 @@ function listingCard(l) {
     <div class="px-1.5 pt-3">
       <p class="text-[11.5px] font-medium" style="color:var(--muted)">${l.unit}</p>
       <div class="flex items-baseline justify-between gap-2 mt-0.5">
-        <p class="display text-[15.5px] font-semibold" style="letter-spacing:-.02em">${l.id === 'livingston' ? `<a class="property-address" data-property-link href="property.html">${l.address}</a>` : l.address}</p>
+        ${l.id === 'livingston' ? `<a class="property-address display text-[15.5px] font-semibold" style="letter-spacing:-.02em" data-property-link href="property.html">${l.address}</a>` : `<p class="display text-[15.5px] font-semibold" style="letter-spacing:-.02em">${l.address}</p>`}
       </div>
       <div class="flex items-baseline justify-between gap-2 mt-2">
         <p class="price">$${l.price.toLocaleString()}<small>/mo</small></p>

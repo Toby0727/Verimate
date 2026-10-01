@@ -49,14 +49,15 @@
     .action { height: 38px; padding: 0 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; }
     .action:hover { border-color: #bbb; }
     .action.active { color: var(--brand); background: var(--brand-tint); border-color: #f1b9bd; }
-    .gallery { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 1fr); gap: 8px; height: 390px; overflow: hidden; border-radius: 9px; background: #eee; }
-    .gallery-main { min-width: 0; height: 100%; }
+    .gallery { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(250px, 1fr); gap: 8px; height: 390px; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, #f3f1ee, #eceae7); border: 1px solid var(--line); box-shadow: 0 10px 24px rgba(23,23,23,0.04); }
+    .gallery-main { min-width: 0; height: 100%; background: linear-gradient(135deg, #f7f4f1, #efece9); }
     .gallery-side { min-width: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
-    .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; background: linear-gradient(135deg, #f7f4f1, #efece9); }
     .gallery-main img { object-position: center 53%; }
     .gallery-side img:first-child { grid-column: 1 / -1; }
-    .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 44px; align-items: start; margin-top: 28px; }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.9fr); gap: 32px; align-items: start; margin-top: 28px; }
     .main-column { min-width: 0; }
+    .gallery-column { display: flex; flex-direction: column; gap: 20px; }
     .facts { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); padding: 17px 0; margin-bottom: 27px; }
     .fact { padding: 0 20px; border-left: 1px solid var(--line); }
     .fact:first-child { padding-left: 0; border-left: 0; }
@@ -133,8 +134,8 @@
       .content-grid { display: flex; flex-direction: column; gap: 28px; margin-top: 20px; }
       .main-column { display: contents; }
       .facts { order: 0; width: 100%; margin: 0; padding: 14px 0; }
-      .gallery { order: -1; }
-      .sidebar { position: static; order: 1; width: 100%; }
+      .gallery-column { order: -1; }
+      .sidebar { position: static; width: 100%; }
       .details-copy, .details-list { order: 2; }
       .thread-head { order: 3; width: 100%; }
       .composer, .comment-list { order: 4; width: 100%; }
@@ -176,15 +177,6 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg>
           <span>Share</span>
         </button>
-      </div>
-    </section>
-
-    <section class="gallery" aria-label="Property photos">
-      <div class="gallery-main"><img src="img/u-room-real.jpg" alt="Furnished bedroom with bed and desk" /></div>
-      <div class="gallery-side">
-        <img src="img/u-room-sofa.jpg" alt="Bedroom with a desk and sitting area" />
-        <img src="img/u-living.jpg" alt="Shared living room" />
-        <img src="img/u-kitchen.jpg" alt="Shared kitchen" />
       </div>
     </section>
 
@@ -231,25 +223,35 @@
         <div class="comment-list" id="commentList" aria-live="polite"></div>
       </div>
 
-      <aside class="sidebar" aria-label="Rent and host details">
-        <div class="rent-card">
-          <div class="rent">$925 <small>/ month</small></div>
-          <div class="available">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <span><strong>Available Jan 10 – May 15, 2027</strong><br /><span style="color:var(--muted)">Spring semester</span></span>
+      <div class="gallery-column">
+        <section class="gallery" aria-label="Property photos">
+          <div class="gallery-main"><img src="img/u-room-real.jpg" alt="Furnished bedroom with bed and desk" onerror="this.style.display='none'; this.parentNode.style.background='linear-gradient(135deg, #f7f4f1, #efece9)';" /></div>
+          <div class="gallery-side">
+            <img src="img/u-room-sofa.jpg" alt="Bedroom with a desk and sitting area" onerror="this.style.display='none'; this.parentNode.style.background='linear-gradient(135deg, #f7f4f1, #efece9)';" />
+            <img src="img/u-living.jpg" alt="Shared living room" onerror="this.style.display='none'; this.parentNode.style.background='linear-gradient(135deg, #f7f4f1, #efece9)';" />
+            <img src="img/u-kitchen.jpg" alt="Shared kitchen" onerror="this.style.display='none'; this.parentNode.style.background='linear-gradient(135deg, #f7f4f1, #efece9)';" />
           </div>
-          <div class="host">
-            <img class="avatar" src="img/p-1500648767.jpg" alt="Noah Brennan" />
-            <div><div class="host-name">Noah Brennan <span class="resident">✓ Verified</span></div><div class="host-meta">Student host · ECS '26</div></div>
+        </section>
+        <aside class="sidebar" aria-label="Rent and host details">
+          <div class="rent-card">
+            <div class="rent">$925 <small>/ month</small></div>
+            <div class="available">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <span><strong>Available Jan 10 – May 15, 2027</strong><br /><span style="color:var(--muted)">Spring semester</span></span>
+            </div>
+            <div class="host">
+              <img class="avatar" src="img/p-1500648767.jpg" alt="Noah Brennan" onerror="this.style.display='none'; this.parentNode.style.background='linear-gradient(135deg, #f7f4f1, #efece9)';" />
+              <div><div class="host-name">Noah Brennan <span class="resident">✓ Verified</span></div><div class="host-meta">Student host · ECS '26</div></div>
+            </div>
+            <button class="ask-btn" id="askQuestion" type="button">Ask the community</button>
+            <div class="walk-note">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              8-minute walk to Syracuse University
+            </div>
+            <p class="trust-note">Photos verified · Student host verified · 2 resident reviews</p>
           </div>
-          <button class="ask-btn" id="askQuestion" type="button">Ask the community</button>
-          <div class="walk-note">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            8-minute walk to Syracuse University
-          </div>
-          <p class="trust-note">Photos verified · Student host verified · 2 resident reviews</p>
-        </div>
-      </aside>
+        </aside>
+      </div>
     </div>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
