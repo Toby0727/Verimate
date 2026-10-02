@@ -1,0 +1,290 @@
+- generic [active] [ref=e1]:
+  - region "Home" [ref=e2]:
+    - generic [ref=e3]:
+      - tablist [ref=e4]:
+        - button "Home" [ref=e5] [cursor=pointer]
+        - button "Sublets" [ref=e6] [cursor=pointer]
+        - button "Roommates" [ref=e7] [cursor=pointer]
+        - link "Your profile" [ref=e8] [cursor=pointer]:
+          - /url: "#"
+      - search [ref=e12]:
+        - textbox "Search" [ref=e16]:
+          - /placeholder: Street, building or landlord
+        - button "Search" [ref=e17] [cursor=pointer]
+      - button "Change your dates" [ref=e21] [cursor=pointer]:
+        - generic [ref=e25]: Jan 10 → May 20
+        - emphasis [ref=e26]: 19 weeks
+      - generic [ref=e27]:
+        - button "For you" [ref=e28] [cursor=pointer]
+        - button "Photos verified" [ref=e29] [cursor=pointer]
+        - button "Under $900" [ref=e30] [cursor=pointer]
+        - button "≤10 min walk" [ref=e31] [cursor=pointer]
+        - button "Whole stay" [ref=e32] [cursor=pointer]
+        - button "Furnished" [ref=e33] [cursor=pointer]
+      - generic [ref=e34]:
+        - button [ref=e35] [cursor=pointer]
+        - button [ref=e39] [cursor=pointer]
+        - button [ref=e45] [cursor=pointer]
+        - button [ref=e50] [cursor=pointer]
+        - button [ref=e56] [cursor=pointer]
+        - button [ref=e61] [cursor=pointer]
+    - generic [ref=e66]:
+      - generic [ref=e70]: Everyone here passed 3 checks
+      - generic [ref=e71]:
+        - generic [ref=e72]: ✓ Face
+        - generic [ref=e73]: ✓ ID
+        - generic [ref=e74]: ✓ College
+    - generic [ref=e75]:
+      - generic [ref=e76]:
+        - article [ref=e77] [cursor=pointer]:
+          - generic [ref=e78]:
+            - img "Room in a 4-bed at 734 Comstock Ave" [ref=e79]
+            - generic [ref=e80]: Photos verified
+            - generic [ref=e84]: Comstock Ave · 6 min to SU
+          - generic [ref=e86]:
+            - paragraph [ref=e87]:
+              - generic [ref=e88]: Exact dates
+              - text: Sunny room on Comstock, 6 min to the Quad, furnished
+            - paragraph [ref=e89]: Room in a 4-bed|Jan 10 – May 20
+            - paragraph [ref=e90]: 4 verified resident reviews
+            - paragraph [ref=e91]:
+              - generic [ref=e92]: $875/mo
+              - emphasis [ref=e93]: 12 want it
+            - generic [ref=e94]:
+              - generic [ref=e95]: Lena P.
+              - generic [ref=e96]: Verified student
+        - article [ref=e97] [cursor=pointer]:
+          - generic [ref=e98]:
+            - img "Room in a 3-bed at 812 Euclid Ave" [ref=e99]
+            - generic [ref=e100]: Photos verified
+            - generic [ref=e104]: Euclid Ave · 9 min to SU
+          - generic [ref=e107]:
+            - paragraph [ref=e108]:
+              - generic [ref=e109]: Whole stay
+              - text: Euclid 3-bed, big shared living room, laundry in unit
+            - paragraph [ref=e110]: Room in a 3-bed|Jan 3 – May 31
+            - paragraph [ref=e111]: 4 verified resident reviews
+            - paragraph [ref=e112]:
+              - generic [ref=e113]: $850/mo
+              - emphasis [ref=e114]: 9 want it
+            - generic [ref=e115]:
+              - generic [ref=e116]: Jason L.
+              - generic [ref=e117]: Verified student
+        - article [ref=e118] [cursor=pointer]:
+          - generic [ref=e119]:
+            - img "Priya Nair" [ref=e120]
+            - generic [ref=e121]: 84% match
+            - generic [ref=e123]: Arts & Sciences · 0.4 mi
+          - generic [ref=e126]:
+            - paragraph [ref=e127]:
+              - generic [ref=e128]: Roommate
+              - text: Off to Florence in January. My room is open Jan to May
+            - paragraph [ref=e129]: Art History
+            - paragraph [ref=e130]:
+              - generic [ref=e131]: $850/mo
+            - generic [ref=e132]:
+              - generic [ref=e133]: Priya N.
+              - generic [ref=e134]: Verified student
+        - article [ref=e135] [cursor=pointer]:
+          - generic [ref=e136]:
+            - img "Ethan Wu" [ref=e137]
+            - generic [ref=e138]: 72% match
+            - generic [ref=e140]: SUNY ESF · 0.6 mi
+          - generic [ref=e143]:
+            - paragraph [ref=e144]:
+              - generic [ref=e145]: Roommate
+              - text: Taking over a lease from Jan 10
+            - paragraph [ref=e146]: Bioprocess Engineering
+            - paragraph [ref=e147]:
+              - generic [ref=e148]: $700 – $850/mo
+            - generic [ref=e149]:
+              - generic [ref=e150]: Ethan W.
+              - generic [ref=e151]: Verified student
+        - article [ref=e152] [cursor=pointer]:
+          - generic [ref=e153]:
+            - img "Whole 1-bed at 118 Clarendon St" [ref=e154]
+            - generic [ref=e155]: Checking photos…
+            - generic [ref=e156]: Clarendon St · 11 min to SU
+          - generic [ref=e159]:
+            - paragraph [ref=e160]: Whole 1-bed on Clarendon, no roommates
+            - paragraph [ref=e161]: Whole 1-bed|Jan 12 – May 20
+            - paragraph [ref=e162]:
+              - generic [ref=e163]: $1,080/mo
+              - emphasis [ref=e164]: 3 want it
+            - generic [ref=e165]:
+              - generic [ref=e166]: Omar H.
+              - generic [ref=e167]: Verified student
+        - article [ref=e168] [cursor=pointer]:
+          - generic [ref=e169]:
+            - img "Room in a 3-bed at 305 Maryland Ave" [ref=e170]
+            - generic [ref=e171]: Photos verified
+            - generic [ref=e175]: Maryland Ave · 13 min to SU
+          - generic [ref=e177]:
+            - paragraph [ref=e178]:
+              - generic [ref=e179]: Whole stay
+              - text: Maryland Ave room, two VPA roommates, cozy
+            - paragraph [ref=e180]: Room in a 3-bed|Jan 5 – Jun 30
+            - paragraph [ref=e181]: 5 verified resident reviews
+            - paragraph [ref=e182]:
+              - generic [ref=e183]: $760/mo
+              - emphasis [ref=e184]: 6 want it
+            - generic [ref=e185]:
+              - generic [ref=e186]: Sofia M.
+              - generic [ref=e187]: Verified student
+        - article [ref=e188] [cursor=pointer]:
+          - generic [ref=e189]:
+            - img "Layla Haddad" [ref=e190]
+            - generic [ref=e191]: 86% match
+            - generic [ref=e193]: Maxwell · 0.3 mi
+          - generic [ref=e196]:
+            - paragraph [ref=e197]:
+              - generic [ref=e198]: Roommate
+              - text: Looking to sublet Jan to May, close to Marshall St
+            - paragraph [ref=e199]: Political Science
+            - paragraph [ref=e200]:
+              - generic [ref=e201]: $650 – $800/mo
+            - generic [ref=e202]:
+              - generic [ref=e203]: Layla H.
+              - generic [ref=e204]: Verified student
+      - generic [ref=e205]:
+        - article [ref=e206] [cursor=pointer]:
+          - generic [ref=e207]:
+            - img "Chloe Zhang" [ref=e208]
+            - generic [ref=e209]: 91% match
+            - generic [ref=e211]: Newhouse · 1.2 mi
+          - generic [ref=e214]:
+            - paragraph [ref=e215]:
+              - generic [ref=e216]: Roommate
+              - text: Looking to sublet Jan to May
+            - paragraph [ref=e217]: Fashion Communications
+            - paragraph [ref=e218]:
+              - generic [ref=e219]: $750 – $900/mo
+            - generic [ref=e220]:
+              - generic [ref=e221]: Chloe Z.
+              - generic [ref=e222]: Verified student
+        - article [ref=e223] [cursor=pointer]:
+          - generic [ref=e224]:
+            - img "Private suite at 419 Ackerman Ave" [ref=e225]
+            - generic [ref=e226]: AI photos?
+            - generic [ref=e230]: Ackerman Ave · 12 min to SU
+          - generic [ref=e232]:
+            - paragraph [ref=e233]: Brand new luxury suite!! Must go fast, DM for deposit
+            - paragraph [ref=e234]: Private suite|Jan 8 – May 22
+            - paragraph [ref=e235]: 2 flags from our photo check
+            - paragraph [ref=e236]:
+              - generic [ref=e237]: $690/mo
+              - emphasis [ref=e238]: 31 want it
+            - generic [ref=e239]:
+              - generic [ref=e240]: Chris M.
+              - generic [ref=e241]: Unverified
+        - article [ref=e242] [cursor=pointer]:
+          - generic [ref=e243]:
+            - img "Room in a 5-bed at 601 Ostrom Ave" [ref=e244]
+            - generic [ref=e245]: Photos verified
+            - generic [ref=e249]: Ostrom Ave · 4 min to SU
+          - generic [ref=e252]:
+            - paragraph [ref=e253]:
+              - generic [ref=e254]: Whole stay
+              - text: Ostrom 5-bed, 4 min walk, new kitchen, ESF friendly
+            - paragraph [ref=e255]: Room in a 5-bed|Aug 22 – May 20
+            - paragraph [ref=e256]: 6 verified resident reviews
+            - paragraph [ref=e257]:
+              - generic [ref=e258]: $820/mo
+              - emphasis [ref=e259]: 7 want it
+            - generic [ref=e260]:
+              - generic [ref=e261]: Aisha R.
+              - generic [ref=e262]: Verified student
+        - article [ref=e263] [cursor=pointer]:
+          - generic [ref=e264]:
+            - img "Room in a 3-bed at 207 Livingston Ave" [ref=e265]
+            - generic [ref=e266]: Photos verified
+            - generic [ref=e270]: Livingston Ave · 8 min to SU
+          - generic [ref=e272]:
+            - paragraph [ref=e273]: Furnished room on Livingston, quiet block, spring only
+            - paragraph [ref=e274]: Room in a 3-bed|Jan 10 – May 15
+            - paragraph [ref=e275]:
+              - generic [ref=e276]: $925/mo
+              - emphasis [ref=e277]: 5 want it
+            - generic [ref=e278]:
+              - generic [ref=e279]: Noah B.
+              - generic [ref=e280]: Verified student
+        - article [ref=e281] [cursor=pointer]:
+          - generic [ref=e282]:
+            - img "Room in a 4-bed at 312 Sumner Ave" [ref=e283]
+            - generic [ref=e284]: Photos verified
+            - generic [ref=e288]: Sumner Ave · 15 min to SU
+          - generic [ref=e291]:
+            - paragraph [ref=e292]:
+              - generic [ref=e293]: Whole stay
+              - text: Sumner room through summer, porch and parking
+            - paragraph [ref=e294]: Room in a 4-bed|Dec 20 – Aug 10
+            - paragraph [ref=e295]:
+              - generic [ref=e296]: $720/mo
+              - emphasis [ref=e297]: 4 want it
+            - generic [ref=e298]:
+              - generic [ref=e299]: Grace L.
+              - generic [ref=e300]: Verified student
+        - article [ref=e301] [cursor=pointer]:
+          - generic [ref=e302]:
+            - img "Kevin Liu" [ref=e303]
+            - generic [ref=e304]: 78% match
+            - generic [ref=e306]: Whitman · 0.8 mi
+          - generic [ref=e309]:
+            - paragraph [ref=e310]:
+              - generic [ref=e311]: Roommate
+              - text: Need a roommate for summer in Chicago
+            - paragraph [ref=e312]: Finance
+            - paragraph [ref=e313]:
+              - generic [ref=e314]: $1,100 – $1,400/mo
+            - generic [ref=e315]:
+              - generic [ref=e316]: Kevin L.
+              - generic [ref=e317]: Verified student
+        - article [ref=e318] [cursor=pointer]:
+          - generic [ref=e319]:
+            - img "Mia Chen" [ref=e320]
+            - generic [ref=e321]: 88% match
+            - generic [ref=e323]: SUNY ESF · 1.5 mi
+          - generic [ref=e326]:
+            - paragraph [ref=e327]:
+              - generic [ref=e328]: Roommate
+              - text: Need a roommate for next fall. Dog friendly please
+            - paragraph [ref=e329]: Environmental Biology
+            - paragraph [ref=e330]:
+              - generic [ref=e331]: $800 – $950/mo
+            - generic [ref=e332]:
+              - generic [ref=e333]: Mia C.
+              - generic [ref=e334]: Verified student
+    - paragraph [ref=e335]: 8 places and 6 students fit Jan 10 – May 20. That's everyone for now.
+  - navigation "Sections" [ref=e336]:
+    - button [ref=e337] [cursor=pointer]
+    - button "Agent AI" [ref=e341] [cursor=pointer]:
+      - text: Agent
+      - generic [ref=e346]: AI
+    - button "List your place" [ref=e347] [cursor=pointer]:
+      - generic [ref=e348]: Sublet
+    - button "Messages 7" [ref=e352] [cursor=pointer]:
+      - text: Messages
+      - generic [ref=e356]: "7"
+    - button [ref=e357] [cursor=pointer]
+  - dialog "Choose your dates" [ref=e362]:
+    - heading "When do you need it?" [level=2] [ref=e364]
+    - paragraph [ref=e365]: We only show places that cover at least 80% of your stay.
+  - dialog "Rent with protection" [ref=e366]
+  - dialog "Info" [ref=e367]
+  - status
+  - generic "Why Verimate" [ref=e368] [cursor=pointer]:
+    - paragraph [ref=e369]: A perfect sublease needs
+    - generic [ref=e370]:
+      - paragraph [ref=e371]:
+        - text: Real
+        - generic [ref=e375]: students.
+      - paragraph [ref=e376]:
+        - text: Real
+        - generic [ref=e380]: information.
+      - paragraph [ref=e381]:
+        - text: Safe
+        - generic [ref=e385]: transactions.
+    - generic [ref=e386]:
+      - generic [ref=e387]: All of it, on
+      - strong [ref=e392]: Verimate
+    - generic [ref=e393]: Tap to start browsing

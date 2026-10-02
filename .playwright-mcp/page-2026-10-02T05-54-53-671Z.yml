@@ -1,0 +1,293 @@
+- generic [ref=f5e2]:
+  - generic [ref=f5e3]:
+    - generic [ref=f5e4]:
+      - generic [ref=f5e5]:
+        - button "For you" [ref=f5e6] [cursor=pointer]
+        - button "Places" [ref=f5e7] [cursor=pointer]
+        - button "Roommates" [ref=f5e8] [cursor=pointer]
+        - button "Why Verimate" [ref=f5e9] [cursor=pointer]
+      - generic [ref=f5e13]:
+        - textbox "Search" [ref=f5e17]:
+          - /placeholder: Syracuse University · street or building
+        - button "Search" [ref=f5e18] [cursor=pointer]
+    - generic [ref=f5e22]:
+      - button [ref=f5e23] [cursor=pointer]
+      - button [ref=f5e28] [cursor=pointer]
+      - button [ref=f5e33] [cursor=pointer]
+      - button [ref=f5e38] [cursor=pointer]
+      - button [ref=f5e43] [cursor=pointer]
+      - button [ref=f5e50] [cursor=pointer]
+    - button "Your dates Jan 10 May 20 19 wks Change" [ref=f5e55] [cursor=pointer]:
+      - generic [ref=f5e59]:
+        - generic [ref=f5e60]: Your dates
+        - generic [ref=f5e61]:
+          - generic [ref=f5e62]: Jan 10
+          - generic [ref=f5e65]: May 20
+          - generic [ref=f5e66]: 19 wks
+      - generic [ref=f5e67]: Change
+    - generic [ref=f5e68]:
+      - button "Location" [ref=f5e69] [cursor=pointer]
+      - button "Under $900" [ref=f5e72] [cursor=pointer]
+      - button "Whole stay" [ref=f5e75] [cursor=pointer]
+      - button "Sort" [ref=f5e79] [cursor=pointer]
+    - generic [ref=f5e82]:
+      - button "Photos verified" [ref=f5e83] [cursor=pointer]
+      - button "Student verified" [ref=f5e84] [cursor=pointer]
+      - button "10 min walk" [ref=f5e85] [cursor=pointer]
+      - button "Furnished" [ref=f5e86] [cursor=pointer]
+      - button "Ask the agent" [ref=f5e87] [cursor=pointer]
+    - paragraph [ref=f5e91]: 8 places fit Jan 10 – May 20, 6 verified students looking too
+    - generic [ref=f5e92]:
+      - generic [ref=f5e93]:
+        - article [ref=f5e94] [cursor=pointer]:
+          - generic [ref=f5e95]:
+            - img "Room in a 4-bed at 734 Comstock Ave" [ref=f5e96]
+            - generic [ref=f5e97]: Photos verified
+            - generic [ref=f5e101]: Comstock Ave · 6 min walk
+          - generic [ref=f5e103]:
+            - paragraph [ref=f5e104]:
+              - generic [ref=f5e105]: Exact dates
+              - text: Sunny room by the Quad, exact spring dates
+            - paragraph [ref=f5e106]: Room in a 4-bed | Jan 10 – May 20
+            - paragraph [ref=f5e107]:
+              - generic [ref=f5e108]: $875/mo
+              - generic [ref=f5e109]: 12 want
+            - generic [ref=f5e110]:
+              - generic [ref=f5e111]: Lena P.
+              - generic [ref=f5e112]: Verified student
+        - article [ref=f5e113] [cursor=pointer]:
+          - generic [ref=f5e114]:
+            - img "Room in a 3-bed at 812 Euclid Ave" [ref=f5e115]
+            - generic [ref=f5e116]: Photos verified
+            - generic [ref=f5e120]: Euclid Ave · 9 min walk
+          - generic [ref=f5e123]:
+            - paragraph [ref=f5e124]:
+              - generic [ref=f5e125]: Protected
+              - text: Big furnished room in a 3-bed on Euclid
+            - paragraph [ref=f5e126]: Room in a 3-bed | Jan 3 – May 31
+            - paragraph [ref=f5e127]:
+              - generic [ref=f5e128]: $850/mo
+              - generic [ref=f5e129]: 9 want
+            - generic [ref=f5e130]:
+              - generic [ref=f5e131]: Jason L.
+              - generic [ref=f5e132]: Verified student
+        - article [ref=f5e133] [cursor=pointer]:
+          - generic [ref=f5e134]:
+            - img "Priya Nair" [ref=f5e135]
+            - generic [ref=f5e136]: 84% match
+            - paragraph [ref=f5e138]: Off to Florence in January. My room is open Jan to May
+          - generic [ref=f5e139]:
+            - paragraph [ref=f5e141]: Priya Nair
+            - paragraph [ref=f5e148]: Art History
+            - paragraph [ref=f5e149]:
+              - generic [ref=f5e150]: Asking
+              - generic [ref=f5e151]: $850
+            - generic [ref=f5e152]:
+              - generic [ref=f5e153]: SU '27
+              - generic [ref=f5e154]: Museums
+              - generic [ref=f5e155]: Tennis
+        - article [ref=f5e156] [cursor=pointer]:
+          - generic [ref=f5e157]:
+            - img "Ethan Wu" [ref=f5e158]
+            - generic [ref=f5e159]: 72% match
+            - paragraph [ref=f5e161]: Taking over a lease from Jan 10
+          - generic [ref=f5e162]:
+            - paragraph [ref=f5e164]: Ethan Wu
+            - paragraph [ref=f5e171]: Bioprocess Engineering
+            - paragraph [ref=f5e172]:
+              - generic [ref=f5e173]: Budget
+              - generic [ref=f5e174]: $700 – $850
+            - generic [ref=f5e175]:
+              - generic [ref=f5e176]: ESF '27
+              - generic [ref=f5e177]: Guitar
+              - generic [ref=f5e178]: Gym
+        - article [ref=f5e179] [cursor=pointer]:
+          - generic [ref=f5e180]:
+            - img "Whole 1-bed at 118 Clarendon St" [ref=f5e181]
+            - generic [ref=f5e182]: Checking photos
+            - generic [ref=f5e184]: Clarendon St · 11 min walk
+          - generic [ref=f5e187]:
+            - paragraph [ref=f5e188]: Whole 1-bed on Clarendon, no roommates
+            - paragraph [ref=f5e189]: Whole 1-bed | Jan 12 – May 20
+            - paragraph [ref=f5e190]:
+              - generic [ref=f5e191]: $1,080/mo
+              - generic [ref=f5e192]: 15 want
+            - generic [ref=f5e193]:
+              - generic [ref=f5e194]: Omar H.
+              - generic [ref=f5e195]: Verified student
+        - article [ref=f5e196] [cursor=pointer]:
+          - generic [ref=f5e197]:
+            - img "Room in a 3-bed at 305 Maryland Ave" [ref=f5e198]
+            - generic [ref=f5e199]: Photos verified
+            - generic [ref=f5e203]: Maryland Ave · 13 min walk
+          - generic [ref=f5e205]:
+            - paragraph [ref=f5e206]:
+              - generic [ref=f5e207]: Protected
+              - text: Room on Maryland with flexible dates
+            - paragraph [ref=f5e208]: Room in a 3-bed | Jan 5 – Jun 30
+            - paragraph [ref=f5e209]:
+              - generic [ref=f5e210]: $760/mo
+              - generic [ref=f5e211]: 5 want
+            - generic [ref=f5e212]:
+              - generic [ref=f5e213]: Sofia M.
+              - generic [ref=f5e214]: Verified student
+        - article [ref=f5e215] [cursor=pointer]:
+          - generic [ref=f5e216]:
+            - img "Layla Haddad" [ref=f5e217]
+            - generic [ref=f5e218]: 86% match
+            - paragraph [ref=f5e220]: Sublet Jan to May, close to Marshall St
+          - generic [ref=f5e221]:
+            - paragraph [ref=f5e223]: Layla Haddad
+            - paragraph [ref=f5e230]: Political Science
+            - paragraph [ref=f5e231]:
+              - generic [ref=f5e232]: Budget
+              - generic [ref=f5e233]: $650 – $800
+            - generic [ref=f5e234]:
+              - generic [ref=f5e235]: SU '27
+              - generic [ref=f5e236]: Debate
+              - generic [ref=f5e237]: Coffee
+      - generic [ref=f5e238]:
+        - article [ref=f5e239] [cursor=pointer]:
+          - generic [ref=f5e240]:
+            - img "Chloe Zhang" [ref=f5e241]
+            - generic [ref=f5e242]: 91% match
+            - paragraph [ref=f5e244]: Looking to sublet Jan to May
+          - generic [ref=f5e245]:
+            - paragraph [ref=f5e247]: Chloe Zhang
+            - paragraph [ref=f5e254]: Fashion Communications
+            - paragraph [ref=f5e255]:
+              - generic [ref=f5e256]: Budget
+              - generic [ref=f5e257]: $750 – $900
+            - generic [ref=f5e258]:
+              - generic [ref=f5e259]: SU '27
+              - generic [ref=f5e260]: Thrifting
+              - generic [ref=f5e261]: Pilates
+        - article [ref=f5e262] [cursor=pointer]:
+          - generic [ref=f5e263]:
+            - img "Private suite at 419 Ackerman Ave" [ref=f5e264]
+            - generic [ref=f5e265]: AI-generated
+            - generic [ref=f5e269]:
+              - generic [ref=f5e270]: AI signal in 3 of 5 photos
+              - generic [ref=f5e272]: No camera metadata
+          - generic [ref=f5e274]:
+            - paragraph [ref=f5e275]: Brand new private suite, all utilities included!!
+            - paragraph [ref=f5e276]: Private suite | Jan 8 – May 22
+            - paragraph [ref=f5e277]:
+              - generic [ref=f5e278]: $690/mo
+              - generic [ref=f5e279]: 31 want
+            - generic [ref=f5e280]:
+              - generic [ref=f5e281]: Chris M.
+              - generic [ref=f5e282]: Unverified
+        - article [ref=f5e283] [cursor=pointer]:
+          - generic [ref=f5e284]:
+            - img "Room in a 5-bed at 601 Ostrom Ave" [ref=f5e285]
+            - generic [ref=f5e286]: Photos verified
+            - generic [ref=f5e290]: Ostrom Ave · 4 min walk
+          - generic [ref=f5e293]:
+            - paragraph [ref=f5e294]:
+              - generic [ref=f5e295]: Protected
+              - text: Room in a 5-bed on Ostrom, 4 min to class
+            - paragraph [ref=f5e296]: Room in a 5-bed | Aug 22 – May 20
+            - paragraph [ref=f5e297]:
+              - generic [ref=f5e298]: $820/mo
+              - generic [ref=f5e299]: 7 want
+            - generic [ref=f5e300]:
+              - generic [ref=f5e301]: Aisha R.
+              - generic [ref=f5e302]: Verified student
+        - article [ref=f5e303] [cursor=pointer]:
+          - generic [ref=f5e304]:
+            - img "Room in a 3-bed at 207 Livingston Ave" [ref=f5e305]
+            - generic [ref=f5e306]: Photos verified
+            - generic [ref=f5e310]: Livingston Ave · 8 min walk
+          - generic [ref=f5e312]:
+            - paragraph [ref=f5e313]:
+              - generic [ref=f5e314]: Protected
+              - text: Furnished room on Livingston for spring
+            - paragraph [ref=f5e315]: Room in a 3-bed | Jan 10 – May 15
+            - paragraph [ref=f5e316]:
+              - generic [ref=f5e317]: $925/mo
+              - generic [ref=f5e318]: 6 want
+            - generic [ref=f5e319]:
+              - generic [ref=f5e320]: Noah B.
+              - generic [ref=f5e321]: Verified student
+        - article [ref=f5e322] [cursor=pointer]:
+          - generic [ref=f5e323]:
+            - img "Room in a 4-bed at 312 Sumner Ave" [ref=f5e324]
+            - generic [ref=f5e325]: Photos verified
+            - generic [ref=f5e329]: Sumner Ave · 15 min walk
+          - generic [ref=f5e332]:
+            - paragraph [ref=f5e333]:
+              - generic [ref=f5e334]: Protected
+              - text: Quiet room on Sumner, Dec through Aug
+            - paragraph [ref=f5e335]: Room in a 4-bed | Dec 20 – Aug 10
+            - paragraph [ref=f5e336]:
+              - generic [ref=f5e337]: $720/mo
+              - generic [ref=f5e338]: 4 want
+            - generic [ref=f5e339]:
+              - generic [ref=f5e340]: Grace L.
+              - generic [ref=f5e341]: Verified student
+        - article [ref=f5e342] [cursor=pointer]:
+          - generic [ref=f5e343]:
+            - img "Kevin Liu" [ref=f5e344]
+            - generic [ref=f5e345]: 78% match
+            - paragraph [ref=f5e347]: Need a roommate for summer in Chicago
+          - generic [ref=f5e348]:
+            - paragraph [ref=f5e350]: Kevin Liu
+            - paragraph [ref=f5e357]: Finance
+            - paragraph [ref=f5e358]:
+              - generic [ref=f5e359]: Budget
+              - generic [ref=f5e360]: $1,100 – $1,400
+            - generic [ref=f5e361]:
+              - generic [ref=f5e362]: SU '26
+              - generic [ref=f5e363]: Lifting
+              - generic [ref=f5e364]: Cooking
+        - article [ref=f5e365] [cursor=pointer]:
+          - generic [ref=f5e366]:
+            - img "Mia Chen" [ref=f5e367]
+            - generic [ref=f5e368]: 88% match
+            - paragraph [ref=f5e370]: Need a roommate for next fall. Dog friendly please
+          - generic [ref=f5e371]:
+            - paragraph [ref=f5e373]: Mia Chen
+            - paragraph [ref=f5e380]: Environmental Biology
+            - paragraph [ref=f5e381]:
+              - generic [ref=f5e382]: Budget
+              - generic [ref=f5e383]: $800 – $950
+            - generic [ref=f5e384]:
+              - generic [ref=f5e385]: ESF '28
+              - generic [ref=f5e386]: Dogs
+              - generic [ref=f5e387]: Yoga
+  - navigation "Main" [ref=f5e388]:
+    - button "Home" [ref=f5e389] [cursor=pointer]
+    - button "Nearby" [ref=f5e392] [cursor=pointer]
+    - button "List your place" [ref=f5e397] [cursor=pointer]: List
+    - button "Messages 7" [ref=f5e401] [cursor=pointer]:
+      - text: Messages
+      - generic [ref=f5e404]: "7"
+    - button "Me" [ref=f5e405] [cursor=pointer]
+  - dialog [ref=f5e409]
+  - dialog "Verimate agent" [ref=f5e410]:
+    - generic [ref=f5e411]:
+      - generic [ref=f5e416]:
+        - paragraph [ref=f5e417]: Verimate Agent
+        - paragraph [ref=f5e418]: Shows you the evidence, with sources
+      - button "Close agent" [ref=f5e419] [cursor=pointer]
+    - generic [ref=f5e426]:
+      - textbox "Ask about a building, landlord or photo" [ref=f5e427]
+      - button "Send" [ref=f5e428] [cursor=pointer]
+  - status
+  - dialog "Why Verimate":
+    - generic:
+      - paragraph: A perfect sublease needs
+      - generic:
+        - paragraph:
+          - text: Real
+          - generic: students.
+        - paragraph:
+          - text: Real
+          - generic: info.
+        - paragraph:
+          - text: Safe
+          - generic: deals.
+      - generic:
+        - text: All of it, on
+        - strong: Verimate
