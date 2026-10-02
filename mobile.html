@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#FFF4F4" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Verimate</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F5F5F5;
+    --card: #FFFFFF;
+    --ink: #111111;
+    --muted: #8A8A8A;
+    --faint: #B8B8B8;
+    --line: #EDEDED;
+    --soft: #F2F2F2;
+    --brand: #D81E28;
+    --brand-deep: #A8151D;
+    --brand-tint: #FCE8E9;
+    --verified: #16A34A;
+    --verified-tint: #E7F5EC;
+    --flagged: #DC2626;
+    --flagged-tint: #FDECEC;
+    --warm: #F26B1D;
+    --warm-tint: #FFF1E6;
+    --tabbar: calc(64px + env(safe-area-inset-bottom));
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: #E9E9E9; color: var(--ink); overflow: hidden;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 1.4;
+    -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  }
+  body svg { display: inline-block; vertical-align: -2px; }
+  .display { font-family: "Inter Tight", "Inter", sans-serif; letter-spacing: -.02em; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+  .no-bar { scrollbar-width: none; }
+  .no-bar::-webkit-scrollbar { display: none; }
+
+  /* The app is a phone-width column; on a wider screen it sits centered. */
+  #app { position: fixed; inset: 0; margin: 0 auto; max-width: 520px; background: var(--bg); overflow: hidden; }
+  @media (min-width: 521px) { #app { box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 30px 80px rgba(0,0,0,.18); } }
+  .screen { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(var(--tabbar) + 20px); display: none; }
+  .screen.on { display: block; }
+
+  /* ---------- Tab bar (center button raised, as in the reference) ---------- */
+  .tabbar {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 30; height: var(--tabbar); padding-bottom: env(safe-area-inset-bottom);
+    display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
+    background: rgba(250,250,250,.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(0,0,0,.05);
+  }
+  .tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: 0; font-size: 11px; font-weight: 600; color: #333; padding: 6px 0; }
+  .tab svg { width: 27px; height: 27px; }
+  .tab.on { color: var(--ink); }
+  .tab.on .ic-fill { fill: var(--brand); stroke: var(--ink); }
+  .tab .badge { position: absolute; top: 0; left: 50%; margin-left: 6px; }
+  .tab-center { position: relative; height: 100%; }
+  .tab-center button {
+    position: absolute; left: 50%; top: -22px; transform: translateX(-50%); width: 70px; height: 70px; border-radius: 999px; border: 0;
+    background: var(--brand); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    box-shadow: 0 0 0 5px rgba(250,250,250,.94), 0 8px 18px rgba(216,30,40,.35); font-size: 11.5px; font-weight: 800;
+  }
+  .badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--flagged); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+  .dot { width: 9px; height: 9px; border-radius: 99px; background: var(--flagged); box-shadow: 0 0 0 2px #fff; }
+
+  /* ---------- Home ---------- */
+  .home-head { position: sticky; top: 0; z-index: 10; padding: calc(env(safe-area-inset-top) + 10px) 14px 8px; background: linear-gradient(#FFF4F4, #FBF6F6 70%, rgba(245,245,245,.96)); backdrop-filter: blur(10px); }
+  .top-tab { position: relative; background: none; border: 0; padding: 4px 0 8px; font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -.03em; color: #9A9A9A; }
+  .top-tab.on { color: var(--ink); font-size: 24px; }
+  .top-tab.on::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 22px; height: 4px; margin-left: -11px; border-radius: 4px; background: var(--ink); }
+  .logo-mark { width: 40px; height: 40px; border-radius: 999px; background: var(--brand); display: grid; place-items: center; color: #fff; border: 0; flex: none; }
+  .search { display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 4px 0 14px; border-radius: 999px; border: 2.5px solid var(--ink); background: #fff; }
+  .search input { flex: 1; min-width: 0; border: 0; outline: none; font-size: 16px; background: transparent; }
+  .search .go { height: 36px; width: 56px; border-radius: 999px; background: var(--ink); color: #fff; border: 0; display: grid; place-items: center; flex: none; }
+  .cats { display: flex; gap: 4px; overflow-x: auto; padding: 14px 8px 4px; }
+  .cat { flex: none; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; font-size: 12.5px; font-weight: 500; color: #333; }
+  .cat i { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; color: #fff; box-shadow: inset 0 -4px 0 rgba(0,0,0,.12), 0 4px 10px rgba(0,0,0,.08); }
+  .date-card { margin: 10px 12px 0; display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; border-radius: 16px; background: #fff; border: 0; width: calc(100% - 24px); text-align: left; }
+  .date-card .when { font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; }
+  .date-card .chg { margin-left: auto; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; }
+  .filters { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 8px; font-size: 15px; font-weight: 600; color: #333; }
+  .filters button { background: none; border: 0; display: inline-flex; align-items: center; gap: 3px; }
+  .filters .on { color: var(--brand); }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 12px 10px; }
+  .chip { flex: none; height: 36px; padding: 0 13px; border-radius: 10px; border: 0; background: #EBEBEB; font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; color: #333; }
+  .chip.on { background: var(--brand-tint); color: var(--brand); font-weight: 700; }
+  .chip.ask { background: #fff; font-weight: 800; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .feed-note { padding: 0 16px 10px; font-size: 12.5px; color: var(--muted); }
+  /* Keep the Xianyu-style single-line rows from wrapping on narrow phones (360–390px). */
+  .top-tab, .date-card .when, .date-card .chg, .filters button { white-space: nowrap; flex: none; }
+  .date-card > .flex { min-width: 0; }
+  @media (max-width: 400px) {
+    .home-head > div:first-child { gap: 14px; }
+    .top-tab { font-size: 18px; }
+    .top-tab.on { font-size: 21px; }
+    .filters { padding: 14px 12px 8px; font-size: 14px; }
+  }
+  @media (max-width: 350px) {
+    .home-head > div:first-child { gap: 10px; }
+    .top-tab { font-size: 16px; }
+    .top-tab.on { font-size: 19px; }
+    #dWeeks { display: none; }
+    .filters { font-size: 13px; justify-content: flex-start; gap: 14px; overflow-x: auto; scrollbar-width: none; }
+  }
+
+  .feed { display: flex; gap: 8px; padding: 0 8px; align-items: flex-start; }
+  .feed-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .card { background: var(--card); border-radius: 12px; overflow: hidden; cursor: pointer; }
+  .card:active { transform: scale(.985); }
+  .ph { position: relative; background: #EAEAEA; overflow: hidden; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ph-badge { position: absolute; top: 7px; left: 7px; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px 0 5px; border-radius: 999px; background: rgba(255,255,255,.95); font-size: 11px; font-weight: 700; }
+  .ph-badge.bad { background: var(--flagged); color: #fff; padding-left: 7px; box-shadow: 0 4px 10px rgba(220,38,38,.35); }
+  .ph-badge.wait { color: var(--muted); padding-left: 7px; }
+  .loc { position: absolute; left: 7px; bottom: 7px; max-width: calc(100% - 14px); display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px 0 6px; border-radius: 7px; background: rgba(17,17,17,.62); color: #fff; font-size: 11.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .flag-strip { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; flex-direction: column; gap: 4px; }
+  .flag-strip span { align-self: flex-start; background: rgba(17,17,17,.8); color: #fff; font-size: 10.5px; font-weight: 600; padding: 4px 7px; border-radius: 7px; display: inline-flex; gap: 5px; align-items: center; }
+  .flag-strip i { width: 6px; height: 6px; border-radius: 99px; background: #FF6B6B; flex: none; }
+  .ttl { font-size: 14.5px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .t-tag { display: inline-block; margin-right: 4px; padding: 0 4px; border-radius: 4px; background: var(--brand); color: #fff; font-size: 11.5px; font-weight: 800; line-height: 18px; vertical-align: 1px; }
+  .t-tag.green { background: var(--verified); }
+  .sub { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .price { font-family: "Inter Tight", sans-serif; font-weight: 800; color: var(--brand); font-size: 21px; letter-spacing: -.03em; line-height: 1; }
+  .price small { font-size: 12px; font-weight: 700; letter-spacing: 0; }
+  .want { font-size: 12px; color: var(--muted); }
+  .seller { display: flex; align-items: center; gap: 5px; margin-top: 8px; min-width: 0; }
+  .seller img { width: 20px; height: 20px; border-radius: 99px; object-fit: cover; flex: none; }
+  .seller .nm { font-size: 12px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .cred { margin-left: auto; flex: none; font-size: 10.5px; font-weight: 700; color: var(--warm); background: var(--warm-tint); padding: 2px 6px; border-radius: 6px; white-space: nowrap; }
+  .cred.grey { color: var(--muted); background: var(--soft); }
+  .match { position: absolute; top: 7px; right: 7px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.95); padding: 3px 8px; border-radius: 999px; display: inline-flex; gap: 4px; align-items: center; }
+  .match i { width: 6px; height: 6px; border-radius: 99px; background: var(--brand); }
+  .intent { position: absolute; left: 8px; right: 8px; bottom: 8px; color: #fff; font-weight: 700; font-size: 12.5px; line-height: 1.3; z-index: 1; }
+  .pcard .ph::after { content: ""; position: absolute; inset: 45% 0 0 0; background: linear-gradient(to top, rgba(0,0,0,.65), transparent); }
+  .uni { font-size: 10.5px; font-weight: 800; color: #fff; border-radius: 5px; padding: 1px 5px; white-space: nowrap; }
+  .hobby { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: var(--soft); color: #555; }
+
+  /* ---------- Pushed pages ---------- */
+  .page {
+    position: absolute; inset: 0; z-index: 40; background: var(--bg); overflow-y: auto; overscroll-behavior: contain;
+    transform: translateX(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s .3s; visibility: hidden;
+  }
+  .page.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .nav-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 8px) 10px 8px; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); }
+  .icon-btn { width: 38px; height: 38px; border-radius: 999px; border: 0; background: transparent; display: grid; place-items: center; flex: none; }
+  .float-btn { width: 36px; height: 36px; border-radius: 999px; border: 0; background: rgba(0,0,0,.42); color: #fff; display: grid; place-items: center; backdrop-filter: blur(6px); }
+  .gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; aspect-ratio: 1 / 1; background: #ddd; }
+  .gallery img { flex: none; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; }
+  .sect { background: #fff; border-radius: 16px; margin: 10px 10px 0; padding: 14px; }
+  .sect h3 { font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 17px; letter-spacing: -.02em; display: flex; align-items: center; gap: 7px; }
+  .row-check { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  .row-check:first-of-type { border-top: 0; }
+  .ci { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; }
+  .ci.pass { background: var(--verified-tint); color: var(--verified); }
+  .ci.flag { background: var(--flagged-tint); color: var(--flagged); }
+  .ci.info { background: var(--soft); color: var(--muted); }
+  .cover-track { position: relative; height: 6px; border-radius: 6px; background: var(--soft); overflow: hidden; }
+  .cover-fill { position: absolute; top: 0; bottom: 0; background: var(--brand); border-radius: 6px; }
+  .step-n { width: 26px; height: 26px; border-radius: 999px; background: var(--brand-tint); color: var(--brand); font-weight: 800; font-size: 13px; display: grid; place-items: center; flex: none; }
+  .bottom-bar {
+    position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 6px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    background: rgba(255,255,255,.97); backdrop-filter: blur(12px); border-top: 1px solid var(--line); margin-top: 16px;
+  }
+  .bb-ic { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 52px; background: none; border: 0; font-size: 11px; color: #444; }
+  .bb-ic.on { color: var(--brand); }
+  .cta { flex: 1; height: 46px; border-radius: 999px; border: 0; background: var(--brand); color: #fff; font-weight: 800; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+  .cta small { font-size: 11px; font-weight: 600; opacity: .85; }
+  .cta.dark { background: var(--ink); }
+  .cta.ghost { background: var(--soft); color: var(--ink); }
+
+  /* ---------- Messages ---------- */
+  .msg-head { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; padding: calc(env(safe-area-inset-top) + 14px) 14px 10px 20px; background: rgba(245,245,245,.96); backdrop-filter: blur(10px); }
+  .msg-row { display: flex; gap: 14px; width: 100%; padding: 14px 16px 0 18px; background: none; border: 0; text-align: left; }
+  .msg-row .av { position: relative; flex: none; width: 54px; height: 54px; }
+  .msg-row .av img, .msg-row .av .sys { width: 54px; height: 54px; border-radius: 999px; object-fit: cover; display: grid; place-items: center; color: #fff; }
+  .msg-row .av .badge, .msg-row .av .dot { position: absolute; top: -3px; right: -4px; }
+  .msg-row .body { flex: 1; min-width: 0; display: flex; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid #E6E6E6; }
+  .msg-row .nm { font-size: 17px; font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 6px; }
+  .msg-row .pv { font-size: 14px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .msg-row .tm { font-size: 12px; color: var(--faint); margin-top: 4px; }
+  .msg-row .th { width: 54px; height: 54px; border-radius: 9px; object-fit: cover; flex: none; }
+  .svc { font-size: 10.5px; font-weight: 600; color: var(--muted); background: #EAEAEA; padding: 1px 6px; border-radius: 5px; }
+
+  /* ---------- Chat ---------- */
+  .chat-page { display: flex; flex-direction: column; overflow: hidden; }
+  .deal { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border-bottom: 1px solid var(--line); }
+  .deal img { width: 58px; height: 58px; border-radius: 10px; object-fit: cover; flex: none; }
+  .deal .pill { margin-left: auto; height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--brand); color: #fff; font-weight: 800; font-size: 13.5px; flex: none; }
+  .deal .pill.done { background: var(--soft); color: var(--ink); }
+  .chat-body { flex: 1; overflow-y: auto; padding: 14px 12px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .b-row { display: flex; gap: 9px; align-items: flex-start; max-width: 100%; }
+  .b-row.me { flex-direction: row-reverse; }
+  .b-row > img { width: 38px; height: 38px; border-radius: 999px; object-fit: cover; flex: none; }
+  .bub { max-width: 74%; padding: 10px 13px; border-radius: 16px; background: #fff; font-size: 15px; line-height: 1.4; }
+  .me .bub { background: var(--brand); color: #fff; }
+  .bub.card-b { padding: 0; overflow: hidden; min-width: 62%; }
+  .bub.card-b b { display: block; padding: 12px 14px 10px; font-size: 16px; border-bottom: 1px solid rgba(0,0,0,.07); }
+  .me .bub.card-b b { border-color: rgba(255,255,255,.25); }
+  .bub.card-b span { display: block; padding: 9px 14px 12px; font-size: 13.5px; opacity: .8; }
+  .sys-pill { align-self: center; max-width: 88%; text-align: center; font-size: 12.5px; color: #666; background: #EAEAEA; padding: 6px 12px; border-radius: 9px; }
+  .sys-pill a { color: #1D5FD1; font-weight: 600; }
+  .protect-card { align-self: stretch; display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 16px; background: linear-gradient(120deg, #FDECEC, #FFF5F0); }
+  .composer { display: flex; align-items: center; gap: 8px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); background: #F7F7F7; border-top: 1px solid var(--line); }
+  .composer input { flex: 1; min-width: 0; height: 42px; border-radius: 999px; border: 0; background: #EAEAEA; padding: 0 16px; font-size: 16px; outline: none; }
+  .ring-btn { width: 38px; height: 38px; border-radius: 999px; border: 2px solid #222; background: none; display: grid; place-items: center; flex: none; }
+
+  /* ---------- Me ---------- */
+  .me-card { background: #fff; border-radius: 16px; margin: 10px 10px 0; padding: 14px; }
+  .stat { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: 0; }
+  .stat b { font-family: "Inter Tight", sans-serif; font-size: 22px; font-weight: 800; }
+  .stat span { font-size: 12.5px; color: #444; }
+  .tool { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; font-size: 12.5px; color: #333; }
+  .tool i { width: 42px; height: 42px; border-radius: 999px; display: grid; place-items: center; color: #fff; }
+  .switch { width: 44px; height: 26px; border-radius: 999px; background: var(--verified); position: relative; border: 0; flex: none; transition: background .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 99px; background: #fff; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .switch.off { background: #D4D4D4; }
+  .switch.off::after { left: 3px; }
+
+  /* ---------- Map ---------- */
+  #mapBox { position: absolute; inset: 0; background: #EEF0EA; }
+  .map-top { position: absolute; left: 12px; right: 12px; top: calc(env(safe-area-inset-top) + 10px); z-index: 3; }
+  .map-cards { position: absolute; left: 0; right: 0; bottom: calc(var(--tabbar) + 12px); z-index: 3; display: flex; gap: 10px; overflow-x: auto; padding: 0 12px; scroll-snap-type: x mandatory; }
+  .map-card { flex: none; width: 82%; max-width: 360px; display: flex; gap: 10px; padding: 8px; border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.16); scroll-snap-align: center; text-align: left; border: 0; }
+  .map-card img { width: 86px; height: 86px; border-radius: 11px; object-fit: cover; flex: none; }
+  .map-card.hl { box-shadow: 0 0 0 2.5px var(--brand), 0 8px 24px rgba(0,0,0,.16); }
+  .pin-tag { position: relative; display: inline-flex; align-items: center; gap: 3px; height: 28px; padding: 0 9px; border-radius: 8px; border: 0; background: var(--brand); color: #fff; font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,.25); white-space: nowrap; }
+  .pin-tag::after { content: ""; position: absolute; left: 50%; bottom: -5px; margin-left: -5px; border: 5px solid transparent; border-bottom: 0; border-top-color: var(--brand); }
+  .pin-tag.bad { background: #fff; color: var(--flagged); box-shadow: inset 0 0 0 2px var(--flagged), 0 2px 6px rgba(0,0,0,.2); }
+  .pin-tag.bad::after, .pin-tag.pending::after { border-top-color: #fff; }
+  .pin-tag.pending { background: #fff; color: var(--ink); }
+  .pin-tag.dim { background: #666; }
+  .pin-tag.dim::after { border-top-color: #666; }
+  .pin-tag.hl { transform: scale(1.15); background: var(--ink); color: #fff; }
+  .pin-tag.hl::after { border-top-color: var(--ink); }
+  .maplibregl-ctrl-attrib { font-size: 9px !important; }
+  .maplibregl-ctrl-bottom-right { bottom: calc(var(--tabbar) + 118px); }
+
+  /* ---------- Sheets ---------- */
+  .scrim { position: absolute; inset: 0; z-index: 60; background: rgba(17,17,17,.45); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 88%; overflow-y: auto; background: #fff; border-radius: 22px 22px 0 0;
+    padding: 8px 16px calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.8,.2,1);
+  }
+  .sheet.open { transform: none; }
+  .grab { width: 40px; height: 5px; border-radius: 9px; background: #DDD; margin: 0 auto 12px; }
+  .preset { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 14px; border: 0; background: var(--soft); text-align: left; }
+  .preset.on { background: var(--brand); color: #fff; }
+  .preset.on span { color: #fff !important; }
+  .sum-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14.5px; }
+
+  /* ---------- Agent (tall sheet) ---------- */
+  .agent {
+    position: absolute; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top) + 18px); z-index: 61; background: #fff; border-radius: 22px 22px 0 0; overflow: hidden;
+    display: flex; flex-direction: column; transform: translateY(105%); transition: transform .34s cubic-bezier(.2,.8,.2,1);
+  }
+  .agent.open { transform: none; }
+  .agent::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--brand); }
+  .mini-orb { width: 28px; height: 28px; border-radius: 999px; flex: none; background: var(--brand); display: grid; place-items: center; color: #fff; }
+  .subject { background: var(--soft); border-radius: 18px; }
+  .u-bubble { align-self: flex-end; max-width: 88%; background: var(--brand); color: #fff; padding: 10px 15px; border-radius: 18px; font-size: 14px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; }
+  .a-bubble { background: var(--soft); border-radius: 18px; padding: 12px 14px; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .step .sd { width: 16px; height: 16px; border-radius: 999px; border: 2px solid #D5D4CF; border-top-color: var(--brand); animation: spin .7s linear infinite; flex: none; }
+  .step.done .sd { animation: none; border: 0; background: var(--verified-tint); color: var(--verified); display: grid; place-items: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; width: 12px; height: 12px; border-radius: 99px; border: 2px solid #CFCFCF; border-top-color: var(--brand); animation: spin 1s linear infinite; }
+  .reveal { opacity: 0; transform: translateY(6px); transition: opacity .35s ease, transform .35s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  .src-card { border-radius: 16px; padding: 12px 14px; background: var(--soft); }
+  .src-card.ours { background: #E6F4EA; }
+  .src-card q { quotes: "\201C" "\201D"; font-size: 14.5px; font-weight: 500; line-height: 1.45; display: block; margin: 6px 0 8px; }
+  .src-link { font-size: 12.5px; font-weight: 600; display: inline-flex; gap: 4px; align-items: center; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--faint); }
+  .topic { font-size: 11.5px; font-weight: 600; height: 22px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; background: #fff; }
+  .ours-tag { font-size: 10.5px; font-weight: 700; color: #fff; background: var(--verified); padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .suggest { flex: none; font-size: 13px; font-weight: 600; padding: 9px 13px; border-radius: 999px; border: 0; background: var(--soft); white-space: nowrap; }
+  .suggest:active { background: var(--brand); color: #fff; }
+  .fan { position: relative; height: 150px; }
+  .fan .f { position: absolute; top: 8px; left: 50%; width: 90px; height: 112px; border-radius: 13px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 8px 20px rgba(0,0,0,.14); }
+  .fan .f img { width: 100%; height: 100%; object-fit: cover; }
+
+  .toast {
+    position: absolute; left: 50%; bottom: calc(var(--tabbar) + 18px); z-index: 90; transform: translate(-50%, 16px); opacity: 0; pointer-events: none;
+    width: max-content; max-width: calc(100% - 32px); background: rgba(17,17,17,.92); color: #fff; padding: 11px 16px; border-radius: 14px; font-size: 13.5px; line-height: 1.4;
+    display: flex; gap: 9px; align-items: center; transition: all .25s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* Closing line, as on desktop: tap through. */
+  .closer { position: absolute; inset: 0; z-index: 100; background: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+  .closer.open { opacity: 1; pointer-events: auto; }
+  .closer .lead { font-family: "Inter Tight", sans-serif; font-weight: 600; font-size: 20px; color: var(--muted); letter-spacing: -.02em; }
+  .closer .real { display: flex; align-items: center; gap: .3em; font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: min(10.5vw, 52px); line-height: 1.05; letter-spacing: -.045em; }
+  .closer .real b { color: var(--brand); }
+  .closer .step-in { opacity: 0; transform: translateY(16px); transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
+  .closer .step-in.shown { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page, .sheet, .agent, .reveal, .closer .step-in { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= HOME ================= -->
+  <section class="screen on" id="tab-home">
+    <header class="home-head">
+      <div class="flex items-center gap-5">
+        <button class="top-tab on" data-mode="all">For you</button>
+        <button class="top-tab" data-mode="places">Places</button>
+        <button class="top-tab" data-mode="people">Roommates</button>
+        <button class="logo-mark ml-auto" data-act="closer" aria-label="Why Verimate">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>
+        </button>
+      </div>
+      <form class="search mt-2" id="searchForm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--brand)"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <input id="searchInput" placeholder="Syracuse University · street or building" aria-label="Search" />
+        <button class="go" aria-label="Search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      </form>
+    </header>
+
+    <div class="cats no-bar" id="cats"></div>
+
+    <button class="date-card" data-act="dates">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+      <span class="flex flex-col">
+        <span class="text-[11.5px] font-semibold" style="color:var(--muted)">Your dates</span>
+        <span class="when"><span id="dStart">Jan 10</span><svg width="16" height="10" viewBox="0 0 22 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h19M15 1l5 5-5 5"/></svg><span id="dEnd">May 20</span><span class="text-[12.5px] font-semibold" style="color:var(--muted);letter-spacing:0" id="dWeeks">19 wks</span></span>
+      </span>
+      <span class="chg">Change</span>
+    </button>
+
+    <div class="filters">
+      <button data-act="toast:Location: Syracuse University, within 20 min walk">Location<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button data-f="under900" class="ftog">Under $900<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button data-f="whole" class="ftog">Whole stay<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <span style="width:1px;height:16px;background:#DDD"></span>
+      <button id="sortBtn">Sort<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></svg></button>
+    </div>
+    <div class="chips no-bar" id="chips">
+      <button class="chip" data-f="verified">Photos verified</button>
+      <button class="chip" data-f="student">Student verified</button>
+      <button class="chip" data-f="walk">10 min walk</button>
+      <button class="chip" data-f="furnished">Furnished</button>
+      <button class="chip ask" data-act="agent-rep:euclid"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg>Ask the agent</button>
+    </div>
+    <p class="feed-note" id="feedNote"></p>
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <!-- ================= NEARBY (map) ================= -->
+  <section class="screen" id="tab-map" style="padding-bottom:0">
+    <div id="mapBox"></div>
+    <div class="map-top">
+      <div class="search" style="border-width:0;box-shadow:0 4px 16px rgba(0,0,0,.14)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--brand)"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="flex-1 font-semibold text-[15px]">Near Syracuse University</span>
+        <button class="go" style="width:auto;padding:0 14px;font-weight:700;font-size:13px" data-act="dates" id="mapDates">Jan 10 – May 20</button>
+      </div>
+    </div>
+    <div class="map-cards no-bar" id="mapCards"></div>
+  </section>
+
+  <!-- ================= MESSAGES ================= -->
+  <section class="screen" id="tab-msgs">
+    <header class="msg-head">
+      <h1 class="display text-[28px] font-extrabold" style="letter-spacing:-.04em">Messages</h1>
+      <div class="ml-auto flex gap-1">
+        <button class="icon-btn" data-act="toast:Search across your chats and deals" aria-label="Search"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        <button class="icon-btn" data-act="toast:Notification settings: text, email, push" aria-label="Settings"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20.5 7.3v9.4L12 21.5 3.5 16.7V7.3z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </header>
+    <div id="msgList"></div>
+    <p class="flex items-center gap-2 px-6 py-5 text-[15px]" style="color:#555"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Messages older than a month</p>
+  </section>
+
+  <!-- ================= ME ================= -->
+  <section class="screen" id="tab-me">
+    <header class="flex items-center gap-3 px-4" style="padding-top:calc(env(safe-area-inset-top) + 16px);background:linear-gradient(#FFF4F4,var(--bg))">
+      <div class="relative flex-none">
+        <img src="img/p-1517841905.jpg" alt="" class="w-[66px] h-[66px] rounded-full object-cover" />
+        <span class="absolute -right-1 -bottom-1" id="meBadge"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="display text-[22px] font-extrabold flex items-center gap-1" style="letter-spacing:-.03em">Jamie Park<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></p>
+        <p class="mt-1 inline-flex items-center gap-1.5 text-[12.5px] font-semibold px-2.5 py-1 rounded-full" style="background:#fff">Trust score 96 · SU '27</p>
+      </div>
+      <button class="tool" data-act="toast:Help: a real person answers within a day"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/></svg>Help</button>
+      <button class="tool" data-act="desktop"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Desktop</button>
+    </header>
+
+    <div class="me-card" style="padding:0;overflow:hidden">
+      <button class="w-full text-left px-4 py-4 relative overflow-hidden" style="background:linear-gradient(115deg,#D81E28,#F0573F);color:#fff" data-act="premium">
+        <p class="display text-[18px] font-extrabold" style="letter-spacing:-.02em">Verimate Premium · $9.99/mo</p>
+        <p class="text-[13px] mt-1 pr-24" style="opacity:.9">Sublets and roommates that fit your budget, schedule and lifestyle, plus a text when your lease shows up.</p>
+        <span class="absolute right-4 top-1/2 -translate-y-1/2 h-9 px-4 rounded-full bg-white font-extrabold text-[13px] grid place-items-center" style="color:var(--brand)">Try free</span>
+      </button>
+      <div class="grid grid-cols-4 py-4">
+        <button class="stat" data-act="toast:5 saved places"><b>5</b><span>Saved</span></button>
+        <button class="stat" data-act="toast:48 places viewed"><b>48</b><span>Viewed</span></button>
+        <button class="stat" data-act="toast:2 tours booked"><b>2</b><span>Tours</span></button>
+        <button class="stat" data-act="tab:msgs"><b>3</b><span>Alerts</span></button>
+      </div>
+    </div>
+
+    <div class="me-card">
+      <div class="flex items-center justify-between">
+        <h3 class="display text-[18px] font-extrabold" style="letter-spacing:-.02em">You're verified</h3>
+        <span class="text-[12px] font-semibold" style="color:var(--muted)">Third-party checks</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-3" id="threeChecks"></div>
+    </div>
+
+    <div class="me-card">
+      <div class="flex items-baseline gap-2">
+        <h3 class="display text-[18px] font-extrabold" style="letter-spacing:-.02em">My deals</h3>
+        <span class="text-[12.5px]" style="color:var(--muted)" id="dealNote">No money has left Verimate yet</span>
+      </div>
+      <div class="grid grid-cols-4 mt-4" id="dealIcons"></div>
+    </div>
+
+    <div class="me-card flex items-center gap-3">
+      <span class="w-11 h-11 rounded-full grid place-items-center flex-none" style="background:var(--warm-tint);color:var(--warm)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-[15px]">Lease tracker</p>
+        <p class="text-[12.5px]" style="color:var(--muted)" id="trackerNote">Watching Jan 10 – May 20 · near campus · every day</p>
+      </div>
+      <button class="switch" id="trackSwitch" aria-label="Text me new matches" aria-pressed="true"></button>
+    </div>
+
+    <div class="me-card grid grid-cols-5 gap-1">
+      <button class="tool" data-act="agent-photo:ackerman"><i style="background:#F5B400"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg></i>Photo check</button>
+      <button class="tool" data-act="agent-rep:euclid"><i style="background:var(--brand)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/></svg></i>Agent</button>
+      <button class="tool" data-act="toast:Report received. A person reviews every report within a day."><i style="background:#F26B1D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg></i>Report</button>
+      <button class="tool" data-act="toast:Deposit help: we hold it until the lease ends"><i style="background:#16A34A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></i>Deposits</button>
+      <button class="tool" data-act="toast:Campus ambassadors: paid pilot this fall"><i style="background:#3B82F6"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg></i>Ambassador</button>
+    </div>
+
+    <h3 class="display text-[20px] font-extrabold px-5 pt-6 pb-3" style="letter-spacing:-.03em">You might like</h3>
+    <div class="feed" id="likeFeed"></div>
+  </section>
+
+  <!-- ================= TAB BAR ================= -->
+  <nav class="tabbar" aria-label="Main">
+    <button class="tab on" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path class="ic-fill" d="M4 10.2 12 4l8 6.2V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M12 14v3" stroke-linecap="round" stroke-width="2.4"/></svg>Home</button>
+    <button class="tab" data-tab="map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path class="ic-fill" d="M12 21.5s-7.5-6.2-7.5-11.8a7.5 7.5 0 0 1 15 0c0 5.6-7.5 11.8-7.5 11.8z"/><circle cx="12" cy="9.8" r="2.6" stroke-width="2"/></svg>Nearby</button>
+    <div class="tab-center"><button data-act="list" aria-label="List your place">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M12 10v7M8.5 13.5h7"/></svg>List</button></div>
+    <button class="tab" data-tab="msgs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path class="ic-fill" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01" stroke-width="2.8" stroke-linecap="round"/></svg>Messages<span class="badge" id="msgBadge">7</span></button>
+    <button class="tab" data-tab="me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle class="ic-fill" cx="12" cy="12" r="9"/><path d="M8.5 13.5a4 4 0 0 0 7 0" stroke-linecap="round" stroke-width="2"/></svg>Me</button>
+  </nav>
+
+  <!-- ================= PUSHED PAGES ================= -->
+  <section class="page" id="page-listing" aria-label="Listing"></section>
+  <section class="page chat-page" id="page-chat" aria-label="Chat"></section>
+
+  <!-- ================= SHEETS ================= -->
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true"></section>
+  <section class="agent" id="agent" role="dialog" aria-label="Verimate agent">
+    <div class="flex items-center gap-3 px-4 pt-4 pb-3 flex-none">
+      <div class="mini-orb" style="width:34px;height:34px"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg></div>
+      <div class="flex-1">
+        <p class="display font-bold text-[18px] leading-tight" style="letter-spacing:-.03em"><span style="color:var(--faint)">Verimate</span> Agent</p>
+        <p class="text-[12px]" style="color:var(--muted)">Shows you the evidence, with sources</p>
+      </div>
+      <button class="icon-btn" data-act="back" aria-label="Close agent" style="background:var(--soft)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div id="subject" class="subject flex-none mx-3 px-3 py-3 flex items-center gap-3"></div>
+    <div id="thread" class="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-3"></div>
+    <div class="flex-none px-3 pt-2" style="padding-bottom:calc(12px + env(safe-area-inset-bottom))">
+      <div class="flex gap-2 overflow-x-auto pb-2.5 no-bar" id="suggests"></div>
+      <form id="askForm" class="flex items-center gap-2 h-12 pl-4 pr-1.5 rounded-full" style="background:var(--soft)">
+        <input id="askInput" class="flex-1 min-w-0 bg-transparent outline-none text-[16px]" placeholder="Ask about a building, landlord or photo" />
+        <button class="w-9 h-9 rounded-full grid place-items-center text-white flex-none" style="background:var(--brand)" aria-label="Send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      </form>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="closer" class="closer" role="dialog" aria-label="Why Verimate">
+    <div class="flex flex-col gap-7 px-7">
+      <p class="lead step-in">A perfect sublease needs</p>
+      <div class="flex flex-col gap-2">
+        <p class="real step-in"><span data-badge-lg="#3B82F6"></span>Real <b>students.</b></p>
+        <p class="real step-in"><span data-badge-lg="#16A34A"></span>Real <b>info.</b></p>
+        <p class="real step-in"><span data-badge-lg="#D81E28"></span>Safe <b>deals.</b></p>
+      </div>
+      <div class="step-in flex items-center gap-3 flex-wrap display font-semibold text-[19px]" style="color:var(--muted)">
+        All of it, on
+        <span class="logo-mark" style="width:42px;height:42px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg></span>
+        <strong class="text-[28px] font-extrabold" style="color:var(--brand);letter-spacing:-.04em">Verimate</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DATA (same demo data as the desktop page)
+   ===================================================================== */
+const Y = 2027;
+const d = (m, day, y = Y) => new Date(y, m - 1, day);
+
+const PRESETS = [
+  { id: 'spring', name: 'Spring semester', start: d(1, 10), end: d(5, 20) },
+  { id: 'summer', name: 'Summer internship', start: d(5, 24), end: d(8, 14) },
+  { id: 'fall', name: 'Fall semester', start: d(8, 24, 2026), end: d(12, 18, 2026) },
+  { id: 'year', name: 'Academic year', start: d(8, 24, 2026), end: d(5, 20) },
+];
+
+const LISTINGS = [
+  { id: 'comstock', address: '734 Comstock Ave', unit: 'Room in a 4-bed', price: 875, start: d(1,10), end: d(5,20), want: 12,
+    title: 'Sunny room by the Quad, exact spring dates', img: 'img/u-room-sofa.jpg', ratio: 1.3, prov: 'ok', lister: 'lena', reviews: 4, walk: 6, furnished: true, ll: [-76.13015, 43.0318] },
+  { id: 'euclid', address: '812 Euclid Ave', unit: 'Room in a 3-bed', price: 850, start: d(1,3), end: d(5,31), want: 9,
+    title: 'Big furnished room in a 3-bed on Euclid', img: 'img/u-living.jpg', ratio: 0.95, prov: 'ok', lister: 'marcus', reviews: 4, walk: 9, furnished: true, ll: [-76.1263, 43.0369] },
+  { id: 'ackerman', address: '419 Ackerman Ave', unit: 'Private suite', price: 690, start: d(1,8), end: d(5,22), want: 31,
+    title: 'Brand new private suite, all utilities included!!', img: 'img/u-render.jpg', ratio: 1.0, prov: 'bad', lister: 'chris', reviews: 0, walk: 12, furnished: true, ll: [-76.12405, 43.033],
+    flags: ['AI signal in 3 of 5 photos', 'No camera metadata'] },
+  { id: 'ostrom', address: '601 Ostrom Ave', unit: 'Room in a 5-bed', price: 820, start: d(8,22,2026), end: d(5,20), want: 7,
+    title: 'Room in a 5-bed on Ostrom, 4 min to class', img: 'img/u-kitchen.jpg', ratio: 0.9, prov: 'ok', lister: 'aisha', reviews: 6, walk: 4, furnished: false, ll: [-76.12865, 43.04] },
+  { id: 'livingston', address: '207 Livingston Ave', unit: 'Room in a 3-bed', price: 925, start: d(1,10), end: d(5,15), want: 6,
+    title: 'Furnished room on Livingston for spring', img: 'img/u-room-real.jpg', ratio: 1.2, prov: 'ok', lister: 'noah', reviews: 2, walk: 8, furnished: true, ll: [-76.1268, 43.0348] },
+  { id: 'sumner', address: '312 Sumner Ave', unit: 'Room in a 4-bed', price: 720, start: d(12,20,2026), end: d(8,10), want: 4,
+    title: 'Quiet room on Sumner, Dec through Aug', img: 'img/r-1556020685.jpg', ratio: 1.3, prov: 'ok', lister: 'grace', reviews: 3, walk: 15, furnished: true, ll: [-76.1256, 43.03555] },
+  { id: 'clarendon', address: '118 Clarendon St', unit: 'Whole 1-bed', price: 1080, start: d(1,12), end: d(5,20), want: 15,
+    title: 'Whole 1-bed on Clarendon, no roommates', img: 'img/r-1493809842.jpg', ratio: 0.9, prov: 'pending', lister: 'omar', reviews: 1, walk: 11, furnished: false, ll: [-76.1276, 43.0383] },
+  { id: 'maryland', address: '305 Maryland Ave', unit: 'Room in a 3-bed', price: 760, start: d(1,5), end: d(6,30), want: 5,
+    title: 'Room on Maryland with flexible dates', img: 'img/r-1513694203.jpg', ratio: 1.0, prov: 'ok', lister: 'sofia', reviews: 5, walk: 13, furnished: true, ll: [-76.12015, 43.0345] },
+  { id: 'westcott', address: '540 Westcott St', unit: 'Room in a 4-bed', price: 700, start: d(5,22), end: d(8,14), want: 3,
+    title: 'Summer room on Westcott St', img: 'img/r-1502005229.jpg', ratio: 1.3, prov: 'ok', lister: 'ben', reviews: 3, walk: 18, furnished: true, ll: [-76.1188, 43.036] },
+  { id: 'lancaster', address: '229 Lancaster Ave', unit: 'Room in a 2-bed', price: 780, start: d(5,24), end: d(8,14), want: 2,
+    title: 'Summer room in a 2-bed on Lancaster', img: 'img/r-1598928506.jpg', ratio: 0.95, prov: 'ok', lister: 'lena', reviews: 2, walk: 14, furnished: true, ll: [-76.1224, 43.031] },
+  { id: 'harrison', address: '1203 Harrison St', unit: 'Studio', price: 995, start: d(6,1), end: d(8,10), want: 8,
+    title: 'Studio on Harrison for a summer internship', img: 'img/r-1484154218.jpg', ratio: 0.95, prov: 'ok', lister: 'aisha', reviews: 4, walk: 5, furnished: true, ll: [-76.133, 43.0442] },
+  { id: 'walnut', address: '1011 Walnut Ave', unit: 'Room in a 6-bed', price: 650, start: d(8,20,2026), end: d(12,20,2026), want: 11,
+    title: 'Cheap fall room on Walnut, 3 min walk', img: 'img/r-1522708323.jpg', ratio: 0.95, prov: 'ok', lister: 'noah', reviews: 2, walk: 3, furnished: false, ll: [-76.13215, 43.043] },
+];
+const EXTRA_PHOTOS = ['img/r-1631049307.jpg', 'img/r-1600210492.jpg', 'img/r-1617806118.jpg', 'img/r-1567767292.jpg'];
+
+const PEOPLE = {
+  lena:   { name: 'Lena Park',     year: "'26", school: 'Whitman',  img: 'img/p-1544005313.jpg', verified: true },
+  marcus: { name: 'Jason Lin',     year: "'27", school: 'Maxwell',  img: 'img/u-jason.jpg', verified: true },
+  chris:  { name: 'Chris M.',      year: null,  school: null,       img: 'img/p-1506794778.jpg', verified: false },
+  aisha:  { name: 'Aisha Rahman',  year: "'27", uni: 'esf', school: 'Forestry', img: 'img/p-1524504388.jpg', verified: true },
+  noah:   { name: 'Noah Brennan',  year: "'26", school: 'ECS',      img: 'img/p-1500648767.jpg', verified: true },
+  grace:  { name: 'Grace Liu',     year: "'28", school: 'Falk',     img: 'img/p-1534528741.jpg', verified: true },
+  omar:   { name: 'Omar Haddad',   year: "'27", school: 'Whitman',  img: 'img/p-1463453091.jpg', verified: true },
+  sofia:  { name: 'Sofia Marino',  year: "'27", school: 'VPA',      img: 'img/p-1494790108.jpg', verified: true },
+  ben:    { name: 'Ben Achterberg',year: "'26", school: 'Newhouse', img: 'img/p-1539571696.jpg', verified: true },
+};
+
+const PERSON_CARDS = [
+  { id: 'amara', name: 'Chloe Zhang', year: "'27", school: 'Newhouse', major: 'Fashion Communications', img: 'img/u-chloe.jpg', ratio: 1.2, pos: '50% 28%',
+    intent: 'Looking to sublet Jan to May', match: 91, budget: '$750 – $900', hobbies: ['Thrifting', 'Pilates'] },
+  { id: 'priya', name: 'Priya Nair', year: "'27", school: 'Arts & Sciences', major: 'Art History', img: 'img/u-priya.jpg', ratio: 1.3, pos: '60% 45%',
+    intent: 'Off to Florence in January. My room is open Jan to May', match: 84, asking: '$850', hobbies: ['Museums', 'Tennis'] },
+  { id: 'daniel', name: 'Kevin Liu', year: "'26", school: 'Whitman', major: 'Finance', img: 'img/u-kevin.jpg', ratio: 1.2, pos: '60% 22%',
+    intent: 'Need a roommate for summer in Chicago', match: 78, budget: '$1,100 – $1,400', hobbies: ['Lifting', 'Cooking'] },
+  { id: 'jordan', name: 'Ethan Wu', year: "'27", uni: 'esf', school: 'SUNY ESF', major: 'Bioprocess Engineering', img: 'img/u-ethan.jpg', ratio: 1.2, pos: '45% 28%',
+    intent: 'Taking over a lease from Jan 10', match: 72, budget: '$700 – $850', hobbies: ['Guitar', 'Gym'] },
+  { id: 'hannah', name: 'Mia Chen', year: "'28", uni: 'esf', school: 'SUNY ESF', major: 'Environmental Biology', img: 'img/u-mia.jpg', ratio: 1.15, pos: '50% 35%',
+    intent: 'Need a roommate for next fall. Dog friendly please', match: 88, budget: '$800 – $950', hobbies: ['Dogs', 'Yoga'] },
+  { id: 'tyler', name: 'Layla Haddad', year: "'27", school: 'Maxwell', major: 'Political Science', img: 'img/u-layla.jpg', ratio: 1.3, pos: '52% 35%',
+    intent: 'Sublet Jan to May, close to Marshall St', match: 86, budget: '$650 – $800', hobbies: ['Debate', 'Coffee'] },
+];
+
+const FEED_ORDER = [
+  'L:comstock', 'P:amara', 'L:ackerman', 'L:euclid', 'L:ostrom', 'P:priya',
+  'L:livingston', 'P:jordan', 'L:sumner', 'L:clarendon', 'L:maryland', 'P:daniel',
+  'L:westcott', 'P:tyler', 'L:lancaster', 'L:harrison', 'P:hannah', 'L:walnut',
+];
+
+const EVIDENCE = {
+  euclid: {
+    question: 'Is 812 Euclid actually decent?',
+    lead: 'I found 7 mentions across Reddit and Google reviews, plus 4 reviews from verified residents. Three of the public mentions are about heat.',
+    topics: [['Heat', 5], ['Landlord response', 3], ['Laundry', 2], ['Location', 2]],
+    items: [
+      { src: 'r/SyracuseU', when: '4 months ago', kind: 'reddit', topic: 'Heat', quote: 'radiators were off half of January, landlord ghosted', url: 'https://www.reddit.com/r/SyracuseU/' },
+      { ours: true, when: 'Fall 2025', topic: 'Heat', quote: "Laundry works, heat doesn't. Would not renew.", lived: 'Aug 2024 to May 2025' },
+      { src: 'Google reviews', when: 'Feb 2025', kind: 'google', stars: 2, topic: 'Heat', quote: 'Heat went out twice in one week. Took five days to get someone out.', url: 'https://www.google.com/maps' },
+      { ours: true, when: 'Spring 2024', topic: 'Landlord response', quote: 'Jason the current tenant is great. Landlord answers texts within a day for everything except the boiler.', lived: 'Aug 2023 to May 2024' },
+      { src: 'City of Syracuse code enforcement', when: 'Feb 2025', kind: 'city', topic: 'Heat', quote: 'Complaint: inadequate heat, 2nd floor. Status: closed Mar 2025.', url: 'https://www.syr.gov/' },
+    ],
+    rent: { low: 720, median: 880, high: 1040, this: 850, label: 'room in a 3-bed on Euclid' },
+    more: 6,
+  },
+};
+const GENERIC_EVIDENCE = (l) => ({
+  question: `What do people say about ${l.address}?`,
+  lead: `I found ${l.reviews + 2} mentions of ${l.address}, including ${l.reviews} from verified residents. Nothing about heat or safety came up.`,
+  topics: [['Location', 2], ['Landlord response', 2], ['Noise', 1]],
+  items: [
+    { ours: true, when: 'Spring 2025', topic: 'Landlord response', quote: 'Repairs happened the same week every time I asked. Walls are thin though.', lived: 'Aug 2024 to May 2025' },
+    { src: 'r/SyracuseU', when: '8 months ago', kind: 'reddit', topic: 'Location', quote: `lived near ${l.address.split(' ').slice(1).join(' ')} two years, quiet block, easy walk to the Connective Corridor bus`, url: 'https://www.reddit.com/r/SyracuseU/' },
+  ],
+  rent: { low: 680, median: 860, high: 1050, this: l.price, label: 'room near campus' },
+  more: 1,
+});
+
+const PHOTO_CHECK = {
+  ackerman: {
+    question: 'Are the photos on 419 Ackerman real?',
+    risk: 78,
+    photos: ['img/u-render.jpg', 'img/r-1631049307.jpg', 'img/r-1600210492.jpg', 'img/r-1617806118.jpg', 'img/r-1567767292.jpg'],
+    flaggedIdx: [0, 1, 3],
+    checks: [
+      { status: 'flag', name: 'Generation signal', detail: '3 of 5 photos show diffusion-model patterns in textures and window frames (confidence 0.91).' },
+      { status: 'flag', name: 'Metadata and C2PA', detail: 'No camera metadata or content credentials on any photo. Phone photos usually carry both.' },
+      { status: 'pass', name: 'Reverse image match', detail: 'No earlier copies found online. Rules out a reused photo, not a generated one.' },
+      { status: 'info', name: 'Consistency across photos', detail: 'Room layout agrees across photos. Floor finish differs between photo 2 and photo 4.' },
+    ],
+  },
+};
+
+/* Chats. `deal` is the deposit state for a reservation: null, 'held', 'moved'. */
+const CHATS = {
+  priya: { who: { name: 'Priya Nair', img: 'img/u-priya.jpg', line: "SU '27 · Arts & Sciences" }, unread: 2, when: '12 min ago', thumb: 'img/r-1617806118.jpg',
+    msgs: [{ them: 'Hi! Saw you need Jan to May. My room is open while I\'m in Florence.' }, { them: 'Want a video tour this week?' }] },
+  layla: { who: { name: 'Layla Haddad', img: 'img/u-layla.jpg', line: "SU '27 · Maxwell" }, unread: 3, when: '1 h ago',
+    msgs: [{ them: 'We\'re both looking near Marshall St.' }, { them: 'Want to tour Euclid together on Saturday?' }, { them: 'Agent says heat was an issue there, so let\'s ask.' }] },
+  chloe: { who: { name: 'Chloe Zhang', img: 'img/u-chloe.jpg', line: "SU '27 · Newhouse" }, unread: 1, when: 'Yesterday',
+    msgs: [{ them: 'Our budgets and schedules match 91%. Still looking for Jan to May?' }] },
+  jason: { who: { name: 'Jason Lin', img: 'img/u-jason.jpg', line: "SU '27 · Maxwell" }, unread: 0, when: '09-28', listing: 'euclid', thumb: 'img/u-living.jpg',
+    msgs: [{ me: 'Is the heat working this year?' }, { them: 'Fixed in February. I can send you the boiler invoice.' }] },
+};
+const CHAT_ORDER = ['priya', 'layla', 'chloe', 'jason'];
+
+/* =====================================================================
+   STATE + HELPERS
+   ===================================================================== */
+const state = { start: d(1,10), end: d(5,20), preset: 'spring', filters: new Set(), mode: 'all', sort: 'best', tab: 'home' };
+const DAY = 86400000;
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmt = (dt) => `${MONTHS[dt.getMonth()]} ${dt.getDate()}`;
+const days = (a, b) => Math.round((b - a) / DAY);
+const money = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const $ = (s, el = document) => el.querySelector(s);
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+const UNI = {
+  su:  { short: 'SU',  name: 'Syracuse University', color: '#F76900', logo: 'img/logo-su.png' },
+  esf: { short: 'ESF', name: 'SUNY ESF', color: '#1F6B3A', logo: 'img/logo-esf.png' },
+};
+const uniTag = (p) => { const u = UNI[p.uni || 'su']; return `<span class="uni" style="background:${u.color}">${u.short} ${p.year}</span>`; };
+const shortName = (n) => n.includes('.') ? n : n.replace(/ (\w)\w+$/, ' $1.');
+const street = (l) => l.address.split(' ').slice(1).join(' ');
+
+const ICON = {
+  pin: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>`,
+  back: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>`,
+  more: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`,
+  share: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>`,
+  heart: `<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg>`,
+  chat: `<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z"/></svg>`,
+  cal: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>`,
+  badge: (color, s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="flex:none"><path d="M12.00 0.50 L14.41 3.02 L17.75 2.04 L18.58 5.42 L21.96 6.25 L20.98 9.59 L23.50 12.00 L20.98 14.41 L21.96 17.75 L18.58 18.58 L17.75 21.96 L14.41 20.98 L12.00 23.50 L9.59 20.98 L6.25 21.96 L5.42 18.58 L2.04 17.75 L3.02 14.41 L0.50 12.00 L3.02 9.59 L2.04 6.25 L5.42 5.42 L6.25 2.04 L9.59 3.02Z" fill="${color}" stroke="${color}" stroke-width="1.6" stroke-linejoin="round"/><path d="m7.6 12.3 3 3 5.8-6.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  check: (s = 9, w = 4) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+  warn: (s = 13) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>`,
+  ext: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  shield: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+  spark: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg>`,
+  info: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8h.01M12 12v5"/></svg>`,
+  walk: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 20 2-6 3 3v4M7 12l3-4 4 1 3 3"/></svg>`,
+};
+
+function coverage(l) {
+  const S = state.start, E = state.end, total = days(S, E);
+  const a = l.start > S ? l.start : S, b = l.end < E ? l.end : E;
+  const got = Math.max(0, days(a, b));
+  return { pct: got / total, left: Math.max(0, days(S, a)) / total, width: got / total,
+           exact: +l.start === +S && +l.end === +E, whole: l.start <= S && l.end >= E, missing: total - got };
+}
+function visible(l) {
+  if (coverage(l).pct < 0.8) return false;
+  const f = state.filters, c = coverage(l);
+  if (f.has('verified') && l.prov !== 'ok') return false;
+  if (f.has('student') && !PEOPLE[l.lister].verified) return false;
+  if (f.has('whole') && !c.whole) return false;
+  if (f.has('under900') && l.price >= 900) return false;
+  if (f.has('walk') && l.walk > 10) return false;
+  if (f.has('furnished') && !l.furnished) return false;
+  if (state.q && !(l.address + l.title).toLowerCase().includes(state.q)) return false;
+  return true;
+}
+const byId = (id) => LISTINGS.find(x => x.id === id);
+
+function toast(html) {
+  const t = $('#toast'); t.innerHTML = html; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* =====================================================================
+   NAVIGATION: tabs swap screens; pages, sheets and the agent stack on top
+   and close with the phone's back gesture.
+   ===================================================================== */
+const stack = [];
+function push(el, replace) {
+  el.classList.add('open'); stack.push(el);
+  if (el.id === 'sheet' || el.id === 'agent') $('#scrim').classList.add('open');
+  replace ? history.replaceState({ n: stack.length }, '') : history.pushState({ n: stack.length }, '');
+}
+function popTop() {
+  const el = stack.pop(); if (!el) return;
+  el.classList.remove('open');
+  if (!stack.some(x => x.id === 'sheet' || x.id === 'agent')) $('#scrim').classList.remove('open');
+  if (el.id === 'agent') runId++;
+}
+const back = () => (stack.length ? history.back() : null);
+addEventListener('popstate', popTop);
+$('#scrim').addEventListener('click', back);
+
+function setTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === `tab-${tab}`));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  if (tab === 'map') initMap();
+  if (tab === 'msgs') renderMessages();
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  if (state.tab === t.dataset.tab) $(`#tab-${t.dataset.tab}`).scrollTo({ top: 0, behavior: 'smooth' });
+  setTab(t.dataset.tab);
+}));
+
+/* =====================================================================
+   HOME
+   ===================================================================== */
+const CATS = [
+  ['Sublets', 'linear-gradient(160deg,#FF7A93,#E8436A)', `<path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M9.5 21v-6h5v6"/>`, 'mode:places'],
+  ['Roommates', 'linear-gradient(160deg,#FFB547,#F28A1B)', `<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16.5 4.8a3.2 3.2 0 0 1 0 6.4M21 20a6 6 0 0 0-3.5-5.5"/>`, 'mode:people'],
+  ['Summer', 'linear-gradient(160deg,#FFC94D,#F5A300)', `<rect x="5" y="7" width="14" height="13" rx="2.5"/><path d="M9 7V4.5h6V7M9.5 11v5M14.5 11v5"/>`, 'preset:summer'],
+  ['Abroad', 'linear-gradient(160deg,#A78BFA,#7C5CF0)', `<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.7 2.6 14.3 0 17M12 3.5c-2.6 2.7-2.6 14.3 0 17"/>`, 'preset:spring'],
+  ['By campus', 'linear-gradient(160deg,#60A5FA,#2F74E8)', `<rect x="5" y="4" width="14" height="13" rx="3"/><path d="M5 11h14M8.5 20l1.5-3M15.5 20 14 17"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/>`, 'filter:walk'],
+  ['Whole place', 'linear-gradient(160deg,#4ADE80,#16A34A)', `<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 4v16"/>`, 'filter:whole'],
+];
+$('#cats').innerHTML = CATS.map(c => `<button class="cat" data-act="${c[3]}"><i style="background:${c[1]}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${c[2]}</svg></i>${c[0]}</button>`).join('');
+
+function listingCard(l) {
+  const p = PEOPLE[l.lister], c = coverage(l);
+  const r = Math.min(1.35, Math.max(0.9, l.ratio));
+  const badge = l.prov === 'bad' ? `<span class="ph-badge bad">${ICON.warn(12)}AI-generated</span>`
+    : l.prov === 'ok' ? `<span class="ph-badge">${ICON.badge('#16A34A', 15)}Photos verified</span>`
+    : `<span class="ph-badge wait"><i class="spin"></i>Checking photos</span>`;
+  const bottom = l.flags ? `<div class="flag-strip">${l.flags.map(f => `<span><i></i>${f}</span>`).join('')}</div>`
+    : `<span class="loc">${ICON.pin}${street(l)} · ${l.walk} min walk</span>`;
+  const tag = c.exact ? `<span class="t-tag">Exact dates</span>` : l.prov === 'ok' && p.verified ? `<span class="t-tag green">Protected</span>` : '';
+  const cred = p.verified ? `<span class="cred">Verified student</span>` : `<span class="cred grey">Unverified</span>`;
+  return `<article class="card" data-l="${l.id}">
+    <div class="ph" style="aspect-ratio:1/${r}"><img src="${l.img}" alt="${l.unit} at ${l.address}" loading="lazy" />${badge}${bottom}</div>
+    <div class="px-2.5 pt-2 pb-2.5">
+      <p class="ttl">${tag}${l.title}</p>
+      <p class="sub">${l.unit} | ${fmt(l.start)} – ${fmt(l.end)}</p>
+      <p class="mt-1.5 flex items-baseline gap-1.5"><span class="price"><small>$</small>${l.price.toLocaleString()}<small>/mo</small></span><span class="want">${l.want} want</span></p>
+      <div class="seller"><img src="${p.img}" alt="" /><span class="nm">${shortName(p.name)}</span>${cred}</div>
+    </div>
+  </article>`;
+}
+function personCard(p) {
+  return `<article class="card pcard" data-p="${p.id}">
+    <div class="ph" style="aspect-ratio:1/${p.ratio}"><img src="${p.img}" alt="${p.name}" style="object-position:${p.pos}" loading="lazy" />
+      <span class="match"><i></i>${p.match}% match</span><p class="intent">${p.intent}</p></div>
+    <div class="px-2.5 pt-2 pb-2.5">
+      <div class="flex items-center gap-1">
+        <p class="font-bold text-[15px] truncate">${p.name}</p>${ICON.badge('#3B82F6', 15)}${ICON.badge('#16A34A', 15)}
+      </div>
+      <p class="sub" style="margin-top:1px">${p.major}</p>
+      <p class="mt-1.5 flex items-baseline gap-1.5"><span class="text-[11.5px]" style="color:var(--muted)">${p.asking ? 'Asking' : 'Budget'}</span><span class="display font-extrabold text-[15px]" style="letter-spacing:-.02em">${p.asking || p.budget}</span></p>
+      <div class="flex items-center gap-1 mt-2">${uniTag(p)}${p.hobbies.map(h => `<span class="hobby">${h}</span>`).join('')}</div>
+    </div>
+  </article>`;
+}
+function masonry(el, keys) {
+  const cols = [{ h: 0, html: [] }, { h: 0, html: [] }];
+  keys.forEach(key => {
+    const [t, id] = key.split(':');
+    const isL = t === 'L', item = isL ? byId(id) : PERSON_CARDS.find(x => x.id === id);
+    const h = (isL ? Math.min(1.35, Math.max(0.9, item.ratio)) : item.ratio) + (isL ? 0.62 : 0.55);
+    const c = cols[0].h <= cols[1].h ? cols[0] : cols[1];
+    c.html.push(isL ? listingCard(item) : personCard(item)); c.h += h;
+  });
+  el.innerHTML = cols.map(c => `<div class="feed-col">${c.html.join('')}</div>`).join('');
+}
+function renderFeed() {
+  let keys = FEED_ORDER.filter(k => {
+    const [t, id] = k.split(':');
+    if (t === 'L') return state.mode !== 'people' && visible(byId(id));
+    return state.mode !== 'places';
+  });
+  if (state.sort === 'price' && state.mode !== 'people') keys = keys.filter(k => k[0] === 'L').sort((a, b) => byId(a.slice(2)).price - byId(b.slice(2)).price);
+  masonry($('#feed'), keys);
+  const nPlaces = keys.filter(k => k[0] === 'L').length, nPeople = keys.length - nPlaces;
+  $('#feedNote').textContent = state.mode === 'people' ? `${nPeople} verified SU and ESF students looking for ${fmt(state.start)} – ${fmt(state.end)}`
+    : nPlaces ? `${nPlaces} places fit ${fmt(state.start)} – ${fmt(state.end)}${nPeople ? `, ${nPeople} verified students looking too` : ''}${state.sort === 'price' ? ' · lowest price first' : ''}`
+    : 'Nothing listed for these dates yet. Try a wider range.';
+  $('#dStart').textContent = fmt(state.start); $('#dEnd').textContent = fmt(state.end);
+  $('#dWeeks').textContent = `${Math.round(days(state.start, state.end) / 7)} wks`;
+  $('#mapDates').textContent = `${fmt(state.start)} – ${fmt(state.end)}`;
+  $('#trackerNote').textContent = `Watching ${fmt(state.start)} – ${fmt(state.end)} · near campus · every day`;
+  document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', state.filters.has(b.dataset.f)));
+  $('#sortBtn').classList.toggle('on', state.sort === 'price');
+  if (mapReady) syncMap();
+}
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.top-tab').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+  renderFeed();
+}
+document.querySelectorAll('.top-tab').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+function toggleFilter(f) { state.filters.has(f) ? state.filters.delete(f) : state.filters.add(f); renderFeed(); }
+document.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => toggleFilter(b.dataset.f)));
+$('#sortBtn').addEventListener('click', () => { state.sort = state.sort === 'price' ? 'best' : 'price'; renderFeed(); });
+$('#searchForm').addEventListener('submit', e => {
+  e.preventDefault(); $('#searchInput').blur();
+  state.q = $('#searchInput').value.trim().toLowerCase().replace(/ (ave|st|street|avenue)$/, '');
+  renderFeed();
+  if (state.q) toast(`Showing places matching “${$('#searchInput').value.trim()}”`);
+});
+
+function setRange(p) {
+  state.start = p.start; state.end = p.end; state.preset = p.id; renderFeed();
+}
+
+/* =====================================================================
+   LISTING PAGE
+   ===================================================================== */
+const saved = new Set();
+function openListing(id) {
+  const l = byId(id), p = PEOPLE[l.lister], c = coverage(l), bad = l.prov === 'bad';
+  const photos = bad ? PHOTO_CHECK.ackerman.photos : [l.img, ...EXTRA_PHOTOS.slice(0, 3)];
+  const ev = EVIDENCE[id] || GENERIC_EVIDENCE(l);
+  const note = c.exact ? 'Matches your dates exactly' : c.whole ? 'Covers your whole stay' : `Misses ${c.missing} days of your stay`;
+  const check = (ok, name, detail, extra = '') => `<div class="row-check"><span class="ci ${ok === true ? 'pass' : ok === false ? 'flag' : 'info'}">${ok === true ? ICON.check(12, 3.4) : ok === false ? '<b style="font-size:13px">!</b>' : '<i class="spin"></i>'}</span>
+    <div><p class="font-semibold text-[14.5px]">${name}</p><p class="text-[12.5px]" style="color:var(--muted)">${detail}</p></div>${extra}</div>`;
+  const page = $('#page-listing');
+  page.innerHTML = `
+    <div class="relative">
+      <div class="gallery no-bar" id="gal">${photos.map((s, i) => `<img src="${s}" alt="Photo ${i + 1}" />`).join('')}</div>
+      <div class="absolute left-0 right-0 flex items-center gap-2 px-3" style="top:calc(env(safe-area-inset-top) + 10px)">
+        <button class="float-btn" data-act="back" aria-label="Back">${ICON.back}</button>
+        <button class="float-btn ml-auto" data-act="share" aria-label="Share">${ICON.share}</button>
+        <button class="float-btn" data-act="toast:Report this listing or block the lister" aria-label="More">${ICON.more}</button>
+      </div>
+      <span class="absolute right-3 bottom-6 text-[12px] font-semibold text-white px-2.5 py-1 rounded-full" style="background:rgba(0,0,0,.5)" id="galN">1 / ${photos.length}</span>
+      ${bad ? `<button class="absolute left-3 bottom-6 ph-badge bad" style="position:absolute;top:auto;height:30px;font-size:12.5px" data-act="agent-photo:${id}">${ICON.warn(13)}AI-generated · see why</button>`
+            : l.prov === 'ok' ? `<span class="absolute left-3 bottom-6 ph-badge" style="position:absolute;top:auto;height:30px;font-size:12.5px">${ICON.badge('#16A34A', 16)}Photos verified</span>` : ''}
+    </div>
+
+    <div class="sect" style="margin-top:-14px;position:relative;border-radius:18px 18px 16px 16px">
+      <div class="flex items-baseline gap-2">
+        <span class="price" style="font-size:30px"><small style="font-size:16px">$</small>${l.price.toLocaleString()}<small style="font-size:14px">/mo</small></span>
+        <span class="want">${l.want} want · ${l.want * 23} views</span>
+      </div>
+      <h1 class="display font-bold text-[20px] mt-2 leading-snug" style="letter-spacing:-.02em">${l.title}</h1>
+      <p class="text-[13px] mt-1" style="color:var(--muted)">${l.address} · ${l.unit} · ${l.furnished ? 'Furnished' : 'Unfurnished'} · ${ICON.walk} ${l.walk} min to campus</p>
+      <div class="mt-3 p-3 rounded-[14px]" style="background:var(--soft)">
+        <p class="flex items-center gap-1.5 font-bold text-[14px]" style="color:var(--brand)">${ICON.cal}Available ${fmt(l.start)} – ${fmt(l.end)}</p>
+        <div class="cover-track mt-2"><div class="cover-fill" style="left:${c.left * 100}%;width:${c.width * 100}%"></div></div>
+        <p class="text-[12px] mt-1.5" style="color:var(--muted)">${note} (yours: ${fmt(state.start)} – ${fmt(state.end)})</p>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="flex items-center gap-3">
+        <img src="${p.img}" alt="" class="w-12 h-12 rounded-full object-cover" />
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-[15.5px] flex items-center gap-1.5">${p.name}${p.verified ? ICON.badge('#3B82F6', 16) + ICON.badge('#16A34A', 16) : ''}</p>
+          <p class="text-[12.5px]" style="color:var(--muted)">${p.verified ? `${p.school} · replies within an hour` : 'Not verified yet · joined 3 days ago'}</p>
+        </div>
+        ${p.year ? uniTag(p) : `<span class="cred grey">Unverified</span>`}
+      </div>
+    </div>
+
+    <div class="sect">
+      <h3>${ICON.shield(19)}Verified by Verimate</h3>
+      <div class="mt-2">
+        ${check(p.verified, 'Face match', p.verified ? 'Selfie matches the photo ID' : 'Lister skipped the face check')}
+        ${check(p.verified, 'Student ID', p.verified ? 'ID checked by a third-party service' : 'No ID on file')}
+        ${check(p.verified, 'College status', p.verified ? `Enrolled at ${UNI[p.uni || 'su'].name}` : 'No .edu email confirmed')}
+        ${check(l.prov === 'pending' ? null : !bad, 'Listing photos', bad ? '3 of 5 photos look AI-generated, no camera metadata' : l.prov === 'pending' ? 'Check in progress' : 'Real phone photos, no earlier copies online',
+          bad ? `<button class="suggest" style="background:var(--flagged-tint);color:var(--flagged)" data-act="agent-photo:${id}">See why</button>` : '')}
+      </div>
+    </div>
+
+    <div class="sect">
+      <h3>Your deposit is protected</h3>
+      <div class="flex flex-col gap-3 mt-3">
+        <div class="flex gap-3"><span class="step-n">1</span><p class="text-[13.5px]"><b>Pay into Verimate, not to the lister.</b> <span style="color:var(--muted)">One month's deposit plus a 2.5% holding fee.</span></p></div>
+        <div class="flex gap-3"><span class="step-n">2</span><p class="text-[13.5px]"><b>See the place and move in.</b> <span style="color:var(--muted)">Rent only goes out after you tap Confirm move-in.</span></p></div>
+        <div class="flex gap-3"><span class="step-n">3</span><p class="text-[13.5px]"><b>Get your deposit back.</b> <span style="color:var(--muted)">We hold it until the lease ends, then return it or cover documented damage.</span></p></div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <h3>${ICON.spark(17)}Ask the agent</h3>
+      <p class="text-[13px] mt-1" style="color:var(--muted)">Reads Reddit, Google reviews, city code records and our own resident reviews, and shows every source.</p>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        <button class="suggest" style="background:var(--brand);color:#fff" data-act="agent-rep:${id}">What do residents say?</button>
+        <button class="suggest" data-act="agent-photo:${id}">Are the photos real?</button>
+        <button class="suggest" data-act="agent-rep:${id}">Is ${money(l.price)} fair?</button>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="flex items-baseline justify-between">
+        <h3>Resident discussion</h3>
+        <span class="text-[12.5px]" style="color:var(--muted)">${l.reviews} verified reviews</span>
+      </div>
+      ${l.reviews ? ev.items.filter(x => x.ours).slice(0, 2).map(it => `
+        <div class="mt-3 flex gap-2.5">
+          ${ICON.badge('#16A34A', 18)}
+          <div><p class="text-[12.5px]"><b>Verified resident</b> <span style="color:var(--muted)">· lived here ${it.lived}</span></p>
+          <p class="text-[14px] mt-0.5">${it.quote}</p></div>
+        </div>`).join('') : `<p class="text-[13.5px] mt-2" style="color:var(--muted)">No reviews from verified residents yet.</p>`}
+      ${id === 'livingston' ? `<a href="property.html" class="suggest mt-3 inline-block">Open the full discussion</a>` : ''}
+    </div>
+
+    <div class="bottom-bar">
+      <button class="bb-ic ${saved.has(id) ? 'on' : ''}" data-act="save:${id}">${ICON.heart}${saved.has(id) ? 'Saved' : 'Save'}</button>
+      <button class="bb-ic" data-act="chat-lister:${id}">${ICON.chat}Chat</button>
+      <button class="cta ${bad ? 'dark' : ''}" data-act="reserve:${id}">${bad ? 'Payments paused<small>2 photo flags on this listing</small>' : `Reserve · deposit protected<small>Nothing reaches ${p.name.split(' ')[0]} until you move in</small>`}</button>
+    </div>`;
+  page.scrollTop = 0;
+  const gal = $('#gal');
+  gal.addEventListener('scroll', () => { $('#galN').textContent = `${Math.round(gal.scrollLeft / gal.clientWidth) + 1} / ${photos.length}`; }, { passive: true });
+  push(page);
+}
+
+/* =====================================================================
+   SHEETS: dates, reserve, list your place, premium
+   ===================================================================== */
+function openSheet(html) { $('#sheet').innerHTML = `<div class="grab"></div>${html}`; $('#sheet').scrollTop = 0; push($('#sheet')); }
+
+function datesSheet() {
+  openSheet(`
+    <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">When do you need a place?</h2>
+    <p class="text-[13px] mt-1" style="color:var(--muted)">Pick your academic calendar. We only show places that cover at least 80% of it.</p>
+    <div class="flex flex-col gap-2 mt-4">${PRESETS.map(p => `
+      <button class="preset ${state.preset === p.id ? 'on' : ''}" data-act="preset:${p.id}">
+        <span><span class="block font-bold text-[15px]">${p.name}</span><span class="block text-[13px]" style="color:var(--muted)">${fmt(p.start)} – ${fmt(p.end)}</span></span>
+        <span class="text-[13px] font-semibold" style="color:var(--muted)">${Math.round(days(p.start, p.end) / 7)} weeks</span>
+      </button>`).join('')}
+    </div>`);
+}
+
+function reserveSheet(id) {
+  const l = byId(id), p = PEOPLE[l.lister];
+  if (l.prov === 'bad') {
+    return openSheet(`
+      <div class="flex items-center gap-3"><span class="ci flag" style="width:44px;height:44px">${ICON.warn(22)}</span>
+        <h2 class="display text-[20px] font-extrabold leading-tight" style="letter-spacing:-.03em">We paused payments on this listing</h2></div>
+      <p class="text-[14px] mt-3">3 of 5 photos look AI-generated and none carry camera metadata. The lister hasn't verified their face, ID or college either.</p>
+      <p class="text-[14px] mt-2" style="color:var(--muted)">This doesn't prove it's a scam. Ask for a live video tour first. If it checks out, payments reopen, and your deposit is still held by us.</p>
+      <div class="flex flex-col gap-2 mt-5">
+        <button class="cta" data-act="video:${id}">Ask Chris for a live video tour</button>
+        <button class="cta ghost" data-act="agent-photo:${id}">See the photo check</button>
+      </div>`);
+  }
+  const fee = Math.round(l.price * 0.025 * 100) / 100;
+  openSheet(`
+    <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">Reserve ${l.address}</h2>
+    <div class="flex items-center gap-3 mt-3 p-2.5 rounded-[14px]" style="background:var(--soft)">
+      <img src="${l.img}" alt="" class="w-14 h-14 rounded-[10px] object-cover" />
+      <div class="min-w-0"><p class="font-bold text-[14.5px] truncate">${l.title}</p><p class="text-[12.5px]" style="color:var(--muted)">${fmt(l.start)} – ${fmt(l.end)} · listed by ${p.name}</p></div>
+    </div>
+    <div class="mt-3">
+      <div class="sum-row"><span>Security deposit (1 month)</span><b>${money(l.price)}</b></div>
+      <div class="sum-row"><span>Holding fee (2.5%)</span><b>${money(fee)}</b></div>
+      <div class="sum-row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:12px"><b>Due today</b><b class="price" style="font-size:22px">${money(l.price + fee)}</b></div>
+    </div>
+    <div class="protect-card mt-3">
+      <span style="color:var(--brand)">${ICON.shield(30)}</span>
+      <p class="text-[13px]"><b>Held by Verimate, not sent to ${p.name.split(' ')[0]}.</b> Rent goes out only after you see the place and tap Confirm move-in. The deposit comes back when the lease ends.</p>
+    </div>
+    <p class="text-[12px] mt-3" style="color:var(--muted)">The holding fee keeps both sides honest: ${p.name.split(' ')[0]} knows you won't back out, and you know the room is real.</p>
+    <button class="cta mt-4 w-full" style="height:52px" data-act="pay:${id}">Pay ${money(l.price + fee)} into protection</button>`);
+}
+
+function listSheet() {
+  openSheet(`
+    <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">List your place</h2>
+    <p class="text-[13px] mt-1" style="color:var(--muted)">Three steps. Every listing on Verimate goes through them.</p>
+    <div class="mt-3">
+      <div class="row-check"><span class="ci pass">${ICON.check(12, 3.4)}</span><div><p class="font-semibold">Verify yourself</p><p class="text-[12.5px]" style="color:var(--muted)">Face, student ID and college status. You're done.</p></div></div>
+      <div class="row-check"><span class="ci info">2</span><div><p class="font-semibold">Take photos with your phone</p><p class="text-[12.5px]" style="color:var(--muted)">We check camera metadata and scan for AI-generated or reused images.</p></div></div>
+      <div class="row-check"><span class="ci info">3</span><div><p class="font-semibold">Upload your lease</p><p class="text-[12.5px]" style="color:var(--muted)">We confirm the dates and that you're allowed to sublet.</p></div></div>
+    </div>
+    <button class="cta mt-4 w-full" style="height:52px" data-act="toast:Camera opens here in the full app. This demo stops at the checklist.">Take photos</button>`);
+}
+
+function premiumSheet() {
+  openSheet(`
+    <p class="text-[12px] font-bold uppercase tracking-wider" style="color:var(--brand)">Verimate Premium</p>
+    <h2 class="display text-[24px] font-extrabold mt-1" style="letter-spacing:-.03em">$9.99<span class="text-[15px]" style="color:var(--muted)"> / month</span></h2>
+    <div class="mt-3">
+      <div class="row-check"><span class="ci pass">${ICON.check(12, 3.4)}</span><div><p class="font-semibold">Matches that fit you</p><p class="text-[12.5px]" style="color:var(--muted)">Sublets and roommates ranked by budget, schedule and lifestyle.</p></div></div>
+      <div class="row-check"><span class="ci pass">${ICON.check(12, 3.4)}</span><div><p class="font-semibold">Lease tracker alerts</p><p class="text-[12.5px]" style="color:var(--muted)">A text or email the moment your ideal lease shows up.</p></div></div>
+      <div class="row-check"><span class="ci pass">${ICON.check(12, 3.4)}</span><div><p class="font-semibold">Unlimited agent reports</p><p class="text-[12.5px]" style="color:var(--muted)">Reputation and photo checks on any listing, with sources.</p></div></div>
+    </div>
+    <p class="text-[12.5px] mt-3" style="color:var(--muted)">Deposit protection is on every deal, Premium or not.</p>
+    <button class="cta mt-4 w-full" style="height:52px" data-act="premium-start">Start 7-day free trial</button>`);
+}
+
+/* =====================================================================
+   CHAT
+   ===================================================================== */
+let openChatId = null;
+function contactFor(l) { const p = PEOPLE[l.lister]; return { name: p.name, img: p.img, line: p.year ? `${UNI[p.uni || 'su'].short} ${p.year} · ${p.school}` : 'Not verified', verified: p.verified }; }
+function ensureListingChat(id) {
+  const key = 'deal-' + id, l = byId(id);
+  if (!CHATS[key]) {
+    CHATS[key] = { who: contactFor(l), listing: id, unread: 0, when: 'Now', thumb: l.img, deal: null,
+      msgs: [{ them: `Hi! ${l.address} is still open for ${fmt(l.start)} – ${fmt(l.end)}.` }] };
+    CHAT_ORDER.unshift(key);
+  }
+  return key;
+}
+function personChat(pid) {
+  const p = PERSON_CARDS.find(x => x.id === pid);
+  const key = Object.keys(CHATS).find(k => CHATS[k].who.name === p.name) || ('p-' + pid);
+  if (!CHATS[key]) {
+    CHATS[key] = { who: { name: p.name, img: p.img, line: `${UNI[p.uni || 'su'].short} ${p.year} · ${p.school}` }, unread: 0, when: 'Now',
+      msgs: [{ them: `Hey! ${p.intent}. Want to compare notes?` }] };
+    CHAT_ORDER.unshift(key);
+  }
+  return key;
+}
+function bubble(m, who) {
+  if (m.sys) return `<p class="sys-pill">${m.sys}</p>`;
+  if (m.protect) return `<div class="protect-card"><span style="color:var(--brand)">${ICON.shield(30)}</span><div><p class="font-bold text-[14.5px]">${m.protect}</p><p class="text-[12.5px] mt-0.5" style="color:#666">${m.sub}</p></div></div>`;
+  const mine = 'me' in m, text = mine ? m.me : m.them;
+  const body = m.title ? `<div class="bub card-b"><b>${m.title}</b><span>${text}</span></div>` : `<div class="bub">${text}</div>`;
+  return `<div class="b-row ${mine ? 'me' : ''}"><img src="${mine ? 'img/p-1517841905.jpg' : who.img}" alt="" />${body}</div>`;
+}
+function renderChat() {
+  const c = CHATS[openChatId], l = c.listing && byId(c.listing);
+  const dealBar = !l ? '' : `<div class="deal">
+      <img src="${l.img}" alt="" />
+      <div class="min-w-0">
+        <p class="price" style="font-size:20px">${money(c.deal ? l.price + Math.round(l.price * 2.5) / 100 : l.price)}</p>
+        <p class="text-[12.5px] mt-1" style="color:#555">${c.deal === 'held' ? 'Deposit held by Verimate' : c.deal === 'moved' ? `Moved in · deposit protected to ${fmt(l.end)}` : `${l.unit} · ${fmt(l.start)} – ${fmt(l.end)}`}</p>
+      </div>
+      ${c.deal === 'held' ? `<button class="pill" data-act="movein">Confirm move-in</button>`
+        : c.deal === 'moved' ? `<button class="pill done" data-act="toast:Thanks! Your review goes up after the lease ends.">Review</button>`
+        : `<button class="pill" data-act="reserve:${l.id}">Reserve</button>`}
+    </div>`;
+  $('#page-chat').innerHTML = `
+    <div class="nav-bar" style="position:relative">
+      <button class="icon-btn" data-act="back" aria-label="Back">${ICON.back}</button>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-[17px] flex items-center gap-1.5 truncate">${c.who.name}${c.who.verified === false ? '' : ICON.badge('#3B82F6', 15) + ICON.badge('#16A34A', 15)}</p>
+        <p class="text-[12px]" style="color:var(--muted)">${c.who.line}</p>
+      </div>
+      <button class="icon-btn" data-act="toast:Block, report, or share contact info" aria-label="More">${ICON.more}</button>
+    </div>
+    ${dealBar}
+    <div class="chat-body" id="chatBody">
+      <p class="sys-pill">${c.who.verified === false ? 'This person is not verified. Never pay outside Verimate.' : 'You\'re both verified. Phone numbers stay private until you both agree.'}</p>
+      ${c.msgs.map(m => bubble(m, c.who)).join('')}
+    </div>
+    <form class="composer" id="composer">
+      <button type="button" class="ring-btn" data-act="toast:Voice notes" aria-label="Voice"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>
+      <input id="chatInput" placeholder="Say something to ${c.who.name.split(' ')[0]}…" autocomplete="off" />
+      <button type="button" class="ring-btn" data-act="${l ? `agent-rep:${l.id}` : 'agent-rep:euclid'}" aria-label="Ask the agent">${ICON.spark(16)}</button>
+      <button type="button" class="ring-btn" data-act="${l && !c.deal ? `reserve:${l.id}` : 'toast:Send photos, your dates, or a tour request'}" aria-label="More"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    </form>`;
+  const body = $('#chatBody'); body.scrollTop = body.scrollHeight;
+  $('#composer').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('#chatInput').value.trim(); if (!v) return;
+    c.msgs.push({ me: v }); renderChat();
+    setTimeout(() => { if (openChatId !== Object.keys(CHATS).find(k => CHATS[k] === c)) return; c.msgs.push({ them: 'Sounds good! I\'ll get back to you tonight.' }); renderChat(); }, 1200);
+  });
+}
+function openChat(key, replace) {
+  openChatId = key; CHATS[key].unread = 0; updateBadge();
+  renderChat(); push($('#page-chat'), replace);
+}
+
+/* =====================================================================
+   MESSAGES TAB
+   ===================================================================== */
+const SYS = {
+  deposits: { name: 'Deposits & payments', color: 'linear-gradient(160deg,#F0573F,#D81E28)', icon: ICON.shield(26) },
+  tracker:  { name: 'Lease tracker', color: 'linear-gradient(160deg,#FFB547,#F28A1B)', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>` },
+  agent:    { name: 'Verimate Agent', color: 'linear-gradient(160deg,#FF6B81,#C2185B)', icon: ICON.spark(26) },
+  alerts:   { name: 'Price alerts', color: 'linear-gradient(160deg,#4ADE80,#16A34A)', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>` },
+};
+const sysState = { deposits: { pv: 'How deposit protection works', tm: 'Today', badge: 0 }, tracker: { dot: true }, agent: { badge: 1 }, alerts: { dot: true } };
+function sysRow(k, pv, tm, mark, act, svc) {
+  const s = SYS[k];
+  return `<button class="msg-row" data-act="${act}">
+    <span class="av"><span class="sys" style="background:${s.color}">${s.icon}</span>${mark}</span>
+    <span class="body"><span class="flex-1 min-w-0"><span class="nm">${s.name}${svc ? '<span class="svc">Service</span>' : ''}</span><span class="pv block">${pv}</span><span class="tm block">${tm}</span></span></span>
+  </button>`;
+}
+function renderMessages() {
+  const dep = Object.values(CHATS).find(c => c.deal);
+  const depL = dep && byId(dep.listing);
+  const n = days(state.start, state.end);
+  let html = '';
+  html += sysRow('deposits', depL ? `${money(depL.price)} for ${depL.address} is ${dep.deal === 'moved' ? 'protected until ' + fmt(depL.end) : 'held safely'}` : sysState.deposits.pv,
+    depL ? 'Just now' : 'Today', sysState.deposits.badge ? `<span class="badge">${sysState.deposits.badge}</span>` : '', depL ? `chat:${Object.keys(CHATS).find(k => CHATS[k] === dep)}` : 'how-deposit');
+  html += sysRow('tracker', `[3 new] places match ${fmt(state.start)} – ${fmt(state.end)}`, '1 hour ago', sysState.tracker.dot ? '<span class="dot"></span>' : '', 'tracker');
+  html += sysRow('agent', 'Photo check on 419 Ackerman: 2 flags', '09-28', sysState.agent.badge ? '<span class="badge">1</span>' : '', 'agent-msg', true);
+  CHAT_ORDER.forEach(k => {
+    const c = CHATS[k], last = c.msgs[c.msgs.length - 1];
+    const pv = last.title || last.me || last.them || last.protect || last.sys || '';
+    html += `<button class="msg-row" data-act="chat:${k}">
+      <span class="av"><img src="${c.who.img}" alt="" />${c.unread ? `<span class="badge">${c.unread}</span>` : ''}</span>
+      <span class="body"><span class="flex-1 min-w-0"><span class="nm">${c.who.name}</span><span class="pv block">${pv}</span><span class="tm block">${c.when}</span></span>${c.thumb ? `<img class="th" src="${c.thumb}" alt="" />` : ''}</span>
+    </button>`;
+  });
+  html += sysRow('alerts', 'Price drop: 312 Sumner Ave is now $720', '09-12', sysState.alerts.dot ? '<span class="dot"></span>' : '', 'alert-sumner');
+  $('#msgList').innerHTML = html;
+  updateBadge();
+}
+function updateBadge() {
+  const n = Object.values(CHATS).reduce((a, c) => a + c.unread, 0) + sysState.agent.badge + sysState.deposits.badge;
+  $('#msgBadge').textContent = n; $('#msgBadge').style.display = n ? '' : 'none';
+}
+
+/* =====================================================================
+   ME TAB
+   ===================================================================== */
+$('#meBadge').innerHTML = ICON.badge('#16A34A', 20);
+$('#threeChecks').innerHTML = [['Face', 'Selfie matches ID', '#16A34A'], ['Student ID', 'Checked by a third party', '#3B82F6'], ['College', 'Syracuse University', '#F76900']]
+  .map(c => `<div class="rounded-[14px] p-2.5" style="background:var(--soft)">${ICON.badge(c[2], 22)}<p class="font-bold text-[13.5px] mt-1.5">${c[0]}</p><p class="text-[11.5px] leading-tight mt-0.5" style="color:var(--muted)">${c[1]}</p></div>`).join('');
+function renderDeals() {
+  const held = Object.values(CHATS).filter(c => c.deal).length;
+  const it = (n, label, path) => `<button class="tool" data-act="${held && label !== 'Listed' ? 'tab:msgs' : 'toast:' + label}"><span class="relative"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path}</svg><b class="absolute -right-2.5 -bottom-1 text-[12px]">${n}</b></span>${label}</button>`;
+  $('#dealIcons').innerHTML =
+    it(0, 'Listed', '<path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/>') +
+    it(held, 'Reserved', '<rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/>') +
+    it(held, 'Deposits held', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>') +
+    it(2, 'Reviews', '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z"/>');
+  const dep = Object.values(CHATS).find(c => c.deal);
+  $('#dealNote').textContent = dep ? `${money(byId(dep.listing).price)} deposit held by Verimate` : 'No money has left Verimate yet';
+}
+renderDeals();
+masonry($('#likeFeed'), ['L:livingston', 'L:maryland', 'P:hannah', 'L:sumner']);
+$('#trackSwitch').addEventListener('click', e => {
+  const off = e.currentTarget.classList.toggle('off'); e.currentTarget.setAttribute('aria-pressed', !off);
+  toast(off ? 'Tracker paused' : `We'll text you when a place matches ${fmt(state.start)} – ${fmt(state.end)}`);
+});
+
+/* =====================================================================
+   NEARBY MAP (MapLibre, loaded the first time the tab opens)
+   ===================================================================== */
+let map = null, mapReady = false;
+const pinEls = {};
+function mapCardsHtml() {
+  return LISTINGS.filter(visible).map(l => `<button class="map-card" data-l="${l.id}" data-mc="${l.id}">
+      <img src="${l.img}" alt="" />
+      <span class="min-w-0 flex flex-col">
+        <span class="price" style="font-size:19px"><small>$</small>${l.price}<small>/mo</small></span>
+        <span class="ttl text-[13.5px] mt-1">${l.title}</span>
+        <span class="sub">${l.prov === 'bad' ? '<b style="color:var(--flagged)">Photos flagged</b>' : l.prov === 'ok' ? 'Photos verified' : 'Checking photos'} · ${l.walk} min walk</span>
+      </span>
+    </button>`).join('') || `<div class="map-card" style="width:auto">Nothing fits these dates.</div>`;
+}
+function syncMap() {
+  $('#mapCards').innerHTML = mapCardsHtml();
+  LISTINGS.forEach(l => { const el = pinEls[l.id]; if (el) el.classList.toggle('dim', !visible(l)); });
+}
+function focusPin(id) {
+  Object.entries(pinEls).forEach(([k, el]) => el.classList.toggle('hl', k === id));
+  document.querySelectorAll('.map-card').forEach(c => c.classList.toggle('hl', c.dataset.mc === id));
+}
+function initMap() {
+  if (map) { requestAnimationFrame(() => map.resize()); return; }
+  $('#mapCards').innerHTML = mapCardsHtml();
+  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css'; document.head.appendChild(css);
+  const js = document.createElement('script'); js.src = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js';
+  js.onerror = () => { $('#mapBox').innerHTML = '<p class="p-6 pt-24 text-center" style="color:var(--muted)">The map needs a connection. The list still works.</p>'; };
+  js.onload = () => {
+    try {
+      map = new maplibregl.Map({ container: 'mapBox', style: 'https://tiles.openfreemap.org/styles/liberty', center: [-76.1275, 43.0365], zoom: 14.2,
+        dragRotate: false, touchPitch: false, attributionControl: { compact: true } });
+      map.on('load', () => {
+        LISTINGS.forEach(l => {
+          const el = document.createElement('button');
+          el.className = `pin-tag ${l.prov === 'ok' ? '' : l.prov} ${visible(l) ? '' : 'dim'}`;
+          el.innerHTML = (l.prov === 'bad' ? ICON.warn(12) : '') + `$${l.price}`;
+          el.setAttribute('aria-label', `${l.address}, $${l.price} a month`);
+          el.addEventListener('click', e => {
+            e.stopPropagation(); focusPin(l.id);
+            const card = document.querySelector(`.map-card[data-mc="${l.id}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          });
+          pinEls[l.id] = el;
+          const wrap = document.createElement('div'); wrap.style.paddingBottom = '5px'; wrap.appendChild(el);
+          new maplibregl.Marker({ element: wrap, anchor: 'bottom' }).setLngLat(l.ll).addTo(map);
+        });
+        mapReady = true;
+      });
+    } catch (err) { console.warn('Map unavailable', err); }
+  };
+  document.head.appendChild(js);
+}
+$('#mapCards').addEventListener('scroll', () => {
+  clearTimeout(initMap._t);
+  initMap._t = setTimeout(() => {
+    const box = $('#mapCards'), mid = box.scrollLeft + box.clientWidth / 2;
+    const card = [...box.querySelectorAll('.map-card')].find(c => c.offsetLeft <= mid && c.offsetLeft + c.offsetWidth >= mid);
+    if (card && card.dataset.mc && mapReady) { focusPin(card.dataset.mc); map.easeTo({ center: byId(card.dataset.mc).ll, duration: 400 }); }
+  }, 140);
+}, { passive: true });
+
+/* =====================================================================
+   AGENT (same scripted flows as desktop)
+   ===================================================================== */
+const thread = $('#thread');
+let runId = 0;
+function openAgent() { if (!$('#agent').classList.contains('open')) push($('#agent')); }
+function add(html, cls = '') {
+  const el = document.createElement('div'); el.className = cls; el.innerHTML = html; thread.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('in'));
+  thread.scrollTo({ top: thread.scrollHeight, behavior: 'smooth' });
+  return el;
+}
+function setSubject(l) {
+  const p = PEOPLE[l.lister];
+  $('#subject').innerHTML = `
+    <img src="${l.img}" alt="" class="w-12 h-12 rounded-[12px] object-cover flex-none" />
+    <div class="flex-1 min-w-0">
+      <p class="text-[11.5px] font-semibold" style="opacity:.6">Looking into</p>
+      <p class="display font-semibold text-[16px] truncate">${l.address}</p>
+      <p class="text-[12px] font-medium truncate" style="opacity:.7">$${l.price}/mo, listed by ${p.name}</p>
+    </div>
+    <span class="text-[11px] font-bold px-2 py-1 rounded-full flex-none" style="background:#fff;color:${l.prov === 'bad' ? 'var(--flagged)' : '#11813A'}">${l.prov === 'bad' ? 'Flagged' : 'Verified'}</span>`;
+}
+function setSuggests(list) { $('#suggests').innerHTML = list.map(s => `<button class="suggest" data-s="${s[1]}">${s[0]}</button>`).join(''); }
+async function runSteps(my, steps, doneText) {
+  const box = add(`<div class="flex gap-3"><div class="mini-orb">${ICON.spark(14)}</div><div class="flex flex-col gap-2 pt-1.5" data-steps></div></div>`, 'reveal');
+  const list = box.querySelector('[data-steps]');
+  for (const s of steps) {
+    if (my !== runId) return false;
+    const row = document.createElement('div'); row.className = 'step'; row.innerHTML = `<span class="sd"></span><span>${s}</span>`;
+    list.appendChild(row); await wait(420);
+    row.classList.add('done'); row.querySelector('.sd').innerHTML = ICON.check(9, 4);
+  }
+  await wait(250);
+  if (my !== runId) return false;
+  list.innerHTML = `<div class="step done"><span class="sd">${ICON.check(9, 4)}</span><span>${doneText || `Checked ${steps.length} sources in 2.1 s`}</span></div>`;
+  return true;
+}
+function srcCard(it) {
+  if (it.ours) return `<div class="src-card ours">
+      <div class="flex items-center gap-2 text-[12.5px] flex-wrap">${ICON.badge('#16A34A', 16)}<span class="font-semibold">Verified resident</span><span style="color:var(--muted)">${it.when}</span><span class="ml-auto ours-tag">Only on Verimate</span></div>
+      <q>${it.quote}</q>
+      <div class="flex items-center justify-between gap-2"><span class="text-[12px] font-semibold" style="color:#11813A">Lived here ${it.lived}</span><span class="topic">${it.topic}</span></div>
+    </div>`;
+  const logo = it.kind === 'reddit' ? `<span class="w-4 h-4 rounded-full grid place-items-center text-white text-[9px] font-bold" style="background:#FF4500">r/</span>`
+    : it.kind === 'google' ? `<span class="w-4 h-4 rounded-full grid place-items-center text-white text-[10px] font-bold" style="background:#4285F4">G</span>`
+    : `<span class="w-4 h-4 rounded grid place-items-center text-white text-[9px] font-bold" style="background:#6C7079">§</span>`;
+  const stars = it.stars ? `<span style="color:#E8A317;letter-spacing:1px">${'★'.repeat(it.stars)}<span style="color:#D8D7D2">${'★'.repeat(5 - it.stars)}</span></span>` : '';
+  return `<div class="src-card">
+      <div class="flex items-center gap-2 text-[12.5px] flex-wrap">${logo}<span class="font-semibold">${it.src}</span><span style="color:var(--muted)">${it.when}</span>${stars}</div>
+      <q>${it.quote}</q>
+      <div class="flex items-center justify-between"><a class="src-link" href="${it.url}" target="_blank" rel="noopener">View source ${ICON.ext}</a><span class="topic">${it.topic}</span></div>
+    </div>`;
+}
+function rentBar(r) {
+  const pos = (v) => ((v - r.low) / (r.high - r.low)) * 100;
+  return `<div class="src-card" style="background:#fff">
+    <p class="text-[13px]" style="color:var(--muted)">Rent for a ${r.label}, last 12 months</p>
+    <div class="relative h-12 mt-2">
+      <div class="absolute left-0 right-0 top-5 h-2 rounded-full" style="background:linear-gradient(90deg,#F0EFEC,#DAD8D3,#F0EFEC)"></div>
+      <div class="absolute top-3 w-0.5 h-6" style="left:${pos(r.median)}%;background:var(--ink)"></div>
+      <div class="absolute top-[14px] w-4 h-4 rounded-full -ml-2" style="left:${pos(r.this)}%;background:var(--brand);box-shadow:0 0 0 3px #fff"></div>
+      <span class="absolute -top-0.5 text-[11.5px] font-semibold -translate-x-1/2 whitespace-nowrap" style="left:${pos(r.median)}%">median $${r.median}</span>
+      <span class="absolute top-9 text-[11.5px] font-semibold -translate-x-1/2 whitespace-nowrap" style="left:${pos(r.this)}%;color:var(--brand)">this $${r.this}</span>
+    </div>
+    <div class="flex justify-between text-[11.5px] mt-1" style="color:var(--faint)"><span>$${r.low}</span><span>$${r.high}</span></div>
+  </div>`;
+}
+const agentSays = (html) => add(`<div class="flex gap-2.5"><div class="mini-orb">${ICON.spark(14)}</div><div class="a-bubble flex-1 min-w-0 flex flex-col gap-3">${html}</div></div>`, 'reveal');
+const indented = (html) => add(`<div class="pl-[38px]">${html}</div>`, 'reveal');
+
+async function runReputation(id) {
+  openAgent();
+  const my = ++runId; thread.innerHTML = '';
+  const l = byId(id), ev = EVIDENCE[id] || GENERIC_EVIDENCE(l);
+  setSubject(l);
+  setSuggests([['Check photos on 419 Ackerman', 'photo:ackerman'], ['What about 734 Comstock?', 'rep:comstock'], ['Is $850 fair for Euclid?', 'rep:euclid']]);
+  add(`<div class="u-bubble">${ICON.spark(12)}${ev.question}</div>`, 'reveal flex flex-col');
+  await wait(350);
+  const ok = await runSteps(my, ['Searching r/SyracuseU and r/Syracuse', 'Reading Google reviews', 'Matching verified-resident reviews', 'Checking City of Syracuse code records']);
+  if (!ok) return;
+  agentSays(`<p class="text-[14.5px] leading-relaxed font-medium">${ev.lead}</p>
+    <div class="flex flex-wrap gap-1.5">${ev.topics.map(t => `<span class="topic">${t[0]}&nbsp;<b>${t[1]}</b></span>`).join('')}</div>`);
+  for (const it of ev.items) { await wait(260); if (my !== runId) return; indented(srcCard(it)); }
+  await wait(300); if (my !== runId) return;
+  agentSays(`<p class="text-[14.5px] leading-relaxed font-medium">Rent is in range for that block. The median is $${ev.rent.median} for a ${ev.rent.label}.</p>${rentBar(ev.rent)}`);
+  await wait(300); if (my !== runId) return;
+  indented(`<details class="text-[12.5px] rounded-[16px] px-4 py-3" style="background:var(--soft)">
+      <summary class="cursor-pointer font-semibold">How I found this</summary>
+      <div class="mt-2 flex flex-col gap-1.5" style="color:var(--muted)">
+        <p><b style="color:var(--ink)">Input:</b> the address, the landlord on the lease, and your question.</p>
+        <p><b style="color:var(--ink)">Searched:</b> 2 subreddits, Google reviews, City of Syracuse code records, and reviews from students we verified lived here.</p>
+        <p><b style="color:var(--ink)">Output:</b> quotes grouped by topic, each linked to its source. I don't score landlords. You decide.</p>
+      </div>
+    </details>
+    <button class="suggest mt-3" data-s="more">Show ${ev.more} more mentions</button>`);
+}
+
+async function runPhotoCheck(id) {
+  openAgent();
+  const my = ++runId; thread.innerHTML = '';
+  const l = byId(id);
+  setSubject(l);
+  setSuggests([['What do residents say about 812 Euclid?', 'rep:euclid'], ['Show verified places under $700', 'toast:under700']]);
+  const pc = PHOTO_CHECK[id];
+  if (!pc) {
+    add(`<div class="u-bubble">${ICON.spark(12)}Are the photos on ${l.address} real?</div>`, 'reveal flex flex-col');
+    const ok = await runSteps(my, ['Reverse image search', 'Reading metadata and C2PA', 'Scanning for generation signals', 'Comparing photos to each other']);
+    if (!ok) return;
+    agentSays(`<p class="text-[14.5px] leading-relaxed font-medium">All 4 photos passed. They carry phone camera metadata, have no earlier copies online, and agree with each other on layout and light.</p>
+      <div class="src-card flex items-center gap-3" style="background:#fff"><span class="ci pass">${ICON.check(12, 3.4)}</span><div><p class="font-semibold">Risk 6 of 100</p><p class="text-[12.5px]" style="color:var(--muted)">Low. Still meet in person or ask for a video tour before paying.</p></div></div>`);
+    return;
+  }
+  add(`<div class="u-bubble">${ICON.spark(12)}${pc.question}</div>`, 'reveal flex flex-col');
+  await wait(350);
+  const ok = await runSteps(my, ['Reverse image search across 5 photos', 'Reading metadata and C2PA credentials', 'Scanning for generation signals', 'Comparing photos to each other'], 'Ran 4 checks on 5 photos in 3.4 s');
+  if (!ok) return;
+  agentSays(`<p class="text-[14.5px] leading-relaxed font-medium">Two things stood out. This doesn't prove the listing is fake, but I'd ask Chris for a live video tour before sending any money.</p>
+    <div class="src-card" style="background:#fff">
+      <div class="flex items-center justify-between">
+        <div><p class="text-[12.5px]" style="color:var(--muted)">Photo risk score</p><p class="display font-semibold text-[34px] leading-none mt-1" style="color:var(--flagged);letter-spacing:-.04em">${pc.risk}<span class="text-[15px]" style="color:var(--muted)"> / 100</span></p></div>
+        <span class="text-[12.5px] font-semibold px-2.5 py-1 rounded-full" style="background:var(--flagged-tint);color:var(--flagged)">2 flags</span>
+      </div>
+      <div class="h-2 rounded-full mt-3 relative" style="background:linear-gradient(90deg,#16A34A,#EAB308 50%,#DC2626)">
+        <span class="absolute -top-1 w-4 h-4 rounded-full -ml-2 bg-white" style="left:${pc.risk}%;box-shadow:0 0 0 2px var(--ink)"></span>
+      </div>
+      <div class="flex justify-between text-[11.5px] mt-1.5" style="color:var(--faint)"><span>Low</span><span>High</span></div>
+    </div>`);
+  await wait(300); if (my !== runId) return;
+  add(`<div class="fan">${pc.photos.map((src, i) => {
+    const off = (i - 2) * 46, rot = (i - 2) * 7, flagged = pc.flaggedIdx.includes(i);
+    return `<div class="f" style="transform:translateX(calc(-50% + ${off}px)) rotate(${rot}deg) translateY(${Math.abs(i - 2) * 6}px);z-index:${10 - Math.abs(i - 2)}">
+      <img src="${src}" alt="Listing photo ${i + 1}" />
+      <span class="absolute top-1.5 left-1.5 w-5 h-5 rounded-full grid place-items-center text-white" style="background:${flagged ? 'var(--flagged)' : 'var(--verified)'}">${flagged ? '<b style="font-size:11px">!</b>' : ICON.check(9, 4)}</span>
+    </div>`; }).join('')}</div>`, 'reveal');
+  await wait(300); if (my !== runId) return;
+  indented(`<div class="src-card" style="padding:4px 14px">${pc.checks.map(c => `
+    <div class="row-check" style="grid-template-columns:22px 1fr auto;align-items:start">
+      <span class="ci ${c.status}" style="width:22px;height:22px">${c.status === 'pass' ? ICON.check(11, 3.4) : c.status === 'flag' ? '<b style="font-size:12px">!</b>' : ICON.info}</span>
+      <div><p class="font-semibold text-[13.5px]">${c.name}</p><p class="text-[12.5px] mt-0.5" style="color:var(--muted)">${c.detail}</p></div>
+      <span class="text-[11.5px] font-semibold" style="color:${c.status === 'flag' ? 'var(--flagged)' : c.status === 'pass' ? 'var(--verified)' : 'var(--muted)'}">${c.status === 'flag' ? 'Flag' : c.status === 'pass' ? 'Clear' : 'Note'}</span>
+    </div>`).join('')}</div>`);
+  await wait(300); if (my !== runId) return;
+  indented(`<div class="flex gap-2">
+      <button class="flex-1 h-11 rounded-full text-white font-semibold text-[13.5px]" style="background:var(--brand)" data-s="toast:video">Ask for a video tour</button>
+      <button class="h-11 px-5 rounded-full font-semibold text-[13.5px]" style="background:var(--soft)" data-s="toast:report">Report</button>
+    </div>`);
+}
+$('#agent').addEventListener('click', e => {
+  const s = e.target.closest('[data-s]'); if (!s) return;
+  const [kind, arg] = s.dataset.s.split(':');
+  if (kind === 'rep') runReputation(arg);
+  else if (kind === 'photo') runPhotoCheck(arg);
+  else if (kind === 'toast') toast(arg === 'video' ? `${ICON.check(14, 3)} Request sent. Chris has 48 hours to schedule a live tour.` : arg === 'report' ? 'Report received. A person reviews every flagged listing within a day.' : 'Showing verified places under $700.');
+  else if (kind === 'more') toast('6 more mentions loaded below.');
+});
+$('#askForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('#askInput').value.toLowerCase(); $('#askInput').value = ''; $('#askInput').blur();
+  if (/photo|fake|real|ai|ackerman/.test(q)) runPhotoCheck('ackerman');
+  else { const hit = LISTINGS.find(l => q.includes(l.address.split(' ')[1].toLowerCase())); runReputation(hit ? hit.id : 'euclid'); }
+});
+
+/* =====================================================================
+   ONE CLICK ROUTER for every data-act / card tap
+   ===================================================================== */
+document.addEventListener('click', e => {
+  if (e.target.closest('#agent [data-s]')) return;
+  const a = e.target.closest('[data-act]');
+  if (a) {
+    const [verb, ...rest] = a.dataset.act.split(':'); const arg = rest.join(':');
+    switch (verb) {
+      case 'back': return back();
+      case 'toast': return toast(arg);
+      case 'tab': return setTab(arg);
+      case 'mode': return setMode(arg);
+      case 'filter': toggleFilter(arg); return toast(state.filters.has(arg) ? 'Filter on' : 'Filter off');
+      case 'dates': return datesSheet();
+      case 'preset': {
+        const p = PRESETS.find(x => x.id === arg); setRange(p);
+        if ($('#sheet').classList.contains('open')) back();
+        return toast(`${p.name}: ${fmt(p.start)} – ${fmt(p.end)}`);
+      }
+      case 'closer': return setCloser(true);
+      case 'list': return listSheet();
+      case 'premium': return premiumSheet();
+      case 'premium-start': back(); return toast(`${ICON.check(14, 3)} Premium trial on. We'll text you new matches.`);
+      case 'desktop': location.href = 'index.html?desktop'; return;
+      case 'share': {
+        const url = location.origin + location.pathname.replace(/[^/]*$/, '');
+        if (navigator.share) navigator.share({ title: 'Verimate', url }).catch(() => {});
+        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('Link copied'));
+        return;
+      }
+      case 'save': {
+        saved.has(arg) ? saved.delete(arg) : saved.add(arg);
+        a.classList.toggle('on', saved.has(arg)); a.lastChild.textContent = saved.has(arg) ? 'Saved' : 'Save';
+        return toast(saved.has(arg) ? 'Saved. We\'ll tell you if the dates or price change.' : 'Removed from saved');
+      }
+      case 'reserve': return reserveSheet(arg);
+      case 'video': back(); return toast(`${ICON.check(14, 3)} Request sent. Chris has 48 hours to schedule a live tour.`);
+      case 'pay': {
+        const key = ensureListingChat(arg), c = CHATS[key], l = byId(arg), first = PEOPLE[l.lister].name.split(' ')[0];
+        c.deal = 'held'; c.when = 'Just now';
+        c.msgs.push({ me: `Held by Verimate until I move in on ${fmt(l.start)} and confirm.`, title: 'I paid the deposit into protection' });
+        c.msgs.push({ protect: `${money(l.price)} deposit held by Verimate`, sub: `${first} sees it's secured, but can't touch it. Rent goes out after you confirm move-in.` });
+        c.msgs.push({ them: `Got the notice. Keys will be ready on ${fmt(l.start)} 🙌` });
+        sysState.deposits.badge = 1;
+        CHAT_ORDER.splice(CHAT_ORDER.indexOf(key), 1); CHAT_ORDER.unshift(key);
+        renderDeals();
+        // Swap the sheet for the chat in one history entry.
+        popTop(); openChat(key, true);
+        return toast(`${ICON.shield(16)} Deposit protected. ${first} can't touch it.`);
+      }
+      case 'movein': {
+        const c = CHATS[openChatId], l = byId(c.listing), first = PEOPLE[l.lister].name.split(' ')[0];
+        c.deal = 'moved';
+        c.msgs.push({ me: 'Saw the place, it matches the photos. Release the first month\'s rent.', title: 'I moved in' });
+        c.msgs.push({ sys: `First month's rent released to ${first}. Your ${money(l.price)} deposit stays protected until ${fmt(l.end)}.` });
+        c.msgs.push({ them: 'Welcome home! Text me if anything breaks.' });
+        renderChat(); renderDeals();
+        return toast(`${ICON.check(14, 3)} Rent released. Deposit stays protected.`);
+      }
+      case 'chat': return openChat(arg);
+      case 'chat-lister': return openChat(ensureListingChat(arg));
+      case 'agent-rep': return runReputation(arg);
+      case 'agent-photo': return runPhotoCheck(arg);
+      case 'agent-msg': sysState.agent.badge = 0; renderMessages(); return runPhotoCheck('ackerman');
+      case 'tracker': sysState.tracker.dot = false; renderMessages(); setTab('home'); return toast(`3 new places match ${fmt(state.start)} – ${fmt(state.end)}`);
+      case 'alert-sumner': sysState.alerts.dot = false; renderMessages(); return openListing('sumner');
+      case 'how-deposit': sysState.deposits.badge = 0; renderMessages(); return openSheet(`
+        <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">How deposit protection works</h2>
+        <div class="flex flex-col gap-3 mt-4">
+          <div class="flex gap-3"><span class="step-n">1</span><p class="text-[14px]"><b>You pay Verimate, not the lister.</b> One month's deposit plus a 2.5% holding fee.</p></div>
+          <div class="flex gap-3"><span class="step-n">2</span><p class="text-[14px]"><b>Rent waits for you.</b> Nothing goes out until you've seen the place and tapped Confirm move-in.</p></div>
+          <div class="flex gap-3"><span class="step-n">3</span><p class="text-[14px]"><b>Your deposit comes back.</b> We hold it until the lease ends, then return it or cover documented damage.</p></div>
+        </div>
+        <button class="cta mt-5 w-full" style="height:50px" data-act="back">Got it</button>`);
+    }
+    return;
+  }
+  const l = e.target.closest('[data-l]');
+  if (l) return openListing(l.dataset.l);
+  const p = e.target.closest('[data-p]');
+  if (p) return openChat(personChat(p.dataset.p));
+});
+
+/* =====================================================================
+   CLOSING LINE: tap to step through, as on desktop
+   ===================================================================== */
+document.querySelectorAll('[data-badge-lg]').forEach(el => { el.outerHTML = ICON.badge(el.dataset.badgeLg, 0).replace('width="0" height="0"', 'width="0.78em" height="0.78em"'); });
+const closer = $('#closer'), cSteps = [...closer.querySelectorAll('.step-in')];
+let shown = 0;
+const paint = () => cSteps.forEach((el, i) => el.classList.toggle('shown', i < shown));
+function setCloser(on) { closer.classList.toggle('open', on); shown = on ? 1 : 0; paint(); }
+closer.addEventListener('click', () => { if (shown < cSteps.length) { shown++; paint(); } else setCloser(false); });
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+history.replaceState({ n: 0 }, '');
+renderFeed();
+renderMessages();
+if (location.hash.startsWith('#agent')) runReputation('euclid');
+if (location.hash.startsWith('#photo')) runPhotoCheck('ackerman');
+if (location.hash === '#closing') setTimeout(() => setCloser(true), 300);
+</script>
+</body>
+</html>
