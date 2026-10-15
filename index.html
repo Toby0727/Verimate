@@ -179,6 +179,13 @@
   .cover-track { position: relative; height: 4px; border-radius: 4px; background: var(--soft); overflow: hidden; }
   .cover-fill { position: absolute; top: 0; bottom: 0; background: var(--brand); border-radius: 4px; }
   .cover-note { font-size: 11.5px; color: var(--muted); }
+  /* Verimate Hold on listing cards: one quiet line on photo-verified places, one booking link on the demo listing. */
+  .hold-note { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--muted); line-height: 1.3; }
+  .hold-btn {
+    width: 100%; height: 42px; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap;
+  }
+  .hold-btn:hover { background: var(--brand-deep); }
   .vcheck { display: inline-grid; place-items: center; flex: none; }
   .pending { font-size: 11px; color: var(--muted); background: var(--soft); border-radius: 6px; padding: 2px 6px; }
   .class-tag, .su-tag { font-size: 11px; font-weight: 700; color: #fff; background: #F76900; border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
@@ -245,6 +252,10 @@
   .navlink { color: var(--ink); text-decoration: none; padding: 6px 0; border-bottom: 2px solid transparent; }
   .navlink:hover { color: var(--brand); }
   .navlink.on { border-bottom-color: var(--brand); }
+  /* The nav stays on one line; on windows narrower than the demo sizes it tightens, then drops its last link,
+     so the avatar is never pushed off screen. */
+  @media (max-width: 1200px) { header .mainnav { column-gap: 20px; } }
+  @media (max-width: 1140px) { header .mainnav .nav-extra { display: none; } }
   .campus-box { display: flex; align-items: center; gap: 10px; height: 48px; width: 270px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #D4D4D4; background: #fff; flex: none; }
   .campus-box svg { flex: none; }
   .campus-box input { min-width: 0; border: 0; outline: none; flex: 1; font-size: 15px; font-weight: 500; background: transparent; }
@@ -343,11 +354,12 @@
     <header class="flex-none pl-3 pr-6 pt-2 pb-3 border-b" style="border-color:var(--line)">
       <div class="h-14 flex items-center gap-9">
         <span class="display text-[27px] font-bold" style="letter-spacing:-.04em;color:var(--brand)">Verimate <span class="muted-word" style="font-weight:600">Syracuse</span></span>
-        <nav class="flex items-center gap-7 text-[15px] font-semibold" aria-label="Main">
-          <a href="#" class="navlink on">Browse places</a>
+        <nav class="mainnav flex items-center gap-7 text-[15px] font-semibold whitespace-nowrap" aria-label="Main">
+          <a href="#" class="navlink on" aria-current="page">Browse places</a>
           <a href="#" class="navlink">Read reviews</a>
-          <a href="#" class="navlink">List your place</a>
-          <a href="#" class="navlink">How verification works</a>
+          <a href="lister.html" class="navlink">List your place</a>
+          <a href="hold.html" class="navlink">Verimate Hold</a>
+          <a href="#" class="navlink nav-extra">How verification works</a>
         </nav>
         <div class="ml-auto flex items-center gap-2">
           <button class="icon-btn" aria-label="Notifications">
@@ -479,6 +491,7 @@
 
 <div id="toast" class="toast" role="status"></div>
 
+<script src="assets/hold-data.js"></script>
 <script>
 /* =====================================================================
    DATA — everything the demo shows is hardcoded here.
@@ -522,7 +535,7 @@ const LISTINGS = [
 ];
 
 const PEOPLE = {
-  lena:   { name: 'Lena Park',     year: "'26", school: 'Whitman',  img: 'img/p-1544005313.jpg', verified: true },
+  lena:   { name: 'Lena Park',     year: "'28", school: 'Whitman',  img: 'img/p-1544005313.jpg', verified: true },
   marcus: { name: 'Jason Lin',     year: "'27", school: 'Maxwell',  img: 'img/u-jason.jpg', verified: true },
   chris:  { name: 'Chris M.',      year: null,  school: null,       img: 'img/p-1506794778.jpg', verified: false },
   aisha:  { name: 'Aisha Rahman',  year: "'27", uni: 'esf', school: 'Forestry',  img: 'img/p-1524504388.jpg', verified: true },
@@ -638,7 +651,20 @@ const ICON = {
   chat: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   spark: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg>`,
   info: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8h.01M12 12v5"/></svg>`,
+  // The Verimate mark (red circle, white house-check), small enough to sit in a line of text: "held by Verimate".
+  mark: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="12" fill="#D81E28"/><g transform="translate(5 5) scale(.58)" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></g></svg>`,
+  houseCheck: (s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>`,
 };
+
+/* Verimate Hold (assets/hold-data.js). The demo deal's listing gets the booking link; the label is the shared button word.
+   Falls back to plain values if the data file is missing, so the feed never breaks. */
+const HOLD_DEAL_ADDRESS = window.HOLD ? HOLD.deal.address : '734 Comstock Ave';
+const HOLD_BOOK_LABEL = window.HOLD ? HOLD.vocab.buttons.book : 'Book with Hold';
+const holdLine = (l) => l.prov === 'ok';                      // photo-verified places show "Rent held until you move in"
+const holdBook = (l) => l.address === HOLD_DEAL_ADDRESS;      // 734 Comstock: Book with Hold, to book.html
+/* Masonry height estimate: a listing card grows by the Hold line (24px) and the booking link (56px), both measured.
+   The base 200 is unchanged; it keeps the columns closest to even at 1440 and 1280 wide. */
+const HOLD_LINE_H = 24, HOLD_BOOK_H = 56;
 
 function coverage(l) {
   const S = state.start, E = state.end, total = days(S, E);
@@ -721,6 +747,7 @@ function listingCard(l) {
         <p class="price">$${l.price.toLocaleString()}<small>/mo</small></p>
         <span class="meta" style="cursor:default">${ICON.walk}${l.walk} min</span>
       </div>
+      ${holdLine(l) ? `<p class="hold-note mt-2">${ICON.mark(14)}Rent held until you move in</p>` : ''}
       <p class="avail mt-3">${ICON.cal}Available ${fmt(l.start)} – ${fmt(l.end)}</p>
       <div class="cover-track mt-1.5"><div class="cover-fill" style="left:${c.left * 100}%;width:${c.width * 100}%"></div></div>
       <p class="cover-note mt-1">${note}</p>
@@ -728,6 +755,7 @@ function listingCard(l) {
         ${listerRow(p)}
         ${reviews}
       </div>
+      ${holdBook(l) ? `<a class="hold-btn mt-3.5" href="book.html" data-book>${ICON.houseCheck(16)}${HOLD_BOOK_LABEL}</a>` : ''}
     </div>
   </article>`;
 }
@@ -796,7 +824,7 @@ function renderFeed() {
       const l = LISTINGS.find(x => x.id === id);
       if (!visible(l)) return;
       nPlaces++;
-      html = listingCard(l); h = colW * l.ratio + 200;
+      html = listingCard(l); h = colW * l.ratio + 200 + (holdLine(l) ? HOLD_LINE_H : 0) + (holdBook(l) ? HOLD_BOOK_H : 0);
     } else {
       const p = PERSON_CARDS.find(x => x.id === id);
       nPeople++;
@@ -1095,7 +1123,7 @@ function toast(html) {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400);
 }
 $('#feed').addEventListener('click', e => {
-  if (e.target.closest('[data-property-link]')) return;
+  if (e.target.closest('[data-property-link], [data-book]')) return;   // real links: let them navigate, never open the agent
   const sv = e.target.closest('[data-save]');
   if (sv) { const on = sv.classList.toggle('saved'); sv.textContent = on ? 'Saved' : 'Save'; if (on) toast('Saved. We\'ll tell you if the dates or price change.'); return; }
   const m = e.target.closest('[data-msg]');

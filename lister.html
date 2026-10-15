@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>List your place | Verimate</title>
+<meta name="description" content="Lena Park's lister dashboard for 734 Comstock Ave: fee preview, upcoming and paid rent, the deposit held by Verimate, and the New York 14-day move-out clock." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/hold.css" />
+<style>
+  /* lister.html only. Shared tokens and components come from assets/hold.css. */
+  :root { --page-max: 1240px; --gutter: 28px; --field-line: #949494; }
+  #hold-nav { --hn-max: var(--page-max); }
+  html { scroll-padding-top: 16px; }
+  body { background: var(--paper); }
+
+  /* One signature motion: money rows travel from Upcoming to Paid. The rest of the page swaps without animating. */
+  :root { view-transition-name: none; }
+  ::view-transition { pointer-events: none; }
+  ::view-transition-group(*) { animation-duration: var(--dur-move); animation-timing-function: var(--ease-move); }
+  ::view-transition-old(*), ::view-transition-new(*) { animation-duration: var(--dur-move); }
+
+  /* ---------------------------------------------------------------- moments (Lena's timeline, demo clock) */
+  .moments-wrap { border-bottom: 1px solid var(--line); background: var(--paper); }
+  .moments {
+    max-width: var(--page-max); margin: 0 auto; padding: 12px var(--gutter); box-sizing: border-box;
+    display: flex; align-items: center; gap: 22px; min-width: 0;
+  }
+  .moments .date-chip { flex: none; font-size: 15px; padding: 6px 13px; }
+  .moments > nav { min-width: 0; flex: 0 1 auto; }
+  .mo-list { list-style: none; margin: 0; padding: 2px 0; display: flex; align-items: center; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .mo-list::-webkit-scrollbar { display: none; }
+  .mo-item { display: flex; align-items: center; flex: none; }
+  .mo-item + .mo-item::before { content: ""; width: 22px; height: 1px; margin: 0 8px; background: var(--line-2); }
+  .mo-item.is-done + .mo-item::before { background: var(--ink); }
+  .mo-item.mo-alt::before { content: none; }
+  .mo-alt { margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--line); }
+  .mo-link { display: inline-flex; align-items: center; gap: 9px; padding: 5px 6px 5px 4px; border-radius: 9px; text-decoration: none; color: var(--muted); }
+  .mo-link:hover .mo-label { color: var(--ink); }
+  .mo-dot {
+    width: 22px; height: 22px; flex: none; border-radius: 50%; box-sizing: border-box; display: grid; place-items: center;
+    border: 1.5px solid var(--line-2); background: var(--paper); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted);
+  }
+  .mo-dot svg { width: 11px; height: 11px; }
+  .mo-text { display: grid; line-height: 1.2; }
+  .mo-label { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+  .mo-date { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .is-done .mo-dot { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .is-done .mo-label, .is-now .mo-label { color: var(--ink); }
+  .is-now .mo-dot { border: 2px solid var(--brand); color: var(--brand); box-shadow: 0 0 0 3px var(--brand-tint); }
+  .mo-alt .mo-dot { border-style: dashed; }
+  .mo-alt.is-now .mo-dot { border-style: solid; }
+
+  /* ---------------------------------------------------------------- page grid */
+  .dash {
+    max-width: var(--page-max); margin: 0 auto; padding: 34px var(--gutter) 96px; box-sizing: border-box;
+    display: grid; grid-template-columns: minmax(0, 1fr) 316px; grid-template-rows: auto auto 1fr; column-gap: 64px;
+    grid-template-areas: "work side" "earn side" "act side";
+  }
+  .work { grid-area: work; min-width: 0; }
+  .earn { grid-area: earn; min-width: 0; margin-top: 56px; }
+  .act  { grid-area: act;  min-width: 0; margin-top: 52px; }
+  .side { grid-area: side; min-width: 0; }
+
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .sec-head h2 { font-size: 22px; font-weight: 600; }
+  .sec-note { font-size: 13.5px; color: var(--muted); }
+
+  /* ---------------------------------------------------------------- who + status */
+  .who { display: flex; align-items: center; gap: 12px; }
+  .who .avatar { width: 44px; height: 44px; }
+  .who-name { font-weight: 600; line-height: 1.25; }
+  .who-meta { font-size: 13.5px; color: var(--muted); }
+  .status-title { margin-top: 22px; font-size: 34px; font-weight: 600; letter-spacing: -.03em; }
+  .status-title:focus { outline: none; }
+  .status-sub { margin: 8px 0 0; font-size: 17px; color: var(--ink-2); max-width: 62ch; }
+
+  /* ---------------------------------------------------------------- work card (the one raised surface) */
+  .wcard { margin-top: 24px; padding: 26px 28px 28px; }
+  .wc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .wc-head h2 { font-size: 22px; font-weight: 600; }
+  .wc-head p { margin: 4px 0 0; font-size: 14.5px; color: var(--muted); }
+  .wc-head .chip { margin-top: 3px; }
+  .wc-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 36px; margin-top: 24px; align-items: start; }
+  .wc-split.is-even { grid-template-columns: 1fr 1fr; }
+  .wc-split.is-flip { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .wc-label { font-size: 13.5px; font-weight: 500; color: var(--muted); margin: 0 0 4px; }
+  .wc-note { margin: 10px 0 0; font-size: 14px; color: var(--ink-2); }
+  .wc-foot { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
+  .wc-foot strong { color: var(--ink); font-weight: 600; }
+  .wc-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; }
+  .wc-actions .btn-primary { min-width: 240px; }
+  .wc-actions-note { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); }
+  .amt-hero.is-mid { --amt-size: 46px; }
+
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; }
+  .checks li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
+  .checks li:first-child { border-top: 0; padding-top: 2px; }
+  .checks small { display: block; color: var(--muted); font-size: 13px; }
+  .tick { width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; margin-top: 1px; }
+  .tick svg { width: 11px; height: 11px; }
+
+  .renter { display: flex; align-items: center; gap: 14px; margin-top: 20px; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .renter .avatar { width: 48px; height: 48px; }
+  .renter-badges { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 3px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .stack { display: grid; gap: 12px; }
+  .held-item h3, .slot-empty h3 { font-family: var(--font-ui); font-size: 14.5px; font-weight: 600; letter-spacing: 0; color: var(--ink); display: flex; justify-content: space-between; gap: 10px; }
+  .held-item p, .slot-empty p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-2); }
+  .slot-empty p { color: var(--muted); }
+  .held-item .chip, .slot-empty .chip { margin-top: 10px; }
+
+  .record-big { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; padding: 16px 18px; border-radius: var(--r-row); background: var(--verified-tint); }
+  .record-big b { display: block; font-size: 17px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+  .record-big span { font-size: 13.5px; color: var(--ink-2); }
+
+  /* ---------------------------------------------------------------- NY 14-day ruler (the memorable element) */
+  .ruler { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .ruler-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .ruler-head strong { font-size: 15px; font-weight: 600; }
+  .ruler-head span { font-size: 13px; color: var(--muted); }
+  .ruler-track { position: relative; height: 26px; margin: 30px 9px 0; }
+  .ruler-base { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--line-2); }
+  .ruler-win { position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 6px; background: var(--ink);
+    left: calc(var(--a) / 14 * 100%); width: calc((var(--b) - var(--a)) / 14 * 100%); }
+  .ruler-win.is-green { background: var(--verified); }
+  .ruler-win.is-soft { background: var(--line-2); height: 6px; }
+  .ruler-tick { position: absolute; top: 50%; left: calc(var(--d) / 14 * 100%); width: 1.5px; height: 12px; margin: -6px 0 0 -.75px; background: var(--line-2); }
+  .ruler-mark { position: absolute; top: 50%; left: calc(var(--d) / 14 * 100%); width: 18px; height: 18px; margin: -9px 0 0 -9px;
+    border-radius: 50%; box-sizing: border-box; display: grid; place-items: center; color: #fff; }
+  .ruler-mark svg { width: 10px; height: 10px; }
+  .is-start.ruler-mark { background: var(--ink); }
+  .is-deadline.ruler-mark { background: var(--paper); border: 3px solid var(--brand); }
+  .is-auto.ruler-mark, .is-done.ruler-mark { background: var(--verified); }
+  .is-law.ruler-mark { width: 5px; height: 26px; margin: -13px 0 0 -2.5px; border-radius: 3px; background: var(--ink); }
+  .is-muted.ruler-mark { width: 12px; height: 12px; margin: -6px 0 0 -6px; background: var(--paper); border: 2px solid var(--line-2); }
+  .ruler-today { position: absolute; bottom: calc(100% + 6px); left: calc(var(--d) / 14 * 100%); transform: translateX(-50%);
+    padding: 2px 7px; border-radius: var(--r-chip); background: var(--ink); color: #fff; font-size: 11.5px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
+  .ruler-today[data-align="start"] { transform: translateX(-9px); }
+  .ruler-labels { list-style: none; position: relative; height: 42px; margin: 10px 9px 0; padding: 0; }
+  .ruler-label { position: absolute; top: 0; left: calc(var(--d) / 14 * 100%); white-space: nowrap; font-size: 13px; line-height: 1.4; }
+  .ruler-label[data-align="start"] { transform: translateX(-9px); }
+  .ruler-label[data-align="end"] { transform: translateX(calc(-100% + 9px)); text-align: right; }
+  .ruler-label b { display: block; font-weight: 600; color: var(--ink); }
+  .ruler-label span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .rl-key { display: none; }
+
+  /* ---------------------------------------------------------------- waiting on others */
+  .waiting { margin-top: 28px; }
+  .waiting h2 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin-bottom: 4px; }
+  .wait-row { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--line); }
+  .wait-row:first-of-type { border-top: 0; }
+  .wait-row b { display: block; font-weight: 600; font-size: 14.5px; }
+  .wait-row span { font-size: 13.5px; color: var(--muted); }
+  .wait-ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); color: var(--ink-2); }
+  .wait-ic svg { width: 16px; height: 16px; }
+  .wait-ic.is-vm { background: var(--brand); color: #fff; }
+
+  /* ---------------------------------------------------------------- earnings */
+  .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 0 36px; margin-top: 18px; }
+  .list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--ink); }
+  .list-head h3 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; }
+  .list-total { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -.015em; }
+  .mlist { list-style: none; margin: 0; padding: 0; }
+  .mrow { display: grid; grid-template-columns: 50px minmax(0, 1fr) auto; column-gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); background: var(--paper); }
+  .mrow-when { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mrow-title { font-size: 14.5px; font-weight: 500; }
+  .mrow-what small, .mrow-amt small { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.4; margin-top: 1px; }
+  .mrow-amt { text-align: right; }
+  .mrow-amt .amt { font-size: 15px; font-weight: 600; }
+  .list-empty { margin: 0; padding: 14px 0; font-size: 14px; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .dep-slot { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; align-items: baseline; padding: 16px 18px; }
+  .dep-slot b { color: var(--ink); font-weight: 600; }
+  .dep-slot p { margin: 2px 0 0; font-size: 13.5px; grid-column: 1; }
+  .dep-slot .amt { font-size: 18px; font-weight: 600; color: var(--muted); grid-row: 1; grid-column: 2; }
+  .dep-slot.is-back { border-style: solid; border-color: var(--line); }
+
+  /* ---------------------------------------------------------------- activity */
+  .act .ledger { margin-top: 12px; }
+  .act .ledger-row { grid-template-columns: 136px minmax(0, 1fr) auto; padding: 11px 0; border-radius: 0; }
+  .act .ledger-row.is-new { padding-inline: 10px; margin-inline: -10px; border-radius: 8px; }
+  .act .ledger-amt.is-in { color: var(--ink); font-weight: 600; }
+  .act .ledger-amt.is-held { color: var(--muted); }
+
+  /* ---------------------------------------------------------------- aside */
+  .listing { overflow: hidden; }
+  .listing img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+  .listing-body { padding: 16px 18px 18px; }
+  .listing-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .listing-title h2 { font-size: 19px; font-weight: 600; }
+  .listing-body p { margin: 3px 0 0; font-size: 14px; color: var(--muted); }
+  .listing-facts { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; }
+  .listing-facts b { font-weight: 600; }
+  .side-sec { margin-top: 30px; }
+  .side-sec h2 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin-bottom: 12px; }
+  .rec { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .rec li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; font-size: 14px; line-height: 1.35; }
+  .rec li svg { width: 18px; height: 18px; margin-top: 1px; }
+  .rec b { font-weight: 600; }
+  .rec small { display: block; font-size: 12.5px; color: var(--muted); }
+  .rec li.is-quiet b { color: var(--ink-2); font-weight: 500; }
+  .rec li.is-new { animation: hold-row-in 1.2s var(--ease-move) both; border-radius: 8px; }
+  .people { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .people li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; font-size: 14px; line-height: 1.35; }
+  .people .avatar { width: 36px; height: 36px; }
+  .people b { font-weight: 600; }
+  .people small { display: block; font-size: 12.5px; color: var(--muted); }
+  .owner-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; color: var(--ink-2); }
+  .owner-ic svg { width: 17px; height: 17px; }
+  .howpaid { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 13.5px; color: var(--ink-2); }
+  .howpaid b { color: var(--ink); font-weight: 600; }
+  .site-foot { grid-column: 1 / -1; margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px 32px; flex-wrap: wrap; }
+  .site-foot p { margin: 0; max-width: 70ch; }
+
+  /* ---------------------------------------------------------------- claim form */
+  .cl-intro { margin: 10px 0 0; font-size: 14.5px; color: var(--ink-2); max-width: 64ch; }
+  .cl-lines { display: grid; gap: 14px; margin-top: 20px; }
+  .cl-line { position: relative; margin: 0; padding: 14px 16px 16px; border: 1px solid var(--line-2); border-radius: var(--r-row); min-width: 0;
+    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 132px; gap: 12px 14px; }
+  .cl-legend { padding: 0; float: left; grid-column: 1 / -1; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .cl-top { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; margin-bottom: -4px; }
+  .cl-top .btn-quiet { min-height: 30px; font-size: 13.5px; }
+  .field { min-width: 0; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 6px; }
+  .input {
+    box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--field-line); border-radius: 9px;
+    background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; min-width: 0;
+  }
+  select.input { -webkit-appearance: none; appearance: none; padding-right: 34px;
+    background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23111' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 12px center / 12px no-repeat; }
+  .input:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; border-color: var(--ink); }
+  .money-in { position: relative; }
+  .money-in span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .money-in .input { padding-left: 24px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .f-err { display: none; margin: 6px 0 0; font-size: 13px; color: var(--flagged-ink); }
+  .field.is-bad .input { border-color: var(--flagged); background: var(--flagged-tint); }
+  .field.is-bad .f-err { display: block; }
+  .field:has(.input:user-invalid) .input { border-color: var(--flagged); background: var(--flagged-tint); }
+  .field:has(.input:user-invalid) .f-err { display: block; }
+  .cl-files { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .file { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 6px 0 6px; border: 1px solid var(--line); border-radius: 9px; background: var(--wash); max-width: 100%; }
+  .file-ic { width: 28px; height: 28px; border-radius: 6px; background: var(--paper); display: grid; place-items: center; color: var(--ink-2); overflow: hidden; flex: none; box-shadow: inset 0 0 0 1px var(--line); }
+  .file-ic svg { width: 15px; height: 15px; }
+  .file-ic img { width: 100%; height: 100%; object-fit: cover; }
+  .file-name { font-size: 13.5px; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-kind { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .file-x { min-height: 30px !important; padding: 0 6px !important; font-size: 13px !important; }
+  .file-slot { position: relative; display: inline-flex; max-width: 100%; min-width: 0; }
+  .file { min-width: 0; }
+  .file-slot input:focus-visible + label { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .file-slot label svg { width: 15px; height: 15px; }
+  .file-slot.is-bad label { border-color: var(--flagged); color: var(--flagged-ink); background: var(--flagged-tint); }
+  .line-err { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--flagged-ink); }
+  .line-err:empty { display: none; }
+  .cl-add { margin-top: 12px; }
+  .cl-sum { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); align-items: start; }
+  .cl-rules { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13.5px; color: var(--ink-2); }
+  .form-err { margin: 10px 0 0; font-size: 13.5px; color: var(--flagged-ink); font-weight: 500; }
+  .form-err:empty { display: none; }
+
+  .filed-lines { margin-top: 18px; }
+
+  /* ---------------------------------------------------------------- responsive */
+  @media (max-width: 1100px) {
+    .dash { grid-template-columns: minmax(0, 1fr) 280px; column-gap: 40px; }
+  }
+  @media (max-width: 900px) {
+    :root { --gutter: 24px; }
+    .dash { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "work" "side" "earn" "act"; }
+    .side { margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; align-items: start; }
+    .side > .listing { grid-row: span 3; }
+    .side > .side-sec:nth-child(2) { margin-top: 0; }
+  }
+  @media (max-width: 760px) {
+    .moments { flex-wrap: wrap; gap: 10px; padding: 12px 16px 6px; }
+    .mo-list { order: 2; flex: 1 0 100%; margin: 0 -16px; padding: 2px 16px 6px; }
+  }
+  @media (max-width: 640px) {
+    :root { --gutter: 16px; }
+    .dash { padding-top: 24px; }
+    .status-title { font-size: 28px; margin-top: 18px; }
+    .status-sub { font-size: 16px; }
+    .wcard { padding: 20px 18px 22px; margin-left: -4px; margin-right: -4px; }
+    .wc-head h2 { font-size: 20px; }
+    .wc-head { flex-direction: column-reverse; align-items: flex-start; gap: 10px; }
+    .wc-head .chip { margin-top: 0; }
+    .wc-split, .wc-split.is-even, .wc-split.is-flip, .pair, .lists, .cl-sum { grid-template-columns: 1fr; gap: 20px; }
+    .lists { gap: 32px; }
+    .amt-hero { --amt-size: 46px; }
+    .amt-hero.is-mid { --amt-size: 40px; }
+    .wc-actions .btn-primary { width: 100%; min-width: 0; }
+    .wc-actions { gap: 6px; }
+    .wc-actions .btn-quiet { margin: 0 auto; }
+    .side { display: block; }
+    .side > .side-sec:nth-child(2) { margin-top: 30px; }
+    .act .ledger-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
+    .act .ledger-when { grid-column: 1 / -1; }
+    .cl-line { grid-template-columns: minmax(0, 1fr); }
+    .file-kind { display: none; }
+    .dep-slot { grid-template-columns: 1fr; }
+    .dep-slot .amt { grid-row: auto; grid-column: 1; }
+  }
+  @media (max-width: 600px) {
+    .ruler-track { margin-top: 28px; }
+    .ruler-labels { height: auto; display: grid; gap: 9px; margin-top: 16px; }
+    .ruler-label { position: static; transform: none !important; text-align: left !important; display: grid; grid-template-columns: 18px auto 1fr; gap: 10px; align-items: center; white-space: normal; }
+    .ruler-label b { display: inline; }
+    .ruler-label span { text-align: right; }
+    .rl-key { display: block; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; justify-self: center; }
+    .rl-key.is-start { background: var(--ink); }
+    .rl-key.is-deadline { border: 2.5px solid var(--brand); }
+    .rl-key.is-auto, .rl-key.is-done { background: var(--verified); }
+    .rl-key.is-law { width: 4px; height: 14px; border-radius: 2px; background: var(--ink); }
+    .rl-key.is-muted { border: 2px solid var(--line-2); }
+  }
+</style>
+</head>
+<body>
+<div id="hold-nav"></div>
+
+<div class="moments-wrap">
+  <div class="moments">
+    <span class="date-chip" id="clock" aria-live="polite"></span>
+    <nav aria-label="Lena's lease, moment by moment">
+      <ol class="mo-list" id="moments"></ol>
+    </nav>
+  </div>
+</div>
+
+<main class="dash" id="dash">
+  <section class="work" aria-labelledby="statusTitle">
+    <div class="who" id="who"></div>
+    <h1 class="status-title" id="statusTitle" tabindex="-1"></h1>
+    <p class="status-sub" id="statusSub"></p>
+    <div id="workCard"></div>
+    <div id="waiting"></div>
+  </section>
+
+  <aside class="side" aria-label="Your listing and record" id="side"></aside>
+
+  <section class="earn" aria-labelledby="earnTitle">
+    <div class="sec-head"><h2 id="earnTitle">Earnings</h2><span class="sec-note" id="earnNote"></span></div>
+    <div id="earnBody"></div>
+  </section>
+
+  <section class="act" aria-labelledby="actTitle">
+    <div class="sec-head"><h2 id="actTitle">Activity</h2><span class="receipt-ref" id="actRef"></span></div>
+    <ol class="ledger" id="activity"></ol>
+  </section>
+
+  <footer class="site-foot">
+    <p id="foot"></p>
+    <div class="keyhints" aria-label="Presenter keys">
+      <span class="keyhint"><kbd>&rarr;</kbd><kbd>PgDn</kbd>Next moment</span>
+      <span class="keyhint"><kbd>&larr;</kbd><kbd>PgUp</kbd>Back</span>
+      <span class="keyhint"><kbd>D</kbd>Claim deductions</span>
+      <span class="keyhint"><kbd>R</kbd>Start over</span>
+    </div>
+  </footer>
+</main>
+
+<div class="sr-only" aria-live="polite" id="live"></div>
+
+<script src="assets/hold-data.js"></script>
+<script src="assets/hold-nav.js"></script>
+<script>
+(function () {
+  'use strict';
+  var H = window.HOLD;
+  if (!H) return;
+
+  /* ------------------------------------------------------------------ data from HOLD (no dollar amounts typed here) */
+  var m = H.money, fmt = H.date, D = H.deal, DL = D.deadlines, T = H.totals, F = H.fees;
+  var J = H.people.renter, L = H.people.lister, O = H.people.owner;
+  var DAMAGE = H.branches.damage, CLAIMED = DAMAGE.states[0];
+  var DEP = D.deposit, RENT = D.rent, FEE = D.listerFee, NET1 = D.listerFirstPayout;
+  var VB = H.vocab.buttons, VR = H.vocab.results, VS = H.vocab.states;
+  var LISTER_PCT = Math.round(F.listerRate * 100) + '%';
+
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var amt = function (c, cls, o) { return '<span class="amt' + (cls ? ' ' + cls : '') + '">' + m(c, o) + '</span>'; };
+  var ms = function (iso) { return fmt.parse(iso).getTime(); };
+  var dayOf = function (iso) { return fmt.diffDays(DL.movedOut, iso); };
+  var dayStamp = function (iso) { return fmt(iso, 'day') + ' at ' + fmt(iso, 'time'); };   // Sun, Jan 10 at 3:12 PM
+
+  var SETTLED = (H.activity.filter(function (a) { return /settled/i.test(a.text); })[0] || {}).at || DL.achSettles;
+  var REASONS = ['Unpaid rent', 'Damage beyond normal wear', 'Unpaid utilities owed to you', 'Removing things left behind'];
+
+  /* Lena's rent, one row per payment. January goes through the hold; February to May go straight to her. */
+  var ROWS = D.schedule.map(function (s, i) {
+    var direct = H.activity.filter(function (a) { return a.at.slice(0, 10) === s.due && a.who === 'renter'; })[0];
+    var paren = /\(([^)]+)\)$/.exec(s.label);
+    return {
+      id: 'mv-' + i, due: s.due, via: s.via, gross: s.cents, fee: s.fee, net: s.cents - s.fee,
+      title: s.label.replace(/\s*\([^)]*\)$/, ''), detail: paren ? paren[1] : '',
+      paidAt: s.via === 'hold' ? DL.moveInConfirmed : (direct ? direct.at : s.due)
+    };
+  });
+  var DIRECT_TOTAL = H.sum(ROWS.filter(function (r) { return r.via === 'direct'; }), function (r) { return r.net; });
+
+  /* ------------------------------------------------------------------ states */
+  var MAIN = ['new', 'booked', 'paid', 'move-out', 'returned'];
+  var ALL = MAIN.concat(['claim', 'claim-filed']);
+  var AT = { 'new': DL.listed, booked: DL.booked, paid: DL.moveInConfirmed, 'move-out': DL.movedOut, returned: DL.returned, claim: CLAIMED.at, 'claim-filed': CLAIMED.at };
+  var MOMENTS = [
+    { key: 'new', label: 'New listing' },
+    { key: 'booked', label: 'Booked' },
+    { key: 'paid', label: VR.allGood },
+    { key: 'move-out', label: VR.movedOut },
+    { key: 'returned', label: VR.returnDeposit }
+  ];
+  var state = 'new';
+
+  /* ------------------------------------------------------------------ claim draft (Lena's itemized deductions) */
+  function freshDraft() {
+    var c = DAMAGE.claim;
+    return { seq: 1, lines: [{ id: 1, reason: c.reason, what: c.label, amount: (c.cents / 100).toFixed(2),
+      photo: { name: 'IMG_2041.jpg', note: c.evidence[0] }, estimate: { name: 'Blind repair estimate.pdf', note: c.evidence[1] } }] };
+  }
+  var draft = freshDraft();
+  var filed = null;   // snapshot when the claim is filed
+
+  function parseCents(v) {
+    var s = String(v == null ? '' : v).replace(/[\s$,]/g, '');
+    if (s === '') return 0;
+    var mm = /^(\d{1,6})(?:\.(\d{0,2}))?$/.exec(s);
+    if (!mm) return NaN;
+    return parseInt(mm[1], 10) * 100 + parseInt(((mm[2] || '') + '00').slice(0, 2), 10);
+  }
+  function claimTotal(lines) {
+    return H.sum(lines, function (l) { var c = parseCents(l.amount); return isNaN(c) ? 0 : c; });
+  }
+  function filedLines() {
+    var src = filed || freshDraft().lines;
+    return src.filter(function (l) { return parseCents(l.amount) > 0; });
+  }
+  function returnLabel(claim) {
+    if (claim <= 0) return VB.returnDeposit;   // "Return $875.00"
+    return 'Return ' + m(Math.max(0, DEP - claim)) + ' and claim ' + m(Math.min(claim, DEP));
+  }
+
+  /* ------------------------------------------------------------------ icons (hand-drawn, same family as the site) */
+  var IC = {
+    seal: function (c, s) { s = s || 18; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5 14.41 3.02 17.75 2.04 18.58 5.42 21.96 6.25 20.98 9.59 23.5 12 20.98 14.41 21.96 17.75 18.58 18.58 17.75 21.96 14.41 20.98 12 23.5 9.59 20.98 6.25 21.96 5.42 18.58 2.04 17.75 3.02 14.41.5 12 3.02 9.59 2.04 6.25 5.42 5.42 6.25 2.04 9.59 3.02Z" fill="' + c + '" stroke="' + c + '" stroke-width="1.6" stroke-linejoin="round"/><path d="m7.6 12.3 3 3 5.8-6.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; },
+    house: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>',
+    check: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.3 4.8 9 10 3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    photo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m21 15.5-4.5-4.5L8 19.5"/></svg>',
+    doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
+    bank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 4l9 5.5"/><path d="M5.5 10.5v7M10 10.5v7M14 10.5v7M18.5 10.5v7M3.5 20h17"/></svg>',
+    mark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>',
+    building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16M15 10h3a1 1 0 0 1 1 1v10M3 21h18M9 8h2M9 12h2M9 16h2"/></svg>'
+  };
+  var BLUE = getComputedStyle(document.documentElement).getPropertyValue('--student').trim() || '#3B82F6';
+  var GREEN = getComputedStyle(document.documentElement).getPropertyValue('--verified').trim() || '#16A34A';
+  var GREY = getComputedStyle(document.documentElement).getPropertyValue('--faint').trim() || '#A8A8A8';
+
+  /* ------------------------------------------------------------------ small builders */
+  function rc(label, cents, cls, note, o) {
+    return '<div class="rc-row' + (cls ? ' ' + cls : '') + '"><span>' + label + (note ? '<small class="rc-note">' + note + '</small>' : '') +
+      '</span>' + amt(cents, '', o) + '</div>';
+  }
+  function chip(kind, text) { return '<span class="chip chip-' + kind + '">' + esc(text) + '</span>'; }
+  function hero(cents, mid) { return H.moneyHTML(cents, { hero: true, cls: mid ? 'is-mid' : '' }); }
+
+  /* NY 14-day ruler. Day 0 = Jamie taps I've moved out. */
+  function ruler(cfg) {
+    var ticks = '';
+    for (var i = 0; i <= 14; i++) ticks += '<span class="ruler-tick" style="--d:' + i + '"></span>';
+    var win = cfg.win ? '<span class="ruler-win is-' + cfg.win[2] + '" style="--a:' + cfg.win[0] + ';--b:' + cfg.win[1] + '"></span>' : '';
+    var marks = cfg.marks.map(function (k) {
+      return '<span class="ruler-mark is-' + k.kind + '" style="--d:' + k.day + '">' + (k.kind === 'auto' || k.kind === 'done' ? IC.check : '') + '</span>';
+    }).join('');
+    var today = '<span class="ruler-today"' + (cfg.today === 0 ? ' data-align="start"' : '') + ' style="--d:' + cfg.today + '">Today</span>';
+    var labels = cfg.marks.filter(function (k) { return k.label; }).map(function (k) {
+      return '<li class="ruler-label" data-align="' + (k.align || 'start') + '" style="--d:' + k.day + '"><i class="rl-key is-' + k.kind + '" aria-hidden="true"></i><b>' + esc(k.label) + '</b><span>' + esc(k.date) + '</span></li>';
+    }).join('');
+    return '<div class="ruler"><div class="ruler-head"><strong>' + esc(cfg.head) + '</strong><span>' + esc(cfg.note || '') + '</span></div>' +
+      '<div class="ruler-track" aria-hidden="true"><span class="ruler-base"></span>' + win + ticks + marks + today + '</div>' +
+      '<ol class="ruler-labels">' + labels + '</ol></div>';
+  }
+  var MOVE_MARKS = [
+    { day: 0, kind: 'start', label: 'Moved out', date: fmt(DL.movedOut, 'day'), align: 'start' },
+    { day: dayOf(DL.returnBy), kind: 'deadline', label: 'Return or claim by', date: fmt(DL.returnBy, 'day'), align: 'end' },
+    { day: dayOf(DL.autoReturn), kind: 'auto', label: 'Auto-returns to Jamie', date: fmt(DL.autoReturn, 'day'), align: 'start' },
+    { day: dayOf(DL.nyDeadline), kind: 'law', label: 'NY deadline', date: fmt(DL.nyDeadline, 'day'), align: 'end' }
+  ];
+
+  /* ------------------------------------------------------------------ state copy and cards */
+  var VIEWS = {
+    'new': function () {
+      var receipt =
+        rc('Listing', 0, 'rc-zero') +
+        rc('First month’s rent', RENT) +
+        rc('Verimate fee (' + LISTER_PCT + ')', -FEE, 'rc-sub', 'Of the first month, once. Taken from your first rent release, only after your renter moves in') +
+        rc('You receive', NET1, 'rc-total') +
+        '<div class="rc-sep"></div>' +
+        rc('Fee on months 2 to 5', 0, 'rc-zero', 'Your renter pays you directly') +
+        rc('Fee if nobody moves in', 0, 'rc-zero');
+      var checks = [
+        ['Student verified', L.year + ', ' + L.school],
+        ['ID and face check passed', 'Matched to your student ID'],
+        ['Your lease uploaded', D.address + ', ' + D.datesLabel],
+        ['Owner’s written OK to sublet', O.name + '. Earns the Owner approved sublet badge']
+      ].map(function (c) { return '<li><span class="tick">' + IC.check + '</span><span>' + esc(c[0]) + '<small>' + esc(c[1]) + '</small></span></li>'; }).join('');
+      return {
+        title: '1 thing needs you',
+        sub: 'Listing is free. You’ll receive ' + m(NET1) + ' of your first ' + m(RENT) + '.',
+        card:
+          '<div class="wc-head"><div><h2>Publish ' + esc(D.address) + '</h2><p>' + esc(D.unit) + ', ' + esc(D.rentLabel) + ', ' + esc(D.datesLabel) + '</p></div>' + chip('needs', VS.needs) + '</div>' +
+          '<div class="wc-split is-flip">' +
+            '<div><p class="wc-label">What you pay</p><div class="receipt">' + receipt + '</div></div>' +
+            '<div><p class="wc-label">Ready to publish</p><ul class="checks">' + checks + '</ul></div>' +
+          '</div>' +
+          '<div class="wc-actions"><button type="button" class="btn btn-primary btn-lg" data-act="publish">Publish listing</button>' +
+          '<a class="btn btn-quiet" href="book.html">See what renters see</a></div>',
+        waiting: []
+      };
+    },
+
+    booked: function () {
+      return {
+        title: 'Nothing needs you',
+        sub: J.name + ' booked your room. ' + m(D.upfront.total) + ' is held by Verimate until move-in.',
+        card:
+          '<div class="wc-head"><div><h2>' + esc(J.first) + ' booked ' + esc(D.address) + '</h2><p>' + esc(dayStamp(DL.booked)) + ', paid by bank</p></div>' + chip('held', VS.held) + '</div>' +
+          '<div class="renter"><img class="avatar" src="' + esc(J.img) + '" alt="' + esc(J.alt) + '" width="48" height="48" />' +
+            '<div><div class="person-name">' + esc(J.name) + '</div><div class="person-meta">' + esc(J.role) + ', ' + esc(J.year) + '</div>' +
+            '<div class="renter-badges"><span class="badge badge-student">' + IC.seal(BLUE, 16) + 'Student verified</span><span class="badge badge-verified">' + IC.seal(GREEN, 16) + 'Face verified</span></div></div></div>' +
+          '<div class="wc-split" style="margin-top:22px">' +
+            '<div><p class="wc-label">Held by Verimate</p>' + hero(D.upfront.total) + '<p class="wc-note">You can’t withdraw it. Verimate can’t spend it. ' + esc(J.first) + ' paid a Verimate fee of ' + m(D.upfront.verimateFee) + '.</p></div>' +
+            '<div class="stack">' +
+              '<div class="held-item"><h3><span>First month</span>' + amt(RENT) + '</h3><p>Comes to you as ' + m(NET1) + ' after ' + esc(J.first) + ' taps All good on move-in day, or on its own ' + esc(dayStamp(DL.autoRelease)) + '.</p></div>' +
+              '<div class="slot-empty"><h3><span>Deposit</span>' + amt(DEP) + '</h3><p>Held by Verimate, not you. It goes back to ' + esc(J.first) + ' after move-out, so you never send it back by hand.</p></div>' +
+            '</div>' +
+          '</div>' +
+          '<p class="wc-foot">The bank payment settles ' + esc(fmt(DL.achSettles, 'day')) + '. Nothing is released before then.</p>',
+        waiting: [
+          { who: 'renter', b: J.first + ' moves in ' + dayStamp(DL.moveIn), s: 'Rent releases when ' + J.first + ' taps All good, or on its own ' + dayStamp(DL.autoRelease) + '.' },
+          { who: 'bank', b: 'Bank payment settles ' + fmt(DL.achSettles, 'day'), s: 'Bank transfers take 4 business days.' }
+        ]
+      };
+    },
+
+    paid: function () {
+      var feb = ROWS[1];
+      return {
+        title: 'Nothing needs you',
+        sub: J.first + ' moved in and tapped All good. ' + m(NET1) + ' is on its way to your bank.',
+        card:
+          '<div class="wc-head"><div><h2>Rent released</h2><p>' + esc(J.first) + ' tapped All good ' + esc(dayStamp(DL.moveInConfirmed)) + '</p></div>' + chip('released', VS.released) + '</div>' +
+          '<div class="wc-split">' +
+            '<div><p class="wc-label">You receive</p>' + hero(NET1) + '<p class="wc-note">In your bank by ' + esc(fmt(DL.lenaBankArrives, 'day')) + '.</p>' +
+              '<p class="receipt-ref" style="margin:14px 0 0">Ref ' + esc(D.ref) + ', ' + esc(fmt(DL.moveInConfirmed, 'stamp')) + '</p></div>' +
+            '<div class="receipt">' +
+              rc('Rent, first month', RENT, '', ROWS[0].title) +
+              rc('Verimate fee (' + LISTER_PCT + ')', -FEE, 'rc-sub', 'Of the first month, once') +
+              rc('You receive', NET1, 'rc-total') +
+            '</div>' +
+          '</div>' +
+          '<p class="wc-foot"><strong>This is the only Verimate fee on your lease:</strong> ' + esc(T.listerPaidPctOfLease) + ' of the lease, ' + esc(T.listerPaidDaysOfRent) + '. February to May rent comes to you directly, with a ' + m(0) + ' fee.</p>',
+        waiting: [
+          { who: 'renter', b: feb.title + ', ' + m(feb.gross) + ', due ' + fmt(feb.due, 'day'), s: J.first + ' pays you directly. Verimate fee ' + m(0) + '.' }
+        ]
+      };
+    },
+
+    'move-out': function () {
+      return {
+        title: '1 thing needs you',
+        sub: 'Return ' + J.first + '’s deposit by ' + fmt(DL.returnBy, 'day') + '.',
+        card:
+          '<div class="wc-head"><div><h2>' + esc(J.first) + ' moved out</h2><p>' + esc(dayStamp(DL.movedOut)) + ', with move-out photos</p></div>' + chip('needs', VS.needs) + '</div>' +
+          '<div class="wc-split">' +
+            '<div><p class="wc-label">Deposit, held by Verimate</p>' + hero(DEP) + '<p class="wc-note">You never held it. One tap sends it back.</p></div>' +
+            '<div class="receipt">' + rc('Deposit', DEP) + rc('Deductions', 0, 'rc-zero', 'None unless you claim them') + rc('Back to ' + esc(J.first), DEP, 'rc-total') + '</div>' +
+          '</div>' +
+          ruler({ head: 'Day 0 of 14, New York law', note: 'GOL 7-108', today: 0, win: [0, dayOf(DL.returnBy), 'ink'], marks: MOVE_MARKS }) +
+          '<div class="wc-actions"><button type="button" class="btn btn-primary btn-lg" data-act="return">' + esc(VB.returnDeposit) + '</button>' +
+          '<button type="button" class="btn btn-quiet" data-act="claim">' + esc(VB.claim) + '</button></div>' +
+          '<p class="wc-actions-note">If you do nothing, Verimate returns the full ' + m(DEP) + ' to ' + esc(J.first) + ' on ' + esc(fmt(DL.autoReturn, 'day')) + '.</p>',
+        waiting: []
+      };
+    },
+
+    returned: function () {
+      var days = dayOf(DL.returned);
+      return {
+        title: 'Nothing needs you',
+        sub: 'You returned ' + J.first + '’s deposit ' + days + ' day' + (days === 1 ? '' : 's') + ' after move-out. This lease is closed.',
+        card:
+          '<div class="wc-head"><div><h2>' + esc(VR.returnDeposit) + '</h2><p>' + esc(dayStamp(DL.returned)) + ', to ' + esc(J.name) + '</p></div>' + chip('returned', VS.returned) + '</div>' +
+          '<div class="wc-split">' +
+            '<div><p class="wc-label">Back to ' + esc(J.first) + '</p>' + hero(DEP) + '<p class="wc-note">In ' + esc(J.first) + '’s bank ' + esc(fmt(DL.jamieBankArrives[0], 'day')) + ' to ' + esc(fmt(DL.jamieBankArrives[1], 'day')) + '.</p></div>' +
+            '<div class="record-big">' + IC.seal(GREEN, 40) + '<div><b>' + esc(L.record.after.label) + '</b><span>' + esc(L.record.after.detail) + '. Renters see it on your profile and your next listing.</span></div></div>' +
+          '</div>' +
+          ruler({ head: 'New York gives you 14 days. You took ' + days + '.', note: 'GOL 7-108', today: days, win: [0, days, 'green'],
+            marks: [
+              { day: 0, kind: 'start' },
+              { day: days, kind: 'done', label: 'Returned', date: fmt(DL.returned, 'day'), align: 'start' },
+              { day: dayOf(DL.returnBy), kind: 'muted' },
+              { day: dayOf(DL.nyDeadline), kind: 'law', label: 'NY deadline', date: fmt(DL.nyDeadline, 'day'), align: 'end' }
+            ] }) +
+          '<div class="wc-split is-even" style="margin-top:26px"><div><p class="wc-label">Your lease, ' + esc(D.datesLabel) + '</p>' +
+            '<div class="receipt">' + rc('Rent from ' + esc(J.first), D.totalRent) + rc('Verimate fee, once', -FEE, 'rc-sub') + rc('You received', T.listerReceived, 'rc-total') + '</div></div>' +
+            '<div><p class="wc-label">The deposit</p><div class="receipt">' + rc('Deposit you held', 0, 'rc-zero', 'Verimate held it, not you') + rc('Returned to ' + esc(J.first), DEP) + '</div></div></div>',
+        waiting: []
+      };
+    },
+
+    claim: function () {
+      var total = claimTotal(draft.lines);
+      return {
+        title: '1 thing needs you',
+        sub: 'Finish your claim by ' + fmt(DL.returnBy, 'day') + ', or return the full deposit.',
+        card:
+          '<form id="claimForm" novalidate>' +
+          '<div class="wc-head"><div><h2>' + esc(VB.claim) + '</h2><p>Day ' + dayOf(AT.claim) + ' of 14. Claims close after ' + esc(fmt(DL.returnBy, 'day')) + '.</p></div>' + chip('quiet', 'Deposit ' + m(DEP)) + '</div>' +
+          '<p class="cl-intro">Only New York’s 4 reasons count. Each line needs a photo, an amount, and a receipt or estimate. The part you don’t claim goes back to ' + esc(J.first) + ' the moment you file.</p>' +
+          '<div class="cl-lines" id="clLines">' + draft.lines.map(lineHTML).join('') + '</div>' +
+          '<button type="button" class="btn btn-secondary btn-sm cl-add" data-act="add-line">Add a line</button>' +
+          '<div class="cl-sum">' +
+            '<div class="receipt" id="clSum">' + sumHTML(total) + '</div>' +
+            '<ul class="cl-rules">' +
+              '<li>' + esc(J.first) + ' has 72 hours to accept or dispute each line. Silence means accept.</li>' +
+              '<li>Verimate rules on disputed lines by ' + esc(fmt(DL.nyDeadline, 'day')) + ', comparing the signed move-in and move-out photos. You carry the burden of proof.</li>' +
+            '</ul>' +
+          '</div>' +
+          '<p class="form-err" id="formErr" role="alert"></p>' +
+          '<div class="wc-actions"><button type="submit" class="btn btn-primary btn-lg" id="claimBtn">' + esc(returnLabel(total)) + '</button>' +
+          '<button type="button" class="btn btn-quiet" data-act="cancel-claim">Cancel claim</button></div>' +
+          '</form>',
+        waiting: []
+      };
+    },
+
+    'claim-filed': function () {
+      var lines = filedLines(), claim = Math.min(DEP, claimTotal(lines)), back = DEP - claim;
+      var rows = lines.map(function (l) {
+        return rc(esc(l.what), -parseCents(l.amount), 'rc-sub', esc(l.reason) + '. Photo and ' + (/receipt/i.test(l.estimate && l.estimate.name || '') ? 'receipt' : 'estimate') + ' attached');
+      }).join('');
+      return {
+        title: 'Nothing needs you',
+        sub: VR.claim + '. ' + m(back) + ' went back to ' + J.first + ' at once.',
+        card:
+          '<div class="wc-head"><div><h2>' + esc(VR.claim) + '</h2><p>' + esc(dayStamp(CLAIMED.at)) + ', Day ' + dayOf(CLAIMED.at) + ' of 14</p></div></div>' +
+          '<div class="pair" style="margin-top:22px">' +
+            '<div class="held-item is-released"><h3><span>Back to ' + esc(J.first) + ' now</span>' + amt(back) + '</h3><p>The part you didn’t claim. Sent ' + esc(fmt(CLAIMED.at, 'stamp')) + '.</p>' + chip('returned', VS.returned) + '</div>' +
+            '<div class="held-item"><h3><span>Your claim</span>' + amt(claim) + '</h3><p>Held by Verimate. Decided by ' + esc(fmt(CLAIMED.deadlines.decidedBy, 'day')) + '.</p>' + chip('held', VS.held) + '</div>' +
+          '</div>' +
+          '<div class="filed-lines"><div class="receipt">' + rows + rc('Claimed', claim, 'rc-total') + '</div></div>' +
+          ruler({ head: 'Day ' + dayOf(CLAIMED.at) + ' of 14, New York law', note: 'GOL 7-108', today: dayOf(CLAIMED.at), win: [dayOf(CLAIMED.at), 14, 'soft'],
+            marks: [
+              { day: 0, kind: 'start' },
+              { day: dayOf(CLAIMED.at), kind: 'done', label: 'Claim filed', date: fmt(CLAIMED.at, 'day'), align: 'start' },
+              { day: dayOf(CLAIMED.deadlines.renterReply), kind: 'deadline', label: J.first + ' answers by', date: fmt(CLAIMED.deadlines.renterReply, 'day'), align: 'start' },
+              { day: dayOf(CLAIMED.deadlines.decidedBy), kind: 'law', label: 'Decided by', date: fmt(CLAIMED.deadlines.decidedBy, 'day'), align: 'end' }
+            ] }),
+        waiting: [
+          { who: 'renter', b: J.first + ' accepts or disputes each line by ' + dayStamp(CLAIMED.deadlines.renterReply), s: 'Silence means accept.' },
+          { who: 'vm', b: 'Verimate rules on disputed lines by ' + fmt(CLAIMED.deadlines.decidedBy, 'day'), s: 'Using the signed move-in and move-out photos, inside New York’s 14 days.' }
+        ]
+      };
+    }
+  };
+
+  /* ------------------------------------------------------------------ claim form parts */
+  function fileSlot(l, slot) {
+    var f = l[slot], isPhoto = slot === 'photo', id = slot + '-' + l.id;
+    if (f) {
+      var thumb = f.url ? '<img src="' + esc(f.url) + '" alt="" />' : (isPhoto ? IC.photo : IC.doc);
+      return '<span class="file-slot" data-slot="' + slot + '"><span class="file"><span class="file-ic">' + thumb + '</span>' +
+        '<span class="file-name">' + esc(f.name) + '</span><span class="file-kind">' + (isPhoto ? 'Photo' : 'Receipt or estimate') + '</span>' +
+        '<button type="button" class="btn btn-quiet file-x" data-act="remove-file" data-id="' + l.id + '" data-slot="' + slot + '" aria-label="Remove ' + esc(f.name) + '">Remove</button></span></span>';
+    }
+    return '<span class="file-slot" data-slot="' + slot + '"><input class="sr-only" type="file" id="' + id + '" data-id="' + l.id + '" data-k="' + slot + '" accept="' + (isPhoto ? 'image/*' : 'image/*,application/pdf') + '" />' +
+      '<label class="btn btn-secondary btn-sm" for="' + id + '">' + (isPhoto ? IC.photo + 'Add photo' : IC.doc + 'Add receipt or estimate') + '</label></span>';
+  }
+  function lineHTML(l, i) {
+    var n = i + 1, need = parseCents(l.amount) > 0, id = l.id;
+    var opts = '<option value="">Choose a reason</option>' + REASONS.map(function (r) { return '<option' + (r === l.reason ? ' selected' : '') + '>' + esc(r) + '</option>'; }).join('');
+    return '<fieldset class="cl-line" data-id="' + id + '">' +
+      '<legend class="sr-only">Deduction ' + n + '</legend>' +
+      '<div class="cl-top" aria-hidden="false"><span class="wc-label" style="margin:0">Line ' + n + '</span>' +
+        '<button type="button" class="btn btn-quiet" data-act="remove-line" data-id="' + id + '" aria-label="Remove line ' + n + '">Remove</button></div>' +
+      '<div class="field"><label for="reason-' + id + '">Reason</label><select class="input" id="reason-' + id + '" data-id="' + id + '" data-k="reason"' + (need ? ' required' : '') + ' aria-describedby="reason-' + id + '-err">' + opts + '</select>' +
+        '<p class="f-err" id="reason-' + id + '-err">Choose one of New York’s 4 reasons.</p></div>' +
+      '<div class="field"><label for="what-' + id + '">What it’s for</label><input class="input" type="text" id="what-' + id + '" data-id="' + id + '" data-k="what" maxlength="60" autocomplete="off" value="' + esc(l.what) + '"' + (need ? ' required' : '') + ' aria-describedby="what-' + id + '-err" />' +
+        '<p class="f-err" id="what-' + id + '-err">Say what the deduction is for.</p></div>' +
+      '<div class="field"><label for="amount-' + id + '">Amount</label><div class="money-in"><span aria-hidden="true">$</span><input class="input" type="text" inputmode="decimal" id="amount-' + id + '" data-id="' + id + '" data-k="amount" autocomplete="off" value="' + esc(l.amount) + '" pattern="\\$?\\d{1,6}(\\.\\d{0,2})?" aria-describedby="amount-' + id + '-err" /></div>' +
+        '<p class="f-err" id="amount-' + id + '-err">Enter dollars and cents, like 60.00.</p></div>' +
+      '<div class="cl-files">' + fileSlot(l, 'photo') + fileSlot(l, 'estimate') + '</div>' +
+      '<p class="line-err" id="line-' + id + '-err"></p>' +
+      '</fieldset>';
+  }
+  function sumHTML(total) {
+    var over = total > DEP, claim = Math.min(total, DEP);
+    return rc('Deposit', DEP) + rc('Your claim', claim ? -claim : 0, claim ? 'rc-sub' : 'rc-zero') + rc('Back to ' + esc(J.first) + ' now', DEP - claim, 'rc-total') +
+      (over ? '<p class="form-err" style="margin-top:8px">Your lines add up to ' + m(total) + '. A claim can’t be more than the ' + m(DEP) + ' deposit.</p>' : '');
+  }
+  function lineById(id) { return draft.lines.filter(function (l) { return String(l.id) === String(id); })[0]; }
+
+  function refreshClaim() {
+    var total = claimTotal(draft.lines);
+    var sum = $('#clSum'), btn = $('#claimBtn');
+    if (sum) sum.innerHTML = sumHTML(total);
+    if (btn) btn.textContent = returnLabel(total);
+    // Fields are required only on lines that claim money.
+    draft.lines.forEach(function (l) {
+      var need = parseCents(l.amount) > 0;
+      ['reason', 'what'].forEach(function (k) { var el = document.getElementById(k + '-' + l.id); if (el) el.required = need; });
+    });
+    clearTimeout(refreshClaim.t);
+    refreshClaim.t = setTimeout(function () { $('#live').textContent = returnLabel(total); }, 600);
+  }
+
+  function validateClaim() {
+    var first = null, ok = true;
+    var mark = function (el, bad) {
+      if (!el) return;
+      var field = el.closest('.field');
+      if (field) field.classList.toggle('is-bad', bad);
+      el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      if (bad) { ok = false; first = first || el; }
+    };
+    draft.lines.forEach(function (l) {
+      var cents = parseCents(l.amount), need = cents > 0 || isNaN(cents), missing = [];
+      mark(document.getElementById('amount-' + l.id), isNaN(cents));
+      mark(document.getElementById('reason-' + l.id), need && !l.reason);
+      mark(document.getElementById('what-' + l.id), need && !String(l.what || '').trim());
+      ['photo', 'estimate'].forEach(function (s) {
+        var slot = document.querySelector('.cl-line[data-id="' + l.id + '"] .file-slot[data-slot="' + s + '"]');
+        var bad = need && !l[s];
+        if (slot) slot.classList.toggle('is-bad', bad);
+        if (bad) { ok = false; missing.push(s === 'photo' ? 'a photo' : 'a receipt or estimate'); first = first || (slot && slot.querySelector('input')); }
+      });
+      var err = document.getElementById('line-' + l.id + '-err');
+      if (err) err.textContent = missing.length ? 'Add ' + missing.join(' and ') + ' to this line.' : '';
+    });
+    var total = claimTotal(draft.lines);
+    var fe = $('#formErr');
+    if (total > DEP) { ok = false; if (fe) fe.textContent = 'A claim can’t be more than the ' + m(DEP) + ' deposit.'; first = first || document.querySelector('[data-k="amount"]'); }
+    else if (fe) fe.textContent = '';
+    if (first) first.focus();
+    return ok;
+  }
+
+  function submitClaim() {
+    if (!validateClaim()) return;
+    var total = claimTotal(draft.lines);
+    if (total === 0) { go('returned'); return; }          // claiming nothing is a full return
+    filed = draft.lines.map(function (l) { return Object.assign({}, l); });
+    go('claim-filed');
+  }
+
+  /* ------------------------------------------------------------------ page parts that follow the state */
+  function renderMoments() {
+    var idx = MAIN.indexOf(state), inClaim = state === 'claim' || state === 'claim-filed';
+    var pos = inClaim ? MAIN.indexOf('move-out') + 0.5 : idx;
+    var items = MOMENTS.map(function (mo, i) {
+      var cls = i < pos ? 'is-done' : (i === idx ? 'is-now' : '');
+      var dot = i < pos ? IC.check : String(i + 1);
+      return '<li class="mo-item ' + cls + '"><a class="mo-link" href="#' + mo.key + '"' + (i === idx ? ' aria-current="step"' : '') + '>' +
+        '<span class="mo-dot" aria-hidden="true">' + dot + '</span><span class="mo-text"><span class="mo-label">' + esc(mo.label) + '</span><span class="mo-date">' + esc(fmt(AT[mo.key], 'short')) + '</span></span></a></li>';
+    }).join('');
+    var alt = '<li class="mo-item mo-alt' + (inClaim ? ' is-now' : '') + '"><a class="mo-link" href="#claim"' + (inClaim ? ' aria-current="step"' : '') + '>' +
+      '<span class="mo-dot" aria-hidden="true">' + MOMENTS.length + '</span><span class="mo-text"><span class="mo-label">' + (state === 'claim-filed' ? esc(VR.claim) : 'Or: ' + esc(VB.claim)) + '</span><span class="mo-date">' + esc(fmt(AT.claim, 'short')) + '</span></span></a></li>';
+    $('#moments').innerHTML = items + alt;
+    var on = $('#moments [aria-current]');
+    var list = $('#moments');
+    if (on && list.scrollWidth > list.clientWidth) {
+      var li = on.closest('.mo-item');
+      list.scrollLeft = Math.max(0, li.offsetLeft - list.offsetLeft - 16);
+    }
+    $('#clock').innerHTML = esc(fmt(AT[state], 'full')) + '<span class="date-chip-time">' + esc(fmt(AT[state], 'time')) + '</span>';
+  }
+
+  function renderWho() {
+    $('#who').innerHTML = '<img class="avatar" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" width="44" height="44" />' +
+      '<div><div class="who-name">' + esc(L.name) + '</div><div class="who-meta">' + esc(L.role) + ', ' + esc(L.year) + ', ' + esc(L.school) + '. ' + esc(L.note) + '.</div></div>';
+  }
+
+  function waitingHTML(list) {
+    if (!list.length) return '';
+    return '<div class="waiting"><h2>Waiting on others</h2>' + list.map(function (w) {
+      var ic = w.who === 'renter' ? '<img class="avatar" src="' + esc(J.img) + '" alt="" width="32" height="32" style="width:32px;height:32px" />'
+        : w.who === 'vm' ? '<span class="wait-ic is-vm">' + IC.mark + '</span>' : '<span class="wait-ic">' + IC.bank + '</span>';
+      return '<div class="wait-row">' + ic + '<div><b>' + esc(w.b) + '</b><span>' + esc(w.s) + '</span></div></div>';
+    }).join('') + '</div>';
+  }
+
+  function earningsHTML() {
+    var now = ms(AT[state]);
+    if (state === 'new') {
+      $('#earnNote').textContent = '';
+      return '<div class="lists">' +
+        '<div><div class="list-head"><h3>Upcoming</h3>' + amt(0, 'list-total amt-held') + '</div><p class="list-empty">Nothing yet. When someone books, their first month waits here, held by Verimate until they move in.</p></div>' +
+        '<div><div class="list-head"><h3>Paid to you</h3>' + amt(0, 'list-total') + '</div><p class="list-empty">No payouts yet.</p></div>' +
+        '</div>' +
+        '<div class="slot-empty dep-slot" style="view-transition-name:mv-dep"><div><b>Deposit</b><p>Held by Verimate, not you. When someone books, Verimate holds it and returns it after move-out.</p></div>' + amt(DEP) + '</div>';
+    }
+    var up = [], paid = [];
+    ROWS.forEach(function (r) { (ms(r.paidAt) <= now ? paid : up).push(r); });
+    var claimUp = state === 'claim-filed' ? filedLines() : [];
+    var row = function (r, isPaid) {
+      var hold = r.via === 'hold';
+      var what = isPaid
+        ? (hold ? 'Released, in your bank ' + fmt(DL.lenaBankArrives, 'short') : 'Paid to you directly')
+        : (hold ? 'Held by Verimate until move-in' : (r.detail ? r.detail + ', paid to you directly' : 'Paid to you directly'));
+      var sub = hold ? 'After ' + m(r.fee) + ' fee' : 'Fee ' + m(r.fee);
+      return '<li class="mrow" style="view-transition-name:' + r.id + '"><time class="mrow-when" datetime="' + esc(isPaid ? r.paidAt : r.due) + '">' + esc(fmt(isPaid ? r.paidAt : r.due, 'short')) + '</time>' +
+        '<div class="mrow-what"><span class="mrow-title">' + esc(r.title) + '</span><small>' + esc(what) + '</small></div>' +
+        '<div class="mrow-amt">' + amt(r.net, isPaid ? 'amt-done' : 'amt-held') + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div></li>';
+    };
+    var claimRow = function (l, i) {
+      return '<li class="mrow" style="view-transition-name:mv-claim-' + i + '"><time class="mrow-when" datetime="' + esc(CLAIMED.deadlines.decidedBy) + '">' + esc(fmt(CLAIMED.deadlines.decidedBy, 'short')) + '</time>' +
+        '<div class="mrow-what"><span class="mrow-title">Your claim: ' + esc(l.what) + '</span><small>Held by Verimate. Yours if Verimate rules for you by ' + esc(fmt(CLAIMED.deadlines.decidedBy, 'short')) + '</small></div>' +
+        '<div class="mrow-amt">' + amt(parseCents(l.amount), 'amt-held') + '</div></li>';
+    };
+    var upTotal = H.sum(up, function (r) { return r.net; }) + H.sum(claimUp, function (l) { return parseCents(l.amount); });
+    var paidTotal = H.sum(paid, function (r) { return r.net; });
+    $('#earnNote').textContent = ms(DL.moveInConfirmed) <= now ? 'You paid Verimate ' + m(FEE) + ', once' : 'No Verimate fee until ' + J.first + ' moves in';
+    var dep;
+    if (state === 'returned') dep = '<div class="slot-empty dep-slot is-back" style="view-transition-name:mv-dep"><div><b>Deposit returned to ' + esc(J.first) + '</b><p>' + esc(fmt(DL.returned, 'stamp')) + '. You never held it.</p></div>' + amt(DEP) + '</div>';
+    else if (state === 'claim-filed') {
+      var c = Math.min(DEP, claimTotal(filedLines()));
+      dep = '<div class="slot-empty dep-slot is-back" style="view-transition-name:mv-dep"><div><b>Deposit</b><p>' + m(DEP - c) + ' returned to ' + esc(J.first) + '. ' + m(c) + ' held by Verimate until ' + esc(fmt(CLAIMED.deadlines.decidedBy, 'short')) + '.</p></div>' + amt(DEP) + '</div>';
+    } else dep = '<div class="slot-empty dep-slot" style="view-transition-name:mv-dep"><div><b>Deposit, held by Verimate, not you</b><p>It goes back to ' + esc(J.first) + ' after move-out. You return it in one tap, or claim deductions with photos.</p></div>' + amt(DEP) + '</div>';
+    return '<div class="lists">' +
+      '<div><div class="list-head"><h3>Upcoming</h3>' + amt(upTotal, 'list-total amt-held') + '</div>' +
+        (up.length || claimUp.length ? '<ol class="mlist">' + up.map(function (r) { return row(r, false); }).join('') + claimUp.map(claimRow).join('') + '</ol>' : '<p class="list-empty">Nothing upcoming.</p>') + '</div>' +
+      '<div><div class="list-head"><h3>Paid to you</h3>' + amt(paidTotal, 'list-total') + '</div>' +
+        (paid.length ? '<ol class="mlist">' + paid.map(function (r) { return row(r, true); }).join('') + '</ol>' : '<p class="list-empty">No payouts yet. Your first, ' + m(NET1) + ', comes after ' + esc(J.first) + ' moves in.</p>') + '</div>' +
+      '</div>' + dep;
+  }
+
+  function activityRows() {
+    var now = ms(AT[state]), rows = [];
+    if (state !== 'new') rows.push({ at: DL.listed, what: 'You published ' + D.address, note: 'Listing is free', cents: null });
+    rows.push({ at: DL.booked, what: J.name + ' booked with Hold', note: 'First month and deposit, paid by bank. Held by Verimate', cents: D.upfront.total, cls: 'is-held' });
+    rows.push({ at: SETTLED, what: 'Bank payment settled', note: 'Nothing is released before this', cents: D.upfront.total, cls: 'is-held' });
+    rows.push({ at: DL.moveIn, what: 'Move-in day. ' + J.first + '’s 48 hours started', note: 'Auto-release ' + dayStamp(DL.autoRelease), cents: null });
+    rows.push({ at: DL.moveInConfirmed, what: J.first + ' tapped All good. Rent released to you', note: m(RENT) + ' rent, ' + m(-FEE) + ' Verimate fee', cents: NET1, sign: true, cls: 'is-in' });
+    ROWS.filter(function (r) { return r.via === 'direct'; }).forEach(function (r) {
+      rows.push({ at: r.paidAt, what: J.first + ' paid you ' + r.title, note: 'Directly. Verimate fee ' + m(0), cents: r.net, sign: true, cls: 'is-in' });
+    });
+    rows.push({ at: DL.movedOut, what: J.first + ' tapped I’ve moved out', note: 'Day 0 of 14. Move-out photos attached', cents: null });
+    if (state === 'returned') rows.push({ at: DL.returned, what: 'You tapped ' + VB.returnDeposit, note: VR.returnDeposit + ' to ' + J.first, cents: DEP, cls: 'is-held' });
+    if (state === 'claim-filed') {
+      var lines = filedLines(), c = Math.min(DEP, claimTotal(lines));
+      rows.push({ at: CLAIMED.at, what: 'Returned to ' + J.first + ' at once', note: 'The part you didn’t claim', cents: DEP - c, cls: 'is-held', order: 1 });
+      rows.push({ at: CLAIMED.at, what: 'You filed a claim: ' + lines.map(function (l) { return l.what; }).join(', '), note: 'Held by Verimate until ' + fmt(CLAIMED.deadlines.decidedBy, 'short'), cents: c, cls: 'is-held', order: 2 });
+    }
+    return rows.filter(function (r) { return ms(r.at) <= now; })
+      .sort(function (a, b) { return (ms(b.at) - ms(a.at)) || ((b.order || 0) - (a.order || 0)); });
+  }
+
+  function renderActivity(animate) {
+    var rows = activityRows();
+    $('#actRef').textContent = 'Ref ' + D.ref;
+    $('#activity').innerHTML = rows.map(function (r, i) {
+      return '<li class="ledger-row' + (animate && i === 0 ? ' is-new' : '') + '"><time class="ledger-when" datetime="' + esc(r.at) + '">' + esc(fmt(r.at, 'stamp')) + '</time>' +
+        '<span class="ledger-what">' + esc(r.what) + (r.note ? '<small>' + esc(r.note) + '</small>' : '') + '</span>' +
+        '<span class="ledger-amt amt ' + (r.cls || '') + '">' + (r.cents == null ? '' : esc(m(r.cents, r.sign ? { sign: true } : undefined))) + '</span></li>';
+    }).join('');
+  }
+
+  function renderSide(animate) {
+    var after = state === 'returned';
+    var status = { 'new': 'Draft', booked: 'Booked', paid: 'Rented', 'move-out': 'Moved out', returned: 'Lease closed', claim: 'Moved out', 'claim-filed': VR.claim }[state];
+    var rec = L.record, recLine;
+    if (after) recLine = '<li class="' + (animate ? 'is-new' : '') + '">' + IC.seal(GREEN) + '<span><b>' + esc(rec.after.label) + '</b><small>' + esc(rec.after.detail) + '</small></span></li>';
+    else if (state === 'claim-filed') recLine = '<li class="is-quiet">' + IC.seal(GREY) + '<span><b>' + esc(rec.before.label) + '</b><small>Claim under review</small></span></li>';
+    else recLine = '<li class="is-quiet">' + IC.seal(GREY) + '<span><b>' + esc(rec.before.label) + '</b><small>' + esc(state === 'new' || state === 'booked' || state === 'paid' ? rec.before.detail : 'Updates when you return this deposit') + '</small></span></li>';
+    var renter = state === 'new'
+      ? '<li><span class="owner-ic">' + IC.house + '</span><span><b>No renter yet</b><small>Only verified students can book</small></span></li>'
+      : '<li><img class="avatar" src="' + esc(J.img) + '" alt="' + esc(J.alt) + '" width="36" height="36" /><span><b>' + esc(J.name) + '</b><small>' + esc(J.role) + ', ' + esc(J.year) + '. Student and face verified</small></span></li>';
+    $('#side').innerHTML =
+      '<div class="panel listing"><img src="' + esc(D.img) + '" alt="' + esc(D.imgAlt) + '" width="316" height="198" />' +
+        '<div class="listing-body"><div class="listing-title"><h2>' + esc(D.address) + '</h2>' + chip('quiet', status) + '</div>' +
+        '<p>' + esc(D.unit) + ', ' + (D.furnished ? 'furnished' : 'unfurnished') + ', ' + D.walkMinutes + ' min walk to campus</p>' +
+        '<div class="listing-facts"><b>' + esc(D.rentLabel) + '</b><span>' + esc(D.datesLabel) + '</span></div></div></div>' +
+      '<div class="side-sec"><h2>Your record</h2><ul class="rec">' +
+        '<li>' + IC.seal(BLUE) + '<span><b>Student verified</b><small>' + esc(L.year) + ', ' + esc(L.school) + '</small></span></li>' +
+        '<li>' + IC.seal(GREEN) + '<span><b>Face verified</b><small>Matched to your student ID</small></span></li>' +
+        '<li><span style="color:var(--ink)">' + IC.house + '</span><span><b>Owner approved sublet</b><small>' + esc(O.name) + ', in writing</small></span></li>' +
+        recLine + '</ul></div>' +
+      '<div class="side-sec"><h2>On this lease</h2><ul class="people">' + renter +
+        '<li><span class="owner-ic">' + IC.building + '</span><span><b>' + esc(O.name) + '</b><small>' + esc(O.role) + '. Only approves the sublet in writing. Never touches the money</small></span></li>' +
+      '</ul></div>' +
+      '<div class="side-sec"><h2>How you get paid</h2><ul class="howpaid">' +
+        '<li><b>Rent.</b> Your first month waits with Verimate until your renter taps All good, or 48 hours after move-in.</li>' +
+        '<li><b>Fee.</b> ' + LISTER_PCT + ' of the first month, once. Months 2 to 5 come straight to you with no fee.</li>' +
+        '<li><b>Deposit.</b> Verimate holds it, not you. After move-out you return it in one tap, or claim deductions within 7 days.</li>' +
+      '</ul></div>';
+  }
+
+  /* ------------------------------------------------------------------ render */
+  function render(animate) {
+    var v = VIEWS[state]();
+    renderMoments();
+    $('#statusTitle').textContent = v.title;
+    $('#statusSub').textContent = v.sub;
+    $('#workCard').innerHTML = '<div class="panel-raised wcard">' + v.card + '</div>';
+    $('#waiting').innerHTML = waitingHTML(v.waiting);
+    $('#earnBody').innerHTML = earningsHTML();
+    renderActivity(animate);
+    renderSide(animate);
+    document.title = (v.title === '1 thing needs you' ? '(1) ' : '') + 'List your place | Verimate';
+  }
+
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  function show(next, animate) {
+    if (ALL.indexOf(next) < 0) next = 'new';
+    if (next === state && animate) return;
+    state = next;
+    var focus = function () { if (animate) $('#statusTitle').focus({ preventScroll: true }); };
+    if (!animate || !document.startViewTransition || reduce.matches) { render(animate); focus(); return; }
+    var t = document.startViewTransition(function () { render(true); });
+    t.finished.finally(focus);
+  }
+  function fromHash() { var h = location.hash.replace(/^#/, ''); return ALL.indexOf(h) >= 0 ? h : 'new'; }
+  function go(next) {
+    if (location.hash === '#' + next) show(next, true);
+    else location.hash = next;
+  }
+
+  /* ------------------------------------------------------------------ events */
+  addEventListener('hashchange', function () { show(fromHash(), true); });
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'publish') go('booked');
+    else if (act === 'return') go('returned');
+    else if (act === 'claim') go('claim');
+    else if (act === 'cancel-claim') { draft = freshDraft(); go('move-out'); }
+    else if (act === 'add-line') {
+      draft.seq += 1;
+      draft.lines.push({ id: draft.seq, reason: '', what: '', amount: '0.00', photo: null, estimate: null });
+      $('#clLines').innerHTML = draft.lines.map(lineHTML).join('');
+      refreshClaim();
+      var sel = document.getElementById('reason-' + draft.seq);
+      if (sel) sel.focus();
+    }
+    else if (act === 'remove-line') {
+      var id = b.getAttribute('data-id');
+      draft.lines = draft.lines.filter(function (l) { return String(l.id) !== String(id); });
+      $('#clLines').innerHTML = draft.lines.map(lineHTML).join('');
+      refreshClaim();
+      ($('#clLines [data-k]') || $('[data-act="add-line"]')).focus();
+    }
+    else if (act === 'remove-file') {
+      var l = lineById(b.getAttribute('data-id')), slot = b.getAttribute('data-slot');
+      if (l) {
+        if (l[slot] && l[slot].url) URL.revokeObjectURL(l[slot].url);
+        l[slot] = null;
+        var wrap = b.closest('.file-slot');
+        wrap.outerHTML = fileSlot(l, slot);
+        var inp = document.getElementById(slot + '-' + l.id);
+        if (inp) inp.focus();
+      }
+    }
+  });
+
+  document.addEventListener('input', function (e) {
+    var el = e.target, k = el.getAttribute && el.getAttribute('data-k');
+    if (!k || k === 'photo' || k === 'estimate') return;
+    var l = lineById(el.getAttribute('data-id'));
+    if (!l) return;
+    l[k] = el.value;
+    var field = el.closest('.field');
+    if (field && field.classList.contains('is-bad')) { field.classList.remove('is-bad'); el.setAttribute('aria-invalid', 'false'); }
+    if (k === 'amount') refreshClaim();
+  });
+
+  document.addEventListener('change', function (e) {
+    var el = e.target, k = el.getAttribute && el.getAttribute('data-k');
+    if (k === 'reason') { var lr = lineById(el.getAttribute('data-id')); if (lr) lr.reason = el.value; }
+    if (k !== 'photo' && k !== 'estimate') return;
+    var l = lineById(el.getAttribute('data-id')), file = el.files && el.files[0];
+    if (!l || !file) return;
+    l[k] = { name: file.name, url: /^image\//.test(file.type) ? URL.createObjectURL(file) : null };
+    var wrap = el.closest('.file-slot');
+    wrap.outerHTML = fileSlot(l, k);
+    var err = document.getElementById('line-' + l.id + '-err');
+    if (err) err.textContent = '';
+    var x = document.querySelector('.cl-line[data-id="' + l.id + '"] .file-slot[data-slot="' + k + '"] .file-x');
+    if (x) x.focus();
+  });
+
+  // Tidy the amount to two decimals when the field is left.
+  document.addEventListener('focusout', function (e) {
+    var el = e.target;
+    if (!el.getAttribute || el.getAttribute('data-k') !== 'amount') return;
+    var c = parseCents(el.value), l = lineById(el.getAttribute('data-id'));
+    if (!isNaN(c) && l) { el.value = (c / 100).toFixed(2); l.amount = el.value; refreshClaim(); }
+    el.setAttribute('aria-invalid', isNaN(c) ? 'true' : 'false');
+  });
+
+  document.addEventListener('submit', function (e) {
+    if (e.target.id !== 'claimForm') return;
+    e.preventDefault();
+    submitClaim();
+  });
+
+  // Presenter keys. Nothing auto-advances.
+  document.addEventListener('keydown', function (e) {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest && e.target.closest('input, select, textarea, [contenteditable]')) return;
+    var onControl = e.target.closest && e.target.closest('button, a, label, summary');
+    var k = e.key, i = MAIN.indexOf(state), handled = true;
+    if (k === 'PageDown' || k === 'ArrowRight' || ((k === ' ' || k === 'Enter') && !onControl)) {
+      if (state === 'claim') submitClaim();
+      else if (i >= 0 && i < MAIN.length - 1) go(MAIN[i + 1]);
+    } else if (k === 'PageUp' || k === 'ArrowLeft') {
+      if (state === 'claim') go('move-out');
+      else if (state === 'claim-filed') go('claim');
+      else if (i > 0) go(MAIN[i - 1]);
+    } else if (k === 'd' || k === 'D') go('claim');
+    else if (k === 'r' || k === 'R' || k === 'Home') go('new');
+    else if (k === 'End') go('returned');
+    else handled = false;
+    if (handled) e.preventDefault();
+  });
+
+  /* ------------------------------------------------------------------ boot */
+  renderWho();
+  $('#foot').textContent = 'Payments run on Stripe Connect. Verimate never keeps rent or deposits in its own bank account, and only tells Stripe when to release. Ref ' + D.ref + '.';
+  state = fromHash();
+  render(false);
+})();
+</script>
+</body>
+</html>

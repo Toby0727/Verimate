@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Business model | Verimate Hold</title>
+<meta name="description" content="How Verimate Hold makes money: the lister pays 10% of the first month's rent, once, after move-in. Pricing, one deal end to end, unit economics, year 1 in Syracuse and three years." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/hold.css" />
+<style>
+  /* model.html only. Shared tokens and components come from assets/hold.css. */
+  :root {
+    --page: 1200px; --gut: 40px; --toc: 184px; --col-gap: 72px;
+    --lena: #CFCFCF;      /* money that ends with the lister */
+    --cost: #B4B4B4;      /* Verimate's costs */
+    --fee: var(--brand);  /* Verimate's cut: the only red data mark on the page */
+  }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { font-size: 16px; }
+
+  .skip { position: absolute; left: 12px; top: -80px; z-index: 50; background: var(--ink); color: #fff; padding: 10px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  .skip:focus { top: 12px; }
+
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 var(--gut); box-sizing: border-box; }
+
+  /* ---------------------------------------------------------------- hero */
+  .hero { padding-top: 64px; padding-bottom: 0; }
+  .hero-rule { border: 0; border-top: 1px solid var(--line); margin: 76px 0 0; }
+  .hero h1 { font-size: clamp(34px, 4.1vw, 56px); font-weight: 600; letter-spacing: -.028em; line-height: 1.05; max-width: 22ch; }
+  .hero .lede { font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; margin: 22px 0 0; }
+
+  .ribbon { margin: 56px 0 0; }
+  .ribbon-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 20px; flex-wrap: wrap; margin: 0 0 16px; font-size: 15px; color: var(--ink-2); }
+  .ribbon-head strong { color: var(--ink); font-weight: 600; }
+  .nw { white-space: nowrap; }
+  .ribbon-total { white-space: nowrap; color: var(--muted); }
+  .ribbon-total .amt { color: var(--ink); font-weight: 600; margin-left: 8px; font-size: 17px; }
+  .r-row { display: flex; gap: 2px; }
+  .r-grp { display: flex; gap: 2px; min-width: 0; flex: var(--f) 1 0; }
+  .r-months { margin-bottom: 8px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .r-months span { flex: var(--f) 1 0; min-width: 0; white-space: nowrap; overflow: visible; }
+  .r-bar { height: 24px; }
+  .r-bar .seg { flex: var(--f) 1 0; min-width: 0; background: var(--lena); }
+  .r-bar .seg-fee { background: var(--fee); }
+  .r-bar .seg-last { border-radius: 0 4px 4px 0; }
+  .r-notes { margin-top: 10px; }
+  .r-note { flex: var(--f) 1 0; min-width: 0; }
+  .r-note > :not(.bracket) { padding-right: 14px; }
+  .bracket { height: 8px; border: 1px solid var(--line-2); border-top: 0; margin: 0 0 14px; }
+  .r-note h2 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin: 0 0 8px; line-height: 1.35; }
+  .kv { margin: 0; display: flex; gap: 9px; align-items: baseline; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+  .kv + .kv { margin-top: 5px; }
+  .kv .amt { color: var(--ink); font-weight: 600; }
+  .key { flex: none; width: 10px; height: 10px; border-radius: 2px; background: var(--lena); transform: translateY(1px); display: inline-block; }
+  .key-fee { background: var(--fee); }
+  .key-cost { background: var(--cost); }
+  .key-ink { background: var(--ink); }
+  .key-dep { width: 12px; height: 12px; background: transparent; border: 1.5px dashed var(--ink-2); box-sizing: border-box; transform: translateY(2px); }
+  .r-dep { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  /* ---------------------------------------------------------------- page layout */
+  .layout { display: grid; grid-template-columns: var(--toc) minmax(0, 1fr); column-gap: var(--col-gap); }
+  .toc { position: sticky; top: 0; align-self: start; padding: 64px 0 40px; max-height: 100vh; box-sizing: border-box; overflow-y: auto; scrollbar-width: none; }
+  .toc ol { list-style: none; margin: 0; padding: 0; }
+  .toc a { display: block; padding: 7px 0 7px 14px; border-left: 2px solid var(--line); color: var(--muted); font-size: 14px; line-height: 1.35; text-decoration: none; }
+  .toc a:hover { color: var(--ink); }
+  .toc a.on { color: var(--ink); font-weight: 600; border-left-color: var(--brand); }
+  main { min-width: 0; padding-bottom: 40px; }
+  main:focus { outline: none; }
+
+  .sec { border-top: 1px solid var(--line); padding-top: 64px; margin-top: 80px; }
+  main > .sec:first-child { margin-top: 0; border-top: 0; }
+  .sec > h2 { font-size: 32px; font-weight: 600; letter-spacing: -.03em; }
+  .sec-lede { font-size: 17px; line-height: 1.55; color: var(--ink-2); max-width: 62ch; margin: 12px 0 0; }
+  .sec-body { margin-top: 36px; }
+  h3.sub { font-size: 19px; font-weight: 600; letter-spacing: -.015em; margin: 0 0 14px; }
+  .note { font-size: 14px; color: var(--muted); line-height: 1.5; margin: 16px 0 0; max-width: 70ch; }
+  .note .amt { color: var(--ink-2); }
+
+  /* ---------------------------------------------------------------- tables */
+  .t { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.45; }
+  .t th, .t td { padding: 15px 20px 15px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  .t th:last-child, .t td:last-child { padding-right: 0; }
+  .t thead th { font-size: 13px; font-weight: 500; color: var(--muted); padding-top: 0; padding-bottom: 10px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+  .t tbody th { font-weight: 600; }
+  .t .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .t .muted-cell { color: var(--muted); }
+  .cell-label { display: none; font-family: var(--font-ui); font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+
+  /* pricing */
+  .t-price .who { width: 150px; }
+  .t-price .who.is-same { color: var(--muted); font-weight: 500; }
+  .t-price .what-name { display: block; font-weight: 600; }
+  .t-price .what-detail { display: block; color: var(--ink-2); }
+  .t-price .what-note { display: block; color: var(--muted); font-size: 14px; margin-top: 3px; }
+  .t-price .when { width: 210px; color: var(--ink-2); font-size: 14.5px; }
+  .t-price .price { width: 150px; white-space: normal; font-weight: 600; }
+  .t-price tr.is-later td, .t-price tr.is-later th { color: var(--muted); }
+  .t-price tr.is-later .what-name, .t-price tr.is-later .price { color: var(--ink-2); font-weight: 500; }
+  .rev-tag { display: flex; justify-content: flex-end; align-items: center; gap: 7px; margin-top: 6px; font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+  .rev-tag .key { transform: none; width: 8px; height: 8px; }
+
+  /* comparison */
+  .t-cmp { table-layout: fixed; }
+  .t-cmp col.c-opt { width: 30%; } .t-cmp col.c-lister { width: 48%; } .t-cmp col.c-renter { width: 22%; }
+  .t-cmp td, .t-cmp th { vertical-align: middle; }
+  .t-cmp .opt { font-weight: 500; }
+  .cmp-line { position: relative; height: 22px; }
+  .cmp-track { position: absolute; left: 0; top: 6px; height: 10px; width: calc(100% - 150px); }
+  .cmp-bar { position: absolute; left: 0; top: 0; height: 10px; width: calc(var(--w) * 100%); background: var(--cost); border-radius: 0 3px 3px 0; }
+  .cmp-range { position: absolute; top: 0; height: 10px; left: calc(var(--a) * 100%); width: calc(var(--w) * 100%); background: #E3E3E3; border-radius: 0 3px 3px 0; }
+  .cmp-bar.has-range { border-radius: 0; }
+  .cmp-val { position: absolute; top: -6px; left: calc(var(--x) * 100% + 10px); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .cmp-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .t-cmp tr.is-us th, .t-cmp tr.is-us td { border-top: 1px solid var(--ink); font-weight: 600; }
+  .t-cmp tr.is-us .cmp-bar { background: var(--fee); }
+  .t-cmp tr.is-zero .cmp-val { left: 0; }
+
+  /* ---------------------------------------------------------------- one deal */
+  .parties { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); gap: 0; border-top: 1px solid var(--ink); }
+  .party { display: grid; grid-row: span 5; grid-template-rows: subgrid; align-content: start; padding: 20px 28px 4px 0; min-width: 0; font-size: 15px; }
+  .prow { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-content: start; padding: 8px 0; }
+  .prow .amt { text-align: right; font-weight: 500; }
+  .prow .pn { grid-column: 1 / -1; font-size: 13px; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+  .prow.is-total { border-top: 1px solid var(--ink); margin-top: 6px; padding-top: 12px; font-weight: 700; align-items: baseline; }
+  .prow.is-total .amt { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+  .party + .party { padding-left: 28px; border-left: 1px solid var(--line); }
+  .party:last-child { padding-right: 0; }
+  .party .person { margin-bottom: 14px; }
+  .v-mark { width: 40px; height: 40px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; flex: none; }
+    .party-note { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.45; }
+
+  .wf-wrap { margin-top: 56px; }
+  .wf-axis { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr) 104px; column-gap: 24px; font-size: 12.5px; color: var(--muted); padding-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .wf-axis .ax { display: flex; justify-content: space-between; }
+  .wf { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .wf-row { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr) 104px; column-gap: 24px; align-items: center; border-bottom: 1px solid var(--line); }
+  .wf-label { font-size: 15px; padding: 11px 0; line-height: 1.35; }
+  .wf-track { position: relative; height: 46px; border-left: 1px solid var(--line-2); }
+  .wf-bar { position: absolute; top: 16px; height: 14px; left: calc(var(--a) * 100%); width: calc(var(--w) * 100%); background: var(--cost); border-radius: 2px; }
+  .wf-row.is-rev .wf-bar { background: var(--fee); border-radius: 0 4px 4px 0; }
+  .wf-row.is-net .wf-bar { background: var(--ink); border-radius: 0 4px 4px 0; }
+  .wf-link { position: absolute; top: -16px; height: 32px; width: 0; border-left: 1px solid var(--faint); left: calc(var(--x) * 100%); }
+  .wf-amt { text-align: right; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; white-space: nowrap; }
+  .wf-row.is-cost .wf-amt { color: var(--ink-2); }
+  .wf-row.is-net { border-top: 1px solid var(--ink); border-bottom: 0; }
+  .wf-row.is-net .wf-label { font-weight: 700; }
+  .wf-row.is-net .wf-amt { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -.015em; }
+  .wf-row.is-net .wf-amt small { display: block; font-family: var(--font-ui); font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+
+  details.more { margin-top: 40px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  details.more > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 16px 0; font-weight: 600; font-size: 15.5px; }
+  details.more > summary::-webkit-details-marker { display: none; }
+  details.more > summary .sum-meta { font-weight: 400; color: var(--muted); font-size: 14px; }
+  .pm { position: relative; width: 14px; height: 14px; flex: none; margin-left: auto; }
+  .pm::before, .pm::after { content: ""; position: absolute; left: 0; top: 6px; width: 14px; height: 2px; border-radius: 1px; background: var(--ink); }
+  .pm::after { transform: rotate(90deg); transition: transform .2s var(--ease-move); }
+  details[open] > summary .pm::after { transform: rotate(0deg); }
+  @media (prefers-reduced-motion: reduce) { .pm::after { transition: none; } }
+  .more-body { padding: 4px 0 24px; overflow-x: auto; }
+
+  .t-flow { font-size: 14px; }
+  .t-flow th, .t-flow td { padding: 12px 14px 12px 0; }
+  .t-flow .n { width: 22px; color: var(--muted); font-weight: 500; }
+  .t-flow .d { width: 108px; color: var(--ink-2); white-space: nowrap; }
+  .t-flow .ev b { display: block; font-weight: 600; color: var(--ink); }
+  .t-flow .ev span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .t-flow .num { width: 92px; }
+  .t-flow .dash { color: var(--faint); }
+
+  /* ---------------------------------------------------------------- per deal */
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .two-wide { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+  .receipt.big .rc-total > :last-child { font-size: 30px; line-height: 1; }
+  .rc-total small.pct { font-family: var(--font-ui); font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 8px; letter-spacing: 0; }
+  .rc-quiet { color: var(--muted); font-size: 14px; }
+  .rc-quiet > :last-child { font-weight: 400 !important; }
+  .receipt .rc-row > :first-child small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+  .receipt .rc-row > :first-child small.pct { display: inline; }
+
+  .kept { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .kept li { display: grid; gap: 6px; }
+  .kept .k-top { display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; color: var(--ink-2); }
+  .kept .k-line { position: relative; height: 12px; }
+  .kept .k-bar { position: absolute; left: 0; top: 0; height: 12px; width: calc(var(--w) * 100%); background: var(--ink); border-radius: 0 4px 4px 0; }
+  .kept .is-deck .k-bar { background: var(--cost); }
+  .kept .k-top .amt { color: var(--ink); font-weight: 600; }
+  .kept .is-deck .k-top, .kept .is-deck .k-top .amt { color: var(--muted); font-weight: 500; }
+
+  .facts { margin: 32px 0 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .facts > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .facts dt { font-size: 15px; font-weight: 500; }
+  .facts dd { margin: 0; }
+  .facts .f-val { text-align: right; font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -.015em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .facts .f-note { grid-column: 1 / -1; margin-top: 3px; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+  .facts-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 56px; border-top: 0; }
+  .facts-2 > div:nth-child(-n+2) { border-top: 1px solid var(--line); }
+
+  /* ---------------------------------------------------------------- year 1 */
+  .t-assume { font-size: 14.5px; }
+  .t-assume th { width: 30%; font-weight: 600; }
+  .t-assume .src { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .pl .rc-row { padding: 8px 0; }
+  .pl .rc-total { margin-top: 4px; padding-top: 10px; }
+  .pl .rc-total + .rc-row { margin-top: 8px; }
+  .pl .rc-final { border-top-width: 2px; }
+  .pl .rc-final > :last-child { font-size: 28px; }
+  .pl .rc-row:not(.rc-total) > :last-child { font-weight: 500; }
+  .pl .rc-row.is-neg:not(.rc-total) > :last-child { color: var(--ink-2); }
+
+  /* ---------------------------------------------------------------- simulator */
+  .sim { padding: 28px 32px 30px; }
+  .sim-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 28px; flex-wrap: wrap; }
+  .sim-label { display: block; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .sim-num { display: flex; align-items: baseline; gap: 12px; margin-top: 2px; }
+  .sim-num output { font-family: var(--font-display); font-weight: 600; font-size: 52px; letter-spacing: -.035em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .sim-num .unit { font-size: 17px; color: var(--ink-2); }
+  .sim-share { font-size: 14px; color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .sim-ctrl { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+  .switch { display: inline-flex; align-items: center; gap: 12px; padding: 8px 14px 8px 10px; border: 1px solid var(--line-2); border-radius: var(--r-btn); background: var(--paper); cursor: pointer; text-align: left; min-height: 52px; }
+  .switch:hover { border-color: var(--ink); }
+  .sw-track { position: relative; width: 38px; height: 22px; border-radius: 999px; background: var(--line-2); flex: none; transition: background-color .15s; }
+  .sw-thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(17,17,17,.25); transition: transform .15s var(--ease-move); }
+  .switch[aria-checked="true"] .sw-track { background: var(--ink); }
+  .switch[aria-checked="true"] .sw-thumb { transform: translateX(16px); }
+  .sw-text b { display: block; font-size: 15px; font-weight: 600; }
+  .sw-text small { display: block; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) { .sw-track, .sw-thumb { transition: none; } }
+
+  .sim-body { display: grid; grid-template-columns: minmax(0, 1fr) 248px; gap: 36px; margin-top: 26px; align-items: start; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; color: var(--ink-2); margin: 0 0 6px; padding: 0; list-style: none; }
+  .legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .lk { display: inline-block; width: 18px; height: 2px; border-radius: 1px; background: var(--ink); flex: none; }
+  .lk-cost { background: var(--muted); }
+  .chart { position: relative; touch-action: pan-y; }
+  .chart svg { display: block; width: 100%; overflow: visible; }
+  .chart text { font-family: var(--font-ui); font-size: 12.5px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .chart .t-ink { fill: var(--ink); font-weight: 600; }
+  .chart .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+  .tip { position: absolute; z-index: 3; pointer-events: none; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: var(--sh-panel); padding: 10px 12px; font-size: 13px; min-width: 176px; }
+  .tip-h { font-weight: 600; margin-bottom: 6px; }
+  .tip-r { display: grid; grid-template-columns: 18px auto 1fr; align-items: center; column-gap: 8px; padding: 2px 0; }
+  .tip-r .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tip-r .l { color: var(--muted); }
+  .tip-r.res { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 6px; }
+
+  .slider-row { position: relative; margin-top: 4px; }
+  .slider-row input[type="range"] {
+    --track: 6px; --thumb: 22px; --p: 50%;
+    appearance: none; -webkit-appearance: none; display: block; box-sizing: border-box; height: 40px; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer;
+  }
+  .slider-row input[type="range"]::-webkit-slider-runnable-track { height: var(--track); border-radius: 999px; background: linear-gradient(to right, var(--ink) var(--p), var(--line-2) var(--p)); }
+  .slider-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: var(--thumb); height: var(--thumb); margin-top: calc((var(--track) - var(--thumb)) / 2); border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-shadow: 0 1px 3px rgba(17,17,17,.25); box-sizing: border-box; }
+  .slider-row input[type="range"]::-moz-range-track { height: var(--track); border-radius: 999px; background: var(--line-2); }
+  .slider-row input[type="range"]::-moz-range-progress { height: var(--track); border-radius: 999px; background: var(--ink); }
+  .slider-row input[type="range"]::-moz-range-thumb { width: var(--thumb); height: var(--thumb); border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-sizing: border-box; }
+  .slider-row input[type="range"]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
+  .ticks { position: relative; height: 20px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+  .ticks .ticks-title { left: auto; right: 0; transform: none; }
+  .sim-foot { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; margin-top: 10px; font-size: 13.5px; color: var(--muted); }
+
+  .pl-live .rc-row { padding: 6px 0; font-size: 14.5px; }
+  .pl-live .rc-total { padding-top: 9px; margin-top: 3px; }
+  .pl-live .rc-total + .rc-row { margin-top: 6px; }
+  .pl-live .rc-total > :last-child { font-size: 17px; }
+  .pl-live .rc-final > :last-child { font-size: 30px; line-height: 1; }
+  .pl-live .rc-final { border-top-width: 2px; }
+  .pl-live .is-off { color: var(--muted); }
+  .pl-live small { display: block; font-size: 12.5px; color: var(--muted); font-weight: 400; }
+  .sim-facts { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; }
+  .sim-facts dt { font-size: 13px; color: var(--muted); }
+  .sim-facts dd { margin: 2px 0 0; font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
+
+  /* ---------------------------------------------------------------- three years */
+  .t-3y .yr { font-weight: 600; white-space: nowrap; }
+  .t-3y .camp { color: var(--ink-2); }
+  .t-3y .rev { font-weight: 700; font-family: var(--font-display); font-size: 18px; letter-spacing: -.015em; }
+  .t-3y .deck { color: var(--muted); font-size: 14px; }
+  .t-3y thead .deck { font-size: 13px; }
+  .upside { margin: 28px 0 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; }
+  .upside h3 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin: 0 0 8px; }
+  .upside ul { margin: 0; padding: 0 0 0 18px; color: var(--ink-2); font-size: 15px; }
+  .upside li + li { margin-top: 4px; }
+  .upside p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+  /* ---------------------------------------------------------------- legal */
+  .money-line { font-size: 19px; font-weight: 500; line-height: 1.45; margin: 12px 0 0; max-width: 62ch; color: var(--ink); }
+  .legal { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+  .legal-text p { margin: 0 0 18px; font-size: 17px; line-height: 1.65; color: var(--ink-2); max-width: 64ch; }
+  .legal-text p:first-child::first-line { color: var(--ink); }
+  .legal-text .disclaim { font-size: 14px; color: var(--muted); margin-top: 24px; }
+  .legal-facts { margin: 0; border-top: 1px solid var(--ink); }
+  .legal-facts div { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .legal-facts dt { font-size: 13.5px; color: var(--muted); font-weight: 500; }
+  .legal-facts dd { margin: 3px 0 0; font-size: 15px; line-height: 1.5; }
+
+  /* ---------------------------------------------------------------- rules */
+  .rules-short { margin: 0; border-top: 1px solid var(--ink); }
+  .rules-short div { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .rules-short dt { font-weight: 600; }
+  .rules-short dd { margin: 0; color: var(--ink-2); max-width: 62ch; }
+  .silence { margin: 28px 0 0; font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3; max-width: 40ch; }
+  .rules-full { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .rules-full h3 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin: 0 0 10px; }
+  .rules-full ul { margin: 0; padding: 0 0 0 18px; font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
+  .rules-full li + li { margin-top: 8px; }
+
+  /* ---------------------------------------------------------------- Q&A */
+  .qa { border-top: 1px solid var(--ink); }
+  .qa details { border-bottom: 1px solid var(--line); scroll-margin-top: 16px; }
+  .qa summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 20px; padding: 19px 0; font-size: 17.5px; font-weight: 600; line-height: 1.35; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary:hover .q { text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 4px; }
+  .qa .ans { padding: 0 40px 24px 0; }
+  .qa .ans p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--ink-2); max-width: 64ch; }
+  .qa .ans a { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+  .qa .ans a:hover { text-decoration-color: currentColor; }
+  .pocket { margin-top: 36px; }
+  .pocket h3 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin: 0 0 4px; }
+  .pocket dl { margin: 0; }
+  .pocket div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); column-gap: 32px; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .pocket dt { font-weight: 500; }
+  .pocket dd { margin: 0; color: var(--ink-2); }
+
+  /* ---------------------------------------------------------------- footer */
+  .foot { border-top: 1px solid var(--line); margin-top: 96px; padding: 28px 0 56px; font-size: 13.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px 32px; flex-wrap: wrap; }
+  .foot p { margin: 0; max-width: 70ch; }
+  .foot a { color: var(--ink-2); }
+
+  /* ---------------------------------------------------------------- responsive */
+  @media (max-width: 1099px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .toc { display: none; }
+  }
+  @media (max-width: 860px) {
+    :root { --gut: 24px; }
+    .sim-body { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    .two, .two-wide, .legal { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .rules-full { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .facts-2 { grid-template-columns: minmax(0, 1fr); }
+    .facts-2 > div:nth-child(2) { border-top: 0; }
+    .parties { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+    .party { display: block; grid-row: auto; }
+    .party, .party + .party { padding: 18px 0 14px; border-left: 0; }
+    .party + .party { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 720px) {
+    :root { --gut: 16px; }
+    body { font-size: 15.5px; }
+    .hero { padding-top: 36px; }
+    .hero-rule { margin-top: 48px; }
+    .hero .lede { font-size: 17px; margin-top: 16px; }
+    .ribbon { margin-top: 36px; }
+    .r-months { display: none; }
+    .r-notes { display: grid; gap: 18px; margin-top: 16px; }
+    .r-note { padding-right: 0; }
+    .bracket { display: none; }
+    .sec { padding-top: 44px; margin-top: 52px; }
+    .sec > h2 { font-size: 26px; }
+    .sec-lede { font-size: 16px; }
+    .sec-body { margin-top: 26px; }
+    .money-line { font-size: 17px; }
+    .silence { font-size: 19px; }
+
+    /* stacked tables */
+    .stack thead { display: none; }
+    .stack, .stack tbody, .stack tr, .stack th, .stack td { display: block; }
+    .stack tr { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .stack th, .stack td { border: 0; padding: 0; }
+    .stack .num { text-align: left; }
+    .cell-label { display: inline; }
+
+    .t-price tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; row-gap: 4px; }
+    .t-price .who { grid-column: 1; grid-row: 1; width: auto; font-size: 13.5px; color: var(--muted); font-weight: 500; }
+    .t-price .price { grid-column: 2; grid-row: 1 / span 2; width: auto; max-width: 150px; text-align: right; }
+    .t-price .what { grid-column: 1; grid-row: 2; }
+    .t-price .when { grid-column: 1 / -1; grid-row: 3; width: auto; font-size: 14px; color: var(--muted); }
+    .t-price .when .cell-label::after { content: " "; }
+
+    .t-cmp { table-layout: auto; }
+    .t-cmp tr { display: grid; gap: 8px; }
+    .t-cmp tr.is-us { border-top: 1px solid var(--ink); }
+    .t-cmp tr.is-us th, .t-cmp tr.is-us td { border-top: 0; }
+    .t-cmp .renter { font-size: 14.5px; color: var(--ink-2); font-weight: 400 !important; }
+    .t-cmp .renter .cell-label::after { content: " "; }
+    .cmp-track { width: calc(100% - 140px); }
+
+    .wf-axis { display: none; }
+    .wf-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label amt" "track track"; column-gap: 16px; padding: 10px 0 12px; }
+    .wf-label { grid-area: label; padding: 0 0 6px; font-size: 14.5px; }
+    .wf-amt { grid-area: amt; align-self: start; }
+    .wf-track { grid-area: track; height: 14px; border-left: 0; }
+    .wf-bar { top: 0; }
+    .wf-link { display: none; }
+
+    .t-assume tr { padding: 12px 0; }
+    .t-assume th { width: auto; margin-bottom: 2px; }
+
+    .t-3y tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; row-gap: 5px; padding: 16px 0; }
+    .t-3y .yr { grid-column: 1 / -1; font-size: 17px; font-family: var(--font-display); }
+    .t-3y td { display: contents; }
+    .t-3y td .cell-label { grid-column: 1; }
+    .t-3y td .cell-val { grid-column: 2; text-align: right; }
+    .t-3y td.camp .cell-val { max-width: 200px; white-space: normal; }
+
+    .t-flow tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; row-gap: 3px; padding: 14px 0; }
+    .t-flow .n { display: none; }
+    .t-flow .d { grid-column: 1 / -1; width: auto; font-size: 13px; color: var(--muted); }
+    .t-flow .ev { grid-column: 1 / -1; margin-bottom: 6px; }
+    .t-flow td.num { display: contents; }
+    .t-flow td.num .cell-label { grid-column: 1; font-size: 13.5px; }
+    .t-flow td.num .cell-val { grid-column: 2; text-align: right; font-size: 13.5px; }
+    .t-flow td.num.is-empty { display: none; }
+
+    .sim { padding: 20px 16px 22px; }
+    .sim-num output { font-size: 44px; }
+    .sim-ctrl, .switch { width: 100%; }
+    .sim-facts dd { font-size: 17px; }
+    .rules-short div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+    .pocket div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+    .upside { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+    .qa summary { font-size: 16.5px; }
+    .qa .ans { padding-right: 0; }
+    .qa .ans p { font-size: 16px; }
+    .legal-text p { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div id="hold-nav"></div>
+
+<header class="wrap hero" id="top">
+  <h1>Verimate is paid once per lease, by the lister, after move-in.</h1>
+  <p class="lede" id="hero-lede"></p>
+  <figure class="ribbon" id="ribbon"></figure>
+  <hr class="hero-rule" />
+</header>
+
+<div class="wrap layout">
+  <nav class="toc" aria-label="Sections on this page">
+    <ol>
+      <li><a href="#pricing">Who pays what</a></li>
+      <li><a href="#why-10">Why 10% of one month</a></li>
+      <li><a href="#this-deal">One deal, end to end</a></li>
+      <li><a href="#per-deal">The average deal</a></li>
+      <li><a href="#year1">Year 1, Syracuse</a></li>
+      <li><a href="#deals">Change the deal count</a></li>
+      <li><a href="#three-years">Three years</a></li>
+      <li><a href="#legal">How the money is held</a></li>
+      <li><a href="#rules">The rules in short</a></li>
+      <li><a href="#qa">Judge questions</a></li>
+    </ol>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <section class="sec" id="pricing" aria-labelledby="pricing-h">
+      <h2 id="pricing-h">Who pays what</h2>
+      <p class="sec-lede" id="pricing-lede"></p>
+      <div class="sec-body">
+        <table class="t t-price stack" id="pricing-table">
+          <caption class="sr-only">Who pays Verimate, for what, when, and how much</caption>
+          <thead><tr><th scope="col">Who pays</th><th scope="col">For what</th><th scope="col">When</th><th scope="col" class="num">Amount</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sec" id="why-10" aria-labelledby="why-h">
+      <h2 id="why-h">Why 10% of one month</h2>
+      <p class="sec-lede" id="why-lede"></p>
+      <div class="sec-body">
+        <table class="t t-cmp stack" id="cmp-table">
+          <caption class="sr-only">What the lister and the renter pay on each route, same room</caption>
+          <colgroup><col class="c-opt" /><col class="c-lister" /><col class="c-renter" /></colgroup>
+          <thead><tr><th scope="col">Option</th><th scope="col">Lister pays</th><th scope="col">Renter pays</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="note" id="cmp-note"></p>
+      </div>
+    </section>
+
+    <section class="sec" id="this-deal" aria-labelledby="deal-h">
+      <h2 id="deal-h">One deal, end to end</h2>
+      <p class="sec-lede" id="deal-lede"></p>
+      <div class="sec-body">
+        <div class="parties" id="parties"></div>
+        <div class="wf-wrap">
+          <h3 class="sub" id="wf-h"></h3>
+          <div class="wf-axis" aria-hidden="true"><span></span><span class="ax" id="wf-ax"></span><span></span></div>
+          <ol class="wf" id="wf" aria-labelledby="wf-h"></ol>
+        </div>
+        <details class="more" id="flow-more">
+          <summary><span id="flow-sum"></span><span class="pm" aria-hidden="true"></span></summary>
+          <div class="more-body">
+            <table class="t t-flow stack" id="flow-table">
+              <caption class="sr-only">The 734 Comstock deal, step by step</caption>
+              <thead><tr><th scope="col" class="n">#</th><th scope="col" class="d">Date</th><th scope="col">What happens</th><th scope="col" class="num">Jamie</th><th scope="col" class="num">Held by Verimate</th><th scope="col" class="num">Lena</th><th scope="col" class="num">Verimate revenue</th><th scope="col" class="num">Verimate cost</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="sec" id="per-deal" aria-labelledby="avg-h">
+      <h2 id="avg-h">The average deal</h2>
+      <p class="sec-lede" id="avg-lede"></p>
+      <div class="sec-body two two-wide">
+        <div>
+          <div class="receipt big" id="avg-receipt"></div>
+        </div>
+        <div>
+          <h3 class="sub">Kept per deal</h3>
+          <ul class="kept" id="kept"></ul>
+          <dl class="facts" id="avg-facts"></dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="year1" aria-labelledby="y1-h">
+      <h2 id="y1-h">Year 1, Syracuse</h2>
+      <p class="sec-lede" id="y1-lede"></p>
+      <div class="sec-body two">
+        <div>
+          <h3 class="sub">Assumptions</h3>
+          <table class="t t-assume stack" id="assume-table">
+            <caption class="sr-only">Year 1 assumptions and their sources</caption>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div>
+          <h3 class="sub">Result</h3>
+          <div class="receipt pl" id="y1-pl"></div>
+        </div>
+      </div>
+      <dl class="facts facts-2" id="y1-facts" style="margin-top:40px"></dl>
+    </section>
+
+    <section class="sec" id="deals" aria-labelledby="sim-h">
+      <h2 id="sim-h">Change the deal count</h2>
+      <p class="sec-lede" id="sim-lede"></p>
+      <div class="sec-body">
+        <div class="sim panel-raised">
+          <div class="sim-top">
+            <div>
+              <label class="sim-label" for="deals-input">Deals in year 1</label>
+              <div class="sim-num"><output id="deals-out" for="deals-input">280</output><span class="unit">deals</span></div>
+              <div class="sim-share" id="deals-share"></div>
+            </div>
+            <div class="sim-ctrl">
+              <button type="button" class="switch" id="prem" role="switch" aria-checked="true">
+                <span class="sw-track" aria-hidden="true"><span class="sw-thumb"></span></span>
+                <span class="sw-text"><b>Premium</b><small id="prem-sub"></small></span>
+              </button>
+            </div>
+          </div>
+          <div class="sim-body">
+            <div>
+              <ul class="legend" aria-hidden="true">
+                <li><span class="lk"></span>Contribution (revenue minus deal costs)</li>
+                <li><span class="lk lk-cost"></span>Marketing and fixed costs</li>
+              </ul>
+              <div class="chart" id="be-chart">
+                <svg id="be-svg" role="img" aria-labelledby="be-title"><title id="be-title"></title></svg>
+                <div class="tip" id="be-tip" hidden></div>
+              </div>
+              <div class="slider-row" id="slider-row">
+                <input type="range" id="deals-input" min="50" max="600" step="1" value="280" />
+              </div>
+              <div class="ticks" id="ticks" aria-hidden="true"></div>
+              <div class="sim-foot">
+                <span id="sim-hint">Drag, use the arrow keys, or click the chart.</span>
+                <button type="button" class="btn btn-quiet btn-sm" id="reset">Reset to 280 deals</button>
+              </div>
+              <dl class="sim-facts" id="pl-sub"></dl>
+            </div>
+            <div>
+              <div class="receipt pl-live" id="pl-live"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="three-years" aria-labelledby="y3-h">
+      <h2 id="y3-h">Three years</h2>
+      <p class="sec-lede" id="y3-lede"></p>
+      <div class="sec-body">
+        <table class="t t-3y stack" id="y3-table">
+          <caption class="sr-only">Revenue by year for three years, with the deck's old figures for comparison</caption>
+          <thead><tr><th scope="col">Year</th><th scope="col">Campuses</th><th scope="col" class="num">Share</th><th scope="col" class="num">Deals</th><th scope="col" class="num">Lister fees</th><th scope="col" class="num">Premium</th><th scope="col" class="num">Revenue</th><th scope="col" class="num deck">Deck had</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="upside" id="upside"></div>
+      </div>
+    </section>
+
+    <section class="sec" id="legal" aria-labelledby="legal-h">
+      <h2 id="legal-h">How the money is held</h2>
+      <p class="money-line" id="money-line"></p>
+      <div class="sec-body legal">
+        <div class="legal-text" id="legal-text"></div>
+        <dl class="legal-facts" id="legal-facts"></dl>
+      </div>
+    </section>
+
+    <section class="sec" id="rules" aria-labelledby="rules-h">
+      <h2 id="rules-h">The rules in short</h2>
+      <p class="sec-lede">What releases money, what freezes it, and what happens when nobody taps anything.</p>
+      <div class="sec-body">
+        <dl class="rules-short" id="rules-short"></dl>
+        <p class="silence" id="silence"></p>
+        <details class="more" id="rules-more">
+          <summary><span>All the rules</span><span class="sum-meta" id="rules-count"></span><span class="pm" aria-hidden="true"></span></summary>
+          <div class="more-body"><div class="rules-full" id="rules-full"></div></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="sec" id="qa" aria-labelledby="qa-h">
+      <h2 id="qa-h">Judge questions</h2>
+      <p class="sec-lede" id="qa-lede"></p>
+      <div class="sec-body">
+        <div class="qa" id="qa-list"></div>
+        <div class="pocket">
+          <h3>Two more, if asked</h3>
+          <dl id="pocket"></dl>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="wrap">
+  <div class="foot">
+    <p id="foot-text"></p>
+    <p><a href="hold.html">Live demo</a>&ensp;&ensp;<a href="book.html">Renter</a>&ensp;&ensp;<a href="lister.html">Lister</a></p>
+  </div>
+</footer>
+
+<script src="assets/hold-data.js"></script>
+<script src="assets/hold-nav.js"></script>
+<script>
+(function () {
+  'use strict';
+  var H = window.HOLD;
+  if (!H) { document.getElementById('main').insertAdjacentHTML('afterbegin', '<p>The data file assets/hold-data.js did not load.</p>'); return; }
+
+  var D = H.deal, T = H.totals, U = H.unit, Y = H.year1, F = H.fees, P = H.people;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var M = function (c, o) { return H.money(c, o); };
+  var A = function (c, o, cls) { return '<span class="amt' + (cls ? ' ' + cls : '') + '">' + M(c, o) + '</span>'; };
+  var W0 = { cents: false };
+  var RATE = Math.round(F.listerRate * 100) + '%';
+  var lowerFirst = function (s) { return s.charAt(0).toLowerCase() + s.slice(1); };
+  var upperFirst = function (s) { return s.charAt(0).toUpperCase() + s.slice(1); };
+  var VMARK = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>';
+
+  /* ------------------------------------------------------------ hero */
+  $('#hero-lede').innerHTML =
+    'The fee is ' + RATE + ' of the first month’s rent, taken out of the first release after the renter moves in. ' +
+    'Renters pay ' + A(F.renterFee, W0) + ' for Hold. Later months and the deposit carry no fee.';
+
+  (function ribbon() {
+    var s = D.schedule, first = s[0], rest = s.slice(1);
+    var restSum = H.sum(rest, function (x) { return x.cents; });
+    var firstLena = first.cents - first.fee;
+    var monthLabel = function (x) { return '<span style="--f:' + x.cents + '">' + esc(H.date(x.due, 'short')) + '</span>'; };
+    var html = '';
+    html += '<figcaption class="ribbon-head"><span><strong>' + esc(D.address) + '</strong>, rent Jamie pays Lena, <span class="nw">' + esc(D.datesLabel) + '</span></span>' +
+            '<span class="ribbon-total">Lease rent' + A(D.totalRent) + '</span></figcaption>';
+    html += '<div class="r-row r-months" aria-hidden="true"><div class="r-grp" style="--f:' + first.cents + '">' + monthLabel(first) + '</div>' +
+            '<div class="r-grp" style="--f:' + restSum + '">' + rest.map(monthLabel).join('') + '</div></div>';
+    html += '<div class="r-row r-bar" role="img" aria-label="' + esc('Lease rent ' + M(D.totalRent) + '. First month ' + M(first.cents) + ': Lena receives ' + M(firstLena) +
+            ', Verimate fee ' + M(first.fee) + '. February to May ' + M(restSum) + ' straight to Lena, Verimate fee ' + M(0) + '.') + '">' +
+            '<div class="r-grp" style="--f:' + first.cents + '"><span class="seg" style="--f:' + firstLena + '"></span><span class="seg seg-fee" style="--f:' + first.fee + '"></span></div>' +
+            '<div class="r-grp" style="--f:' + restSum + '">' + rest.map(function (x, i) { return '<span class="seg' + (i === rest.length - 1 ? ' seg-last' : '') + '" style="--f:' + x.cents + '"></span>'; }).join('') + '</div></div>';
+    var feeOnRest = H.sum(rest, function (x) { return x.fee; });
+    html += '<div class="r-row r-notes">' +
+      '<div class="r-note" style="--f:' + first.cents + '"><div class="bracket" aria-hidden="true"></div>' +
+        '<h2>First month, held until move-in</h2>' +
+        '<p class="kv"><span class="key" aria-hidden="true"></span><span>Lena receives ' + A(firstLena) + '</span></p>' +
+        '<p class="kv"><span class="key key-fee" aria-hidden="true"></span><span>Verimate fee ' + A(first.fee) + ', ' + RATE + '</span></p></div>' +
+      '<div class="r-note" style="--f:' + restSum + '"><div class="bracket" aria-hidden="true"></div>' +
+        '<h2>February to May, paid straight to Lena</h2>' +
+        '<p class="kv"><span class="key" aria-hidden="true"></span><span>Lena receives ' + A(restSum) + '. Verimate fee ' + A(feeOnRest) + ' on each month.</span></p></div>' +
+      '</div>';
+    html += '<p class="kv r-dep"><span class="key key-dep" aria-hidden="true"></span><span>Deposit ' + A(D.deposit) +
+            ': held by Verimate from booking to move-out, then returned to Jamie in one tap. Verimate fee ' + A(0) + '.</span></p>';
+    $('#ribbon').innerHTML = html;
+  })();
+
+  /* ------------------------------------------------------------ pricing */
+  $('#pricing-lede').textContent = 'One fee, paid by the lister after move-in. Hold is free for renters. Card costs pass through at cost and are not revenue.';
+  (function pricing() {
+    var split = function (w) {
+      var i = w.indexOf(': ');
+      if (i > 0) return [w.slice(0, i), upperFirst(w.slice(i + 2))];
+      var j = w.indexOf(' (');
+      if (j > 0 && w.charAt(w.length - 1) === ')') return [w.slice(0, j), upperFirst(w.slice(j + 2, -1))];
+      return [w, ''];
+    };
+    $('#pricing-table tbody').innerHTML = H.pricing.map(function (p, i) {
+      var same = i > 0 && H.pricing[i - 1].who === p.who;
+      var w = split(p.what);
+      return '<tr class="' + (p.later ? 'is-later' : '') + '">' +
+        '<th scope="row" class="who' + (same ? ' is-same' : '') + '">' + esc(p.who) + '</th>' +
+        '<td class="what"><span class="what-name">' + esc(w[0]) + '</span>' + (w[1] ? '<span class="what-detail">' + esc(w[1]) + '</span>' : '') +
+          '<span class="what-note">' + esc(p.note) + '</span></td>' +
+        '<td class="when"><span class="cell-label">When:</span>' + esc(p.when === '—' ? 'Never' : p.when) + '</td>' +
+        '<td class="num price">' + esc(p.amount) + (p.revenue ? '<span class="rev-tag"><span class="key key-fee" aria-hidden="true"></span>Verimate revenue</span>' : '') + '</td>' +
+        '</tr>';
+    }).join('');
+  })();
+
+  /* ------------------------------------------------------------ comparison */
+  $('#why-lede').innerHTML = 'Same room at ' + esc(D.rentLabel) + '. What the lister and the renter pay on each route.';
+  (function comparison() {
+    var rows = H.comparison;
+    var hiOf = function (r) { return Array.isArray(r.listerCents) ? r.listerCents[1] : r.listerCents; };
+    var max = Math.max.apply(null, rows.map(hiOf));
+    $('#cmp-table tbody').innerHTML = rows.map(function (r) {
+      var lc = r.listerCents, lo = Array.isArray(lc) ? lc[0] : lc, hi = hiOf(r);
+      var bar = '';
+      if (hi > 0) {
+        bar = '<span class="cmp-bar' + (hi > lo ? ' has-range' : '') + '" style="--w:' + (lo / max) + '"></span>' +
+              (hi > lo ? '<span class="cmp-range" style="--a:' + (lo / max) + ';--w:' + ((hi - lo) / max) + '"></span>' : '');
+      }
+      return '<tr class="' + (r.us ? 'is-us' : '') + (hi === 0 ? ' is-zero' : '') + '">' +
+        '<th scope="row" class="opt">' + esc(r.option) + '</th>' +
+        '<td class="lister"><div class="cmp-line"><span class="cmp-track" aria-hidden="true">' + bar +
+          '<span class="cmp-val" style="--x:' + (hi / max) + '">' + esc(r.lister) + '</span></span></div>' +
+          (r.listerNote ? '<span class="cmp-sub">' + esc(r.listerNote) + '</span>' : '') +
+          '<span class="sr-only">' + esc(r.lister) + '</span></td>' +
+        '<td class="renter"><span class="cell-label">Renter pays:</span>' + esc(r.renter) + '</td></tr>';
+    }).join('');
+    $('#cmp-note').innerHTML = 'An empty room costs Lena ' + A(D.rent, W0) + ' every month. Verimate costs her ' + A(D.listerFee) + ' once, ' +
+      esc(T.listerPaidDaysOfRent) + ', and only after a verified renter is inside and her rent has arrived.';
+  })();
+
+  /* ------------------------------------------------------------ one deal */
+  $('#deal-lede').innerHTML = esc(D.address) + ', ' + esc(lowerFirst(D.unit)) + ', ' + esc(D.rentLabel) + ', ' + esc(D.datesLabel) +
+    '. Jamie pays by bank. Verimate holds only the first month and the deposit; February to May goes straight to Lena.';
+  (function parties() {
+    var person = function (p) {
+      return '<div class="person"><img class="avatar" src="' + esc(p.img) + '" alt="' + esc(p.alt) + '" width="40" height="40" />' +
+        '<div><div class="person-name">' + esc(p.name) + '</div><div class="person-meta">' + esc(p.role) + ', ' + esc(p.year) + '</div></div></div>';
+    };
+    var row = function (label, c, note, cls) {
+      return '<div class="prow' + (cls ? ' ' + cls : '') + '"><span>' + esc(label) + '</span>' + A(c) + (note ? '<small class="pn">' + note + '</small>' : '') + '</div>';
+    };
+    var html = '';
+    html += '<div class="party">' + person(P.renter) +
+      row('Paid in', T.renterPaidIn, 'First month and deposit, then rent for February to May') +
+      row('Got back', -T.renterGotBack, 'Deposit, the day after move-out') +
+      row('Net cost', T.renterNet, null, 'is-total') +
+      '<p class="party-note">Rent only. Verimate fees ' + A(T.renterFees) + '.</p></div>';
+    html += '<div class="party">' + person(P.lister) +
+      row('Rent from ' + P.renter.first, D.totalRent, 'Five months, prorated in May') +
+      row('Verimate fee', -T.listerPaid, esc(RATE) + ' of the first month, once') +
+      row('Received', T.listerReceived, null, 'is-total') +
+      '<p class="party-note">She paid ' + esc(T.listerPaidPctOfLease) + ' of her lease, ' + esc(T.listerPaidDaysOfRent) + '. The deposit never sat with her.</p></div>';
+    html += '<div class="party"><div class="person"><span class="v-mark">' + VMARK + '</span><div><div class="person-name">Verimate</div><div class="person-meta">Runs the hold</div></div></div>' +
+      row('Revenue', T.verimateRevenue, 'Lister fee') +
+      row('Costs', -T.verimateCosts, 'Stripe, ID checks, risk reserve') +
+      row('Kept', T.verimateNet, null, 'is-total') +
+      '<p class="party-note">' + esc(T.verimateMargin) + ' of revenue, before team, marketing and hosting.</p></div>';
+    $('#parties').innerHTML = html;
+  })();
+
+  (function waterfall() {
+    var lines = U.thisDeal.lines, max = lines[0].cents, run = 0, prevEdge = null, html = '';
+    $('#wf-h').innerHTML = 'Where the ' + A(max) + ' goes';
+    $('#wf-ax').innerHTML = '<span>' + M(0) + '</span><span>' + M(max) + '</span>';
+    lines.forEach(function (l, i) {
+      var a, w, edge;
+      if (l.cents >= 0) { a = run; w = l.cents; run += l.cents; edge = run; }
+      else { run += l.cents; a = run; w = -l.cents; edge = run; }
+      var link = prevEdge === null ? '' : '<span class="wf-link" style="--x:' + (prevEdge / max) + '"></span>';
+      html += '<li class="wf-row ' + (i === 0 ? 'is-rev' : 'is-cost') + '"><span class="wf-label">' + esc(l.label) + '</span>' +
+        '<span class="wf-track" aria-hidden="true">' + link + '<span class="wf-bar" style="--a:' + (a / max) + ';--w:' + (w / max) + '"></span></span>' +
+        '<span class="wf-amt">' + A(l.cents, i === 0 ? { sign: true } : null) + '</span></li>';
+      prevEdge = i === 0 ? a + w : a;
+    });
+    html += '<li class="wf-row is-net"><span class="wf-label">Kept by Verimate</span>' +
+      '<span class="wf-track" aria-hidden="true"><span class="wf-link" style="--x:' + (prevEdge / max) + '"></span><span class="wf-bar" style="--a:0;--w:' + (U.thisDeal.net / max) + '"></span></span>' +
+      '<span class="wf-amt">' + A(U.thisDeal.net) + '<small>' + esc(U.thisDeal.margin) + ' of the fee</small></span></li>';
+    $('#wf').innerHTML = html;
+  })();
+
+  (function flowTable() {
+    var first = H.flow[0], last = H.flow[H.flow.length - 1];
+    $('#flow-sum').textContent = 'See all ' + H.flow.length + ' steps, ' + H.date(first.at, 'short') + ' to ' + H.date(last.at, 'short');
+    var cell = function (label, c, signed, zeroShows) {
+      var empty = (c === 0 && !zeroShows) || c === null;
+      return '<td class="num' + (empty ? ' is-empty' : '') + '"><span class="cell-label">' + label + '</span><span class="cell-val">' +
+        (empty ? '<span class="dash" aria-label="none">—</span>' : A(c, signed ? { sign: true } : null)) + '</span></td>';
+    };
+    $('#flow-table tbody').innerHTML = H.flow.map(function (s) {
+      var when = s.atEnd ? H.date(s.at, 'short') + ' – ' + H.date(s.atEnd, 'short') : H.date(s.at, 'day');
+      var cost = H.sum(s.costs, function (c) { return c.cents; });
+      return '<tr><td class="n">' + s.n + '</td><td class="d">' + esc(when) + '</td>' +
+        '<td class="ev"><b>' + esc(s.title) + '</b><span>' + esc(s.detail) + '</span></td>' +
+        cell('Jamie', s.renter, true) + cell('Held by Verimate', s.held, false, true) + cell('Lena', s.lister, true) +
+        cell('Verimate revenue', s.revenue, true) + cell('Verimate cost', cost ? -cost : 0, false) + '</tr>';
+    }).join('');
+  })();
+
+  /* ------------------------------------------------------------ average deal */
+  (function average() {
+    var a = U.average, t = U.thisDeal;
+    $('#avg-lede').innerHTML = esc(a.note) + ', paid by bank. Verimate keeps ' + A(a.net) + ' of the ' + A(a.revenue) + ' fee. The deck had ' + A(a.deckHad) + ' a deal.';
+    var html = a.lines.map(function (l, i) {
+      return '<div class="rc-row' + (i ? ' rc-sub' : '') + '"><span>' + esc(l.label) + '</span>' + A(l.cents, i === 0 ? { sign: true } : null) + '</div>';
+    }).join('');
+    html += '<div class="rc-row rc-total"><span>Contribution <small class="pct">' + esc(a.margin) + '</small></span>' + A(a.net, { sign: true }) + '</div>';
+    html += '<div class="rc-row rc-quiet"><span>The deck had</span>' + A(a.deckHad) + '</div>';
+    $('#avg-receipt').innerHTML = html;
+
+    var items = [
+      { label: 'This deal, ' + t.label, c: t.net },
+      { label: 'Average deal', c: a.net },
+      { label: 'The deck’s plan', c: a.deckHad, deck: true }
+    ];
+    var max = Math.max.apply(null, items.map(function (x) { return x.c; }));
+    $('#kept').innerHTML = items.map(function (x) {
+      return '<li class="' + (x.deck ? 'is-deck' : '') + '"><div class="k-top"><span>' + esc(x.label) + '</span>' + A(x.c) + '</div>' +
+        '<div class="k-line" aria-hidden="true"><span class="k-bar" style="--w:' + (x.c / max) + '"></span></div></li>';
+    }).join('');
+
+    var f = [
+      ['Take rate', esc(a.takeRate.split(' (')[0]), esc(upperFirst(a.takeRate.split(' (')[1].replace(/\)$/, '')))],
+      ['Marketing per completed deal', A(Y.cac, W0), 'An assumption the first cycle measures. The ceiling is what one deal keeps, ' + A(Y.cacCeiling) + '.']
+    ];
+    $('#avg-facts').innerHTML = f.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd class="f-val">' + x[1] + '</dd><dd class="f-note">' + x[2] + '</dd></div>'; }).join('');
+  })();
+
+  /* ------------------------------------------------------------ year 1 */
+  var MARKET = Math.round(H.threeYear[0].deals / (parseFloat(H.threeYear[0].share) / 100)); // 2,800 Syracuse subleases
+  (function year1() {
+    $('#y1-lede').innerHTML = esc(Y.period) + '. ' + esc(Y.periodNote) + '. The ' + esc(lowerFirst(Y.beta.label)) + ' (' + Y.beta.deals +
+      ' deals) is free, as the deck says, and not counted here. It costs about ' + A(Y.beta.costs, { k: true }) + ' and earns the first returned-on-time badges.';
+    $('#assume-table tbody').innerHTML = Y.assumptions.map(function (x) {
+      return '<tr><th scope="row">' + esc(x.label) + '</th><td>' + esc(x.value) + '<span class="src">' + esc(x.source) + '</span></td></tr>';
+    }).join('');
+    var last = Y.lines.length - 1;
+    $('#y1-pl').innerHTML = Y.lines.map(function (l, i) {
+      var cls = 'rc-row' + (l.total ? ' rc-total' : '') + (i === last ? ' rc-final' : '') + (l.cents < 0 ? ' is-neg' : '');
+      return '<div class="' + cls + '"><span>' + esc(l.label) + '</span>' + A(l.cents, { cents: false, sign: i === last }) + '</div>';
+    }).join('');
+
+    var perDealRent = Y.facilitated / H.threeYear[0].deals, perDealHeld = Y.heldAtBooking / H.threeYear[0].deals;
+    var peakN = Math.round(Y.peakDepositsHeld / U.average.deposit);
+    var bShare = Math.round(Y.breakEvenWithPremium / MARKET * 100) + '%';
+    var f = [
+      ['Rent through Verimate', A(Y.facilitated, { k: 0 }), H.threeYear[0].deals + ' deals × ' + A(perDealRent, W0) + ' of rent.'],
+      ['Held at booking', A(Y.heldAtBooking, { k: 0 }), 'First month and deposit, ' + H.threeYear[0].deals + ' × ' + A(perDealHeld, W0) + '.'],
+      ['Peak deposits held at once', A(Y.peakDepositsHeld, { k: 0 }), 'About ' + peakN + ' × ' + A(U.average.deposit, W0) + ', in spring.'],
+      ['Every ' + Y.ruleOfThumb.deals + ' deals', A(Y.ruleOfThumb.revenue, W0), 'Of lister fee revenue. The rule of thumb for any campus.'],
+      ['Break-even before salaries', Y.breakEvenWithPremium + ' deals', 'With Premium, about ' + bShare + ' of Syracuse subleases. ' + Y.breakEvenWithoutPremium + ' deals without Premium.'],
+      ['Downside revenue', A(Y.downside.revenue, { k: true }), esc(Y.downside.label) + '. ' + esc(Y.downside.note)]
+    ];
+    $('#y1-facts').innerHTML = f.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd class="f-val">' + x[1] + '</dd><dd class="f-note">' + x[2] + '</dd></div>'; }).join('');
+  })();
+
+  /* ------------------------------------------------------------ simulator */
+  var MIN = 50, MAX = 600, PLAN = H.threeYear[0].deals;
+  var base0 = H.yearModel({ deals: 0 }), perDealMkt = H.yearModel({ deals: 1 }).marketing - base0.marketing;
+  var members = H.threeYear[0].members, subs280 = H.yearModel({ deals: PLAN }).subscriptions, months = subs280 / members;
+  var sim = { deals: PLAN, premium: true, hover: null };
+  var model = function (d, p) { return H.yearModel({ deals: d, premium: p }); };
+
+  $('#sim-lede').textContent = 'Year 1 at any count from ' + MIN + ' to ' + MAX + ' deals. Price, costs and marketing stay as above; switch Premium off to see the case without it.';
+  $('#prem-sub').innerHTML = members + ' members × ' + months + ' months × ' + M(F.premiumMonthly);
+
+  var input = $('#deals-input'), out = $('#deals-out'), svg = $('#be-svg'), tip = $('#be-tip'), chart = $('#be-chart');
+  var geo = null;
+
+  function renderPL() {
+    var m = model(sim.deals, sim.premium), d = sim.deals;
+    var r = function (label, c, note, cls, opt) {
+      return '<div class="rc-row' + (cls ? ' ' + cls : '') + '"><span>' + label + (note ? '<small>' + note + '</small>' : '') + '</span>' + A(c, opt || W0) + '</div>';
+    };
+    var html = '';
+    html += r('Lister fees', m.listerFees, d + ' × ' + M(U.average.revenue, W0));
+    html += r('Premium', m.premium, sim.premium ? members + ' × ' + months + ' × ' + M(F.premiumMonthly) : 'Off', sim.premium ? '' : 'is-off');
+    html += r('Revenue', m.revenue, null, 'is-total');
+    html += r('Deal costs', -m.dealCosts, d + ' × ' + M(U.average.costs));
+    html += r('Premium card fees', -m.premiumCardFees, sim.premium ? m.subscriptions + ' × ' + M(F.premiumCardFee()) : 'Off', sim.premium ? '' : 'is-off');
+    html += r('Contribution', m.contribution, null, 'is-total');
+    html += r('Marketing', -m.marketing, M(base0.marketing, W0) + ' + ' + M(perDealMkt, W0) + ' a deal');
+    html += r('Fixed', -m.fixed, 'Legal opinion, hosting and tools');
+    html += r('Result before team pay', m.result, null, 'rc-total rc-final', { cents: false, sign: true });
+    $('#pl-live').innerHTML = html;
+    $('#pl-sub').innerHTML =
+      '<div><dt>Break-even</dt><dd>' + m.breakEvenDeals + ' deals</dd></div>' +
+      '<div><dt>Marketing per deal</dt><dd>' + M(m.cac, W0) + '</dd></div>' +
+      '<div><dt>Rent through Verimate</dt><dd>' + M(m.facilitated, { k: 0 }) + '</dd></div>';
+    return m;
+  }
+
+  function renderTop(m) {
+    out.value = sim.deals; out.textContent = sim.deals;
+    var share = sim.deals / MARKET * 100;
+    $('#deals-share').textContent = (share < 10 ? share.toFixed(1).replace(/\.0$/, '') : Math.round(share)) + '% of about ' + MARKET.toLocaleString('en-US') + ' Syracuse subleases a year';
+    input.value = sim.deals;
+    input.style.setProperty('--p', ((sim.deals - MIN) / (MAX - MIN) * 100) + '%');
+    input.setAttribute('aria-valuetext', sim.deals + ' deals, result before team pay ' + M(m.result, { cents: false, sign: true }));
+    var b = $('#prem'); b.setAttribute('aria-checked', String(sim.premium));
+  }
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, text) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function drawChart() {
+    var w = Math.round(chart.clientWidth);
+    if (!w) return;
+    var narrow = w < 440;
+    var h = narrow ? 230 : 300, pl = narrow ? 46 : 56, pr = 14, pt = 30, pb = 6;
+    var pw = w - pl - pr, ph = h - pt - pb;
+    var YMAX = 4500000;
+    var X = function (d) { return pl + (d - MIN) / (MAX - MIN) * pw; };
+    var Yc = function (c) { return pt + ph - Math.max(0, Math.min(YMAX, c)) / YMAX * ph; };
+    var costs = function (m) { return m.marketing + m.fixed; };
+    geo = { w: w, h: h, pl: pl, pr: pr, pt: pt, pb: pb, pw: pw, ph: ph, X: X, Yc: Yc };
+
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    svg.setAttribute('height', h);
+    var keep = svg.querySelector('title');
+    while (svg.lastChild && svg.lastChild !== keep) svg.removeChild(svg.lastChild);
+    while (svg.firstChild && svg.firstChild !== keep) svg.removeChild(svg.firstChild);
+
+    var g = el('g');
+    for (var t = 0; t <= 4000000; t += 1000000) {
+      var y = Yc(t);
+      g.appendChild(el('line', { x1: pl, x2: w - pr, y1: y, y2: y, stroke: t === 0 ? '#BDBDBD' : '#EFEFEF', 'stroke-width': 1, 'shape-rendering': 'crispEdges' }));
+      g.appendChild(el('text', { x: pl - 10, y: y + 4, 'text-anchor': 'end' }, t === 0 ? '$0' : M(t, { k: 0 })));
+    }
+    svg.appendChild(g);
+
+    var a = model(MIN, sim.premium), b = model(MAX, sim.premium), m = model(sim.deals, sim.premium);
+    // Lines: marketing + fixed (muted), contribution (ink).
+    svg.appendChild(el('line', { x1: X(MIN), y1: Yc(costs(a)), x2: X(MAX), y2: Yc(costs(b)), stroke: '#767676', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+    svg.appendChild(el('line', { x1: X(MIN), y1: Yc(a.contribution), x2: X(MAX), y2: Yc(b.contribution), stroke: '#111111', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+    // Direct labels near the right end.
+    svg.appendChild(el('text', { x: w - pr, y: Yc(b.contribution) - 10, 'text-anchor': 'end', class: 'halo t-ink' }, 'Contribution'));
+    svg.appendChild(el('text', { x: w - pr, y: Yc(costs(b)) + 20, 'text-anchor': 'end', class: 'halo' }, 'Marketing and fixed'));
+
+    // Break-even point.
+    var be = m.breakEvenDeals, bm = model(be, sim.premium), bx = X(be), by = Yc(costs(bm));
+    svg.appendChild(el('line', { x1: bx, x2: bx, y1: by + 6, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .35, 'shape-rendering': 'crispEdges' }));
+    svg.appendChild(el('circle', { cx: bx, cy: by, r: 5.5, fill: '#fff', stroke: '#111', 'stroke-width': 2 }));
+    var beLeft = bx > pl + pw * 0.8;
+    var beText = el('text', { x: beLeft ? bx - 8 : bx + 8, y: pt + ph - 26, 'text-anchor': beLeft ? 'end' : 'start', class: 'halo' });
+    beText.appendChild(el('tspan', { x: beLeft ? bx - 8 : bx + 8, class: 't-ink' }, 'Break-even'));
+    beText.appendChild(el('tspan', { x: beLeft ? bx - 8 : bx + 8, dy: 16 }, 'about ' + be + ' deals'));
+    svg.appendChild(beText);
+
+    // Current deal count.
+    var cx = X(sim.deals), cy1 = Yc(m.contribution), cy2 = Yc(costs(m));
+    svg.appendChild(el('line', { x1: cx, x2: cx, y1: pt - 6, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .35, 'shape-rendering': 'crispEdges' }));
+    svg.appendChild(el('line', { x1: cx, x2: cx, y1: cy1, y2: cy2, stroke: '#111', 'stroke-width': 2 }));
+    svg.appendChild(el('circle', { cx: cx, cy: cy2, r: 4.5, fill: '#767676', stroke: '#fff', 'stroke-width': 2 }));
+    svg.appendChild(el('circle', { cx: cx, cy: cy1, r: 4.5, fill: '#111', stroke: '#fff', 'stroke-width': 2 }));
+    var lblRight = cx < pl + pw * 0.72;
+    var midY = (cy1 + cy2) / 2 + 4;
+    var resTxt = M(m.result, { cents: false, sign: true });
+    svg.appendChild(el('text', { x: lblRight ? cx + 10 : cx - 10, y: midY, 'text-anchor': lblRight ? 'start' : 'end', class: 'halo t-ink' }, resTxt));
+    var topAnchor = cx < pl + 40 ? 'start' : (cx > w - pr - 40 ? 'end' : 'middle');
+    svg.appendChild(el('text', { x: cx, y: pt - 12, 'text-anchor': topAnchor, class: 'halo t-ink' }, sim.deals + ' deals'));
+
+    // Hover layer: ghost crosshair (drawn on demand).
+    var ghost = el('line', { id: 'be-ghost', x1: 0, x2: 0, y1: pt, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .18, visibility: 'hidden', 'shape-rendering': 'crispEdges' });
+    svg.appendChild(ghost);
+    var hit = el('rect', { x: pl, y: 0, width: pw, height: h, fill: 'transparent', style: 'cursor:crosshair' });
+    svg.appendChild(hit);
+
+    $('#be-title').textContent = 'Year 1 contribution against marketing and fixed costs, ' + MIN + ' to ' + MAX + ' deals' +
+      (sim.premium ? ', with Premium' : ', without Premium') + '. Break-even at about ' + be + ' deals. At ' + sim.deals + ' deals the result before team pay is ' + resTxt + '.';
+
+    // Slider and ticks line up with the plot.
+    var thumb = 22;
+    var row = $('#slider-row');
+    input.style.marginLeft = (pl - thumb / 2) + 'px';
+    input.style.width = (pw + thumb) + 'px';
+    var ticks = narrow ? [50, 200, 400, 600] : [50, 100, 200, 300, 400, 500, 600];
+    $('#ticks').innerHTML = ticks.map(function (t) { return '<span style="left:' + X(t) + 'px">' + t + '</span>'; }).join('');
+    row.style.width = w + 'px';
+  }
+
+  function showTip(d) {
+    if (!geo) return;
+    var m = model(d, sim.premium), c = m.marketing + m.fixed;
+    var ghost = svg.querySelector('#be-ghost');
+    var x = geo.X(d);
+    ghost.setAttribute('x1', x); ghost.setAttribute('x2', x); ghost.setAttribute('visibility', 'visible');
+    tip.innerHTML = '<div class="tip-h">' + d + ' deals</div>' +
+      '<div class="tip-r"><span class="lk"></span><span class="v">' + M(m.contribution, W0) + '</span><span class="l">Contribution</span></div>' +
+      '<div class="tip-r"><span class="lk lk-cost"></span><span class="v">' + M(-c, W0) + '</span><span class="l">Marketing and fixed</span></div>' +
+      '<div class="tip-r res"><span></span><span class="v">' + M(m.result, { cents: false, sign: true }) + '</span><span class="l">Result</span></div>';
+    tip.hidden = false;
+    var tw = tip.offsetWidth, left = x + 14;
+    if (left + tw > geo.w) left = x - 14 - tw;
+    tip.style.left = Math.max(0, left) + 'px';
+    tip.style.top = (geo.pt + 6) + 'px';
+  }
+  function hideTip() {
+    tip.hidden = true;
+    var g = svg.querySelector('#be-ghost'); if (g) g.setAttribute('visibility', 'hidden');
+  }
+  function dealsAt(evt) {
+    var r = svg.getBoundingClientRect();
+    var x = (evt.clientX - r.left) * (geo.w / r.width);
+    var d = Math.round(MIN + (x - geo.pl) / geo.pw * (MAX - MIN));
+    return Math.max(MIN, Math.min(MAX, d));
+  }
+  svg.addEventListener('pointermove', function (e) { if (!geo) return; if (e.pointerType === 'touch') return; showTip(dealsAt(e)); });
+  svg.addEventListener('pointerleave', hideTip);
+  svg.addEventListener('click', function (e) { if (!geo) return; set({ deals: dealsAt(e) }, true); });
+
+  function render() {
+    var m = renderPL();
+    renderTop(m);
+    drawChart();
+  }
+  function set(o, fromUser) {
+    if (o.deals !== undefined) sim.deals = Math.max(MIN, Math.min(MAX, Math.round(o.deals)));
+    if (o.premium !== undefined) sim.premium = !!o.premium;
+    render();
+    if (fromUser) {
+      try { history.replaceState(null, '', '#deals-' + sim.deals + (sim.premium ? '' : '-no-premium')); } catch (err) { /* file:// */ }
+    }
+  }
+  input.addEventListener('input', function () { set({ deals: +input.value }, true); });
+  $('#prem').addEventListener('click', function () { set({ premium: !sim.premium }, true); });
+  $('#reset').addEventListener('click', function () { set({ deals: PLAN, premium: true }, true); });
+  if ('ResizeObserver' in window) new ResizeObserver(function () { drawChart(); }).observe(chart);
+  else addEventListener('resize', drawChart);
+
+  /* ------------------------------------------------------------ three years */
+  (function threeYears() {
+    $('#y3-lede').textContent = 'The deck’s own share, members and campus plan. Only the fee changed, so the deck’s old revenue sits in the last column for comparison.';
+    var c = function (label, val, cls) { return '<td class="' + cls + '"><span class="cell-label">' + label + '</span><span class="cell-val">' + val + '</span></td>'; };
+    $('#y3-table tbody').innerHTML = H.threeYear.map(function (r) {
+      return '<tr><th scope="row" class="yr">Year ' + r.year + '</th>' +
+        c('Campuses', esc(r.campusLabel), 'camp') +
+        c('Share', esc(r.share), 'num') +
+        c('Deals', r.deals.toLocaleString('en-US'), 'num') +
+        c('Lister fees', A(r.listerFees, { k: true }), 'num') +
+        c('Premium', A(r.premium, { k: true }), 'num') +
+        c('Revenue', A(r.revenue, { k: true }), 'num rev') +
+        c('Deck had', A(r.deckHad, { k: 0 }), 'num deck') + '</tr>';
+    }).join('');
+    $('#upside').innerHTML =
+      '<div><h3>Upside not counted</h3><ul>' + H.upside.map(function (u) { return '<li>' + esc(u) + '</li>'; }).join('') + '</ul></div>' +
+      '<div><h3>National ceiling</h3><p>' + esc(H.nationalCeiling.label) + '.</p></div>';
+  })();
+
+  /* ------------------------------------------------------------ legal */
+  (function legal() {
+    $('#money-line').textContent = H.promise.money;
+    var s = H.legal.split(/(?<=[.])\s+(?=[A-Z])/);
+    var groups = [s.slice(0, 4), s.slice(4, 7), s.slice(7)];
+    $('#legal-text').innerHTML = groups.filter(function (g) { return g.length; }).map(function (g) { return '<p>' + esc(g.join(' ')) + '</p>'; }).join('') +
+      '<p class="disclaim">Not legal advice. A New York lawyer signs off before real money moves.</p>';
+    var nobody = H.pricing.filter(function (p) { return p.who === 'Nobody'; })[0];
+    var f = [
+      ['Who holds the money', 'Stripe Payments Company, a licensed money transmitter, including with New York’s Department of Financial Services.'],
+      ['Verimate’s role', 'The lister’s payment agent (NY Banking Law 641). Our software tells Stripe when to release.'],
+      ['Where it sits', 'Stripe’s segregated funds, or the lister’s connected balance under manual payouts. Never mixed with Verimate’s revenue (GOL 7-103).'],
+      ['Interest on held money', esc(nobody ? nobody.amount : '$0') + ' to Verimate. ' + esc(nobody ? nobody.note : '')],
+      ['Open items for counsel', 'Broker license for a success fee (RPL 440) and the apartment-information-vendor license for paid Premium (RPL 446-a).']
+    ];
+    $('#legal-facts').innerHTML = f.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('');
+  })();
+
+  /* ------------------------------------------------------------ rules */
+  (function rules() {
+    // rulesShort speaks to the renter ("you"); on this page the renter is named.
+    $('#rules-short').innerHTML = H.rulesShort.map(function (r) {
+      return '<div><dt>' + esc(r.label) + '</dt><dd>' + esc(r.text.replace(/\byou tap\b/g, P.renter.first + ' taps')) + '</dd></div>';
+    }).join('');
+    var silence = H.rules.filter(function (r) { return r.key === 'silence'; })[0];
+    $('#silence').textContent = silence ? silence.title + ': ' + lowerFirst(silence.items[0]) : '';
+    var full = H.rules.filter(function (r) { return r.key !== 'silence'; });
+    var n = H.sum(full, function (r) { return r.items.length; });
+    $('#rules-count').textContent = n + ' rules, before move-in to Day 14';
+    $('#rules-full').innerHTML = full.map(function (r) {
+      return '<div><h3>' + esc(r.title) + '</h3><ul>' + r.items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul></div>';
+    }).join('');
+  })();
+
+  /* ------------------------------------------------------------ Q&A */
+  var SEE = { 1: ['legal', 'How the money is held'], 2: ['legal', 'How the money is held'], 3: ['year1', 'Year 1, Syracuse'], 4: ['why-10', 'Why 10% of one month'],
+              5: ['pricing', 'Who pays what'], 6: ['year1', 'Year 1, Syracuse'], 7: ['rules', 'The rules in short'], 8: ['three-years', 'Three years'] };
+  (function qa() {
+    $('#qa-lede').textContent = 'The ' + H.qa.length + ' questions we expect, with the answer as the founder gives it.';
+    $('#qa-list').innerHTML = H.qa.map(function (q) {
+      var see = SEE[q.n];
+      return '<details id="qa-' + q.n + '" name="qa"><summary><span class="q">' + esc(q.q) + '</span><span class="pm" aria-hidden="true"></span></summary>' +
+        '<div class="ans"><p>' + esc(q.a) + '</p>' + (see ? '<a href="#' + see[0] + '">See ' + esc(see[1]) + '</a>' : '') + '</div></details>';
+    }).join('');
+    $('#pocket').innerHTML = H.pocket.map(function (p) { return '<div><dt>' + esc(p.q) + '</dt><dd>' + esc(p.a) + '</dd></div>'; }).join('');
+    $('#qa-list').addEventListener('toggle', function (e) {
+      var d = e.target;
+      if (!d.matches || !d.matches('details')) return;
+      try {
+        if (d.open) history.replaceState(null, '', '#' + d.id);
+        else if (location.hash === '#' + d.id) history.replaceState(null, '', '#qa');
+      } catch (err) { /* file:// */ }
+    }, true);
+  })();
+
+  /* ------------------------------------------------------------ footer */
+  (function foot() {
+    var c = H.checkResult || H.check();
+    $('#foot-text').innerHTML = 'Verimate Syracuse. Business model as of ' + esc(H.date(H.version, 'year')) +
+      '. Every amount on this page is computed in cents from one data file; ' + c.passed + ' of ' + c.total + ' sums check out on load.';
+  })();
+
+  /* ------------------------------------------------------------ section rail */
+  (function toc() {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    function mark() {
+      var y = innerHeight * 0.3, cur = null;
+      secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top <= y) cur = i; });
+      links.forEach(function (a, i) { a.classList.toggle('on', i === cur); if (i === cur) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+    }
+    var raf = 0;
+    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; mark(); }); }, { passive: true });
+    addEventListener('resize', mark);
+    mark();
+  })();
+
+  /* ------------------------------------------------------------ hash routes */
+  // #year1, #per-deal, #qa and every section id; #qa-1 … #qa-8 open one answer; #deals-141, #deals-600-no-premium set the model.
+  function route(jump, behavior) {
+    var h = decodeURIComponent(location.hash.slice(1));
+    var opt = { block: 'start', behavior: behavior || 'instant' };
+    var m = /^deals-(\d+)(-no-premium)?$/.exec(h);
+    if (m) {
+      set({ deals: +m[1], premium: !m[2] });
+      if (jump) $('#deals').scrollIntoView(opt);
+      return;
+    }
+    var q = /^qa-(\d+)$/.exec(h);
+    if (q) {
+      var d = document.getElementById('qa-' + q[1]);
+      if (d) { d.open = true; if (jump) d.scrollIntoView(opt); }
+      return;
+    }
+    if (jump && h) { var t = document.getElementById(h); if (t) t.scrollIntoView(opt); }
+  }
+  render();
+  // Plain section links scroll natively; only the deal-count and question hashes need help.
+  addEventListener('hashchange', function () { if (/^#(deals-|qa-)/.test(location.hash)) route(true, 'smooth'); });
+  var initial = location.hash;
+  route(!!initial);
+  // Fonts change the layout after first paint; land on the requested section again once they are in.
+  if (document.fonts && document.fonts.ready) {
+    var startY = scrollY;
+    document.fonts.ready.then(function () { drawChart(); if (initial && Math.abs(scrollY - startY) < 4) route(true); });
+  }
+})();
+</script>
+</body>
+</html>

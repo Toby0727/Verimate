@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Verimate Hold live demo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/hold.css">
+<style>
+/* hold.html: presenter live demo. Shared tokens and components come from assets/hold.css. */
+:root {
+  view-transition-name: none;           /* only the travelling amounts take part in view transitions */
+  --pad-x: 28px; --gap: 28px; --bar-py: 14px;
+  --bar-amt: 36px; --bar-label: 14px; --bar-note: 13.5px;
+  --head-title: 26px; --led-size: 15px; --hold-amt: 28px; --hold-text: 15px;
+  --stage-pt: 20px; --stage-pb: 18px; --ctl-h: 58px;
+  --mv-h: 28px; --mv-size: 14px;
+}
+::view-transition { pointer-events: none; }
+::view-transition-group(mv-0), ::view-transition-group(mv-1) {
+  animation-duration: var(--dur-move); animation-timing-function: var(--ease-move);
+}
+::view-transition-old(mv-0), ::view-transition-new(mv-0), ::view-transition-old(mv-1), ::view-transition-new(mv-1) {
+  animation-duration: var(--dur-move); animation-timing-function: var(--ease-move);
+}
+body { background: var(--wash); }
+button { cursor: pointer; }
+.amt-swap { animation: amt-swap .28s linear; }
+@keyframes amt-swap { from { opacity: .12; } to { opacity: 1; } }
+
+/* ------------------------------------------------------------------ money bar */
+.bar {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--gap);
+  padding: var(--bar-py) var(--pad-x); background: var(--paper); border-bottom: 1px solid var(--line);
+  position: relative; z-index: 20;
+}
+.cell { position: relative; min-width: 0; display: grid; gap: 3px; isolation: isolate; align-content: start; }
+.cell::after {
+  content: ""; position: absolute; z-index: -1; top: calc(-1 * var(--bar-py)); bottom: calc(-1 * var(--bar-py));
+  left: calc(var(--gap) / -2); right: calc(var(--gap) / -2); background: transparent; transition: background-color .3s linear;
+}
+.cell:first-child::after { left: calc(-1 * var(--pad-x)); }
+.cell:last-child::after { right: calc(-1 * var(--pad-x)); }
+.cell + .cell::before {
+  content: ""; position: absolute; left: calc(var(--gap) / -2); top: calc(-1 * var(--bar-py)); bottom: calc(-1 * var(--bar-py));
+  width: 1px; background: var(--line);
+}
+.cell.has-money::after { background: var(--brand-tint); }
+.cell.is-frozen::after { background: var(--flagged-tint); }
+.cell-label { display: flex; align-items: center; gap: 8px; min-width: 0; height: 26px; font-size: var(--bar-label); color: var(--muted); white-space: nowrap; }
+.cell-label strong { color: var(--ink); font-weight: 600; }
+.cell-label .avatar { width: 24px; height: 24px; }
+.cell-label .chip { margin-left: auto; }
+.hold-label { color: var(--brand-deep); font-weight: 600; }
+.hold-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); flex: none; margin: 0 2px 0 4px; }
+.vm-mark { width: 24px; height: 24px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; flex: none; }
+.vm-mark svg { width: 13px; height: 13px; }
+.cell-row { position: relative; display: flex; align-items: center; min-height: calc(var(--bar-amt) * 1.18); }
+.cell-amt {
+  font-family: var(--font-display); font-weight: 600; font-size: var(--bar-amt); letter-spacing: -.025em; line-height: 1.1;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.cell-note { font-size: var(--bar-note); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.4em; }
+.lane { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+/* The travelling amount (the one signature motion) */
+.mv {
+  display: inline-flex; align-items: center; gap: 7px; height: var(--mv-h); padding: 0 11px; border-radius: 999px;
+  background: var(--ink); color: #fff; font-size: var(--mv-size); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;
+  box-shadow: 0 6px 14px -8px rgba(17, 17, 17, .55);
+}
+.mv-held::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px #fff; }
+.mv-rel, .mv-ret { background: var(--verified-ink); }
+
+/* ------------------------------------------------------------------ stage */
+.stage {
+  position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "pj head pl led" "pj hold pl led";
+  column-gap: var(--gap); padding: var(--stage-pt) var(--pad-x) var(--stage-pb); min-height: 0;
+}
+.pwrap { margin: 0; justify-self: center; align-self: start; min-width: 0; }
+.pj { grid-area: pj; } .pl { grid-area: pl; }
+.pwrap .phone { transition: opacity .25s linear; }
+.pwrap.is-idle .phone { opacity: .5; }
+.phone { --phone-h: 680px; }
+.phone-label .avatar { width: 28px; height: 28px; }
+
+.head { grid-area: head; display: grid; justify-items: start; gap: 12px; padding-bottom: 16px; min-width: 0; }
+.date-chip { margin: 0; }
+.head-title { font-size: var(--head-title); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; margin: 0; }
+.head-title:focus { outline: none; }
+
+.hold { grid-area: hold; display: grid; align-content: start; gap: 10px; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 6px; }
+.hold::-webkit-scrollbar { display: none; }
+.held-item { display: grid; gap: 4px; padding: 13px 15px 14px; }
+.hi-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.hi-label { font-size: 15px; font-weight: 600; }
+.hi-amt { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: var(--hold-amt); letter-spacing: -.025em; line-height: 1.1; }
+.hi-text { margin: 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.42; }
+.hold .slot-empty { font-size: var(--hold-text); color: var(--muted); }
+.hold-note { margin: 2px 2px 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.45; }
+.owner { display: flex; gap: 12px; align-items: flex-start; padding: 12px 2px 0; border-top: 1px solid var(--line); margin-top: 4px; }
+.owner-ic { width: 32px; height: 32px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line-2); display: grid; place-items: center; flex: none; }
+.owner-ic svg { width: 17px; height: 17px; }
+.owner p { margin: 0; font-size: var(--hold-text); line-height: 1.42; }
+.owner .muted { font-size: 13.5px; }
+.decide { display: grid; gap: 10px; padding: 14px 15px 15px; border-radius: var(--r-panel); background: var(--paper); border: 1px solid var(--line); }
+.decide-who { margin: 0; font-size: 15px; font-weight: 600; }
+.decide-note { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
+
+/* Ledger panel */
+.led { grid-area: led; align-self: start; max-height: 100%; overflow-y: auto; scrollbar-width: none; padding: 14px 8px 16px; box-sizing: border-box; min-width: 0; }
+.led::-webkit-scrollbar { display: none; }
+.led-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 10px 8px; }
+.led-head h2 { font-size: 18px; font-weight: 600; }
+.led .ledger-row { font-size: var(--led-size); padding: 9px 10px; }
+.led .ledger-row.is-new { animation-delay: .45s; }
+.led-none { display: block !important; color: var(--muted); }
+.led-sub { margin: 12px 10px 2px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.led-costs .ledger-row { grid-template-columns: 1fr auto; padding: 6px 10px; font-size: 14px; }
+.led-costs .ledger-what { color: var(--ink-2); }
+.led .ledger-total { margin: 8px 10px 0; padding: 10px 0 0; }
+.led .ledger-total .amt { font-size: 22px; }
+
+/* Beat 10: model card over the lower half */
+.mcard {
+  position: absolute; left: var(--pad-x); right: var(--pad-x); bottom: 0; height: 57%; z-index: 15;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); box-sizing: border-box; padding: 24px 0 20px;
+}
+.mcard[hidden] { display: none; }
+.stage[data-arrive="fwd"] .mcard { animation: card-up .42s var(--ease-move) both; }
+@keyframes card-up { from { transform: translateY(28px); opacity: 0; } }
+.mc-deal, .mc-year { padding: 0 32px; min-width: 0; display: grid; align-content: start; gap: 12px; }
+.mc-year { border-left: 1px solid var(--line); }
+.mc-h { font-size: 20px; font-weight: 600; }
+.mc-yhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mc-yhead span { font-size: 14px; color: var(--muted); white-space: nowrap; }
+.mc-deal .receipt { font-size: 16px; }
+.mc-deal .rc-row { padding: 6px 0; }
+.mc-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 32px; align-items: end; }
+.mc-deals { margin: 0; font-size: 17px; color: var(--ink-2); font-weight: 500; }
+.mc-deals b { font-family: var(--font-display); font-weight: 600; font-size: 30px; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mc-total { --amt-size: 68px; display: block; margin-top: 2px; }
+.mc-total-label { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+.mc-lines { font-size: 16px; }
+.mc-prem { transition: opacity .3s linear; }
+.mc-prem.is-off { opacity: 0; }
+.mc-foot { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+
+/* ------------------------------------------------------------------ presenter controls */
+.controls {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px;
+  min-height: var(--ctl-h); padding: 0 var(--pad-x); background: var(--paper); border-top: 1px solid var(--line);
+  position: relative; z-index: 20; box-sizing: border-box;
+}
+.ctl-nav { display: flex; align-items: center; gap: 12px; }
+.ctl-count { font-size: 15px; font-weight: 600; min-width: 108px; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.controls .btn { gap: 8px; }
+.controls kbd { height: 20px; min-width: 20px; font-size: 11px; padding: 0 5px; }
+.btn-ink { background: var(--ink); color: #fff; }
+.btn-ink:hover:not(:disabled) { background: #000; }
+.btn-ink kbd { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .28); color: #fff; }
+.ctl-mid { min-width: 0; display: flex; justify-content: center; }
+.ticks { list-style: none; display: flex; gap: 3px; margin: 0; padding: 0; }
+.tick { width: 30px; height: 30px; display: grid; place-items: center; border: 0; padding: 0; background: none; border-radius: 6px; }
+.tick span { display: block; width: 24px; height: 4px; border-radius: 2px; background: var(--line-2); }
+.tick.is-done span { background: var(--ink); }
+.tick.is-now span { background: var(--brand); height: 6px; }
+.caption { margin: 0; font-size: 16px; color: var(--ink); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctl-keys { display: flex; align-items: center; gap: 2px; }
+.ctl-keys .btn { color: var(--ink-2); text-decoration: none; padding: 0 9px; }
+.ctl-keys .btn[aria-pressed="true"] { color: var(--brand-deep); background: var(--brand-tint); }
+
+/* ------------------------------------------------------------------ phone screens (designed at 360 x 680) */
+.phone-body { background: var(--paper); }
+.scr { position: relative; min-height: 100%; display: flex; flex-direction: column; padding: 4px 20px 0; box-sizing: border-box; }
+.scr-main { flex: 1; display: grid; align-content: start; gap: 14px; padding-bottom: 14px; }
+.scr-foot { position: sticky; bottom: 0; display: grid; gap: 8px; padding: 10px 0 30px; background: var(--paper); }
+.scr p { margin: 0; }
+.app-bar { display: flex; align-items: center; gap: 6px; height: 34px; font-size: 15px; font-weight: 600; margin-left: -4px; }
+.app-bar svg { width: 20px; height: 20px; }
+.scr-title { font-size: 24px; font-weight: 600; letter-spacing: -.025em; line-height: 1.15; margin: 0; }
+.scr-sub { font-size: 14px; color: var(--muted); line-height: 1.4; }
+.scr-text { font-size: 15px; color: var(--ink-2); line-height: 1.42; }
+.scr-photo { display: block; width: calc(100% + 40px); height: 168px; margin: -4px -20px 0; object-fit: cover; }
+.scr .chip { justify-self: start; }
+.scr .amt-hero { --amt-size: 46px; }
+.foot-note { font-size: 13px; color: var(--muted); text-align: center; }
+.price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.price { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.03em; }
+.price small { font-family: var(--font-ui); font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.badges .badge { font-size: 14.5px; }
+.badges small { color: var(--muted); font-size: 13px; font-weight: 400; margin-left: 2px; }
+.badges-2 { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+.badges-2 .badge { font-size: 13.5px; }
+.hr { height: 1px; background: var(--line); }
+.mini { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; }
+.mini img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
+.mini strong { display: block; font-size: 15px; }
+.mini span { font-size: 13px; color: var(--muted); }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.checks li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; font-size: 15px; line-height: 1.35; }
+.checks svg { width: 20px; height: 20px; color: var(--verified); }
+.checks small { display: block; font-size: 13px; color: var(--muted); }
+.box { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.box .receipt { font-size: 14.5px; }
+.box .rc-row { padding: 5px 0; }
+.box .rc-total { padding-top: 9px; }
+.box .rc-total > :last-child { font-size: 18px; }
+.box-title { font-size: 15px; font-weight: 600; margin-bottom: 4px !important; }
+.row-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left;
+  padding: 13px 14px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--paper);
+}
+.row-btn strong { display: block; font-size: 15.5px; }
+.row-btn small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+.row-btn svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
+.dl { display: grid; margin: 0; }
+.dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.dl > div:last-child { border-bottom: 1px solid var(--line); }
+.dl dt { color: var(--ink-2); }
+.dl dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scr .steps .step { padding-bottom: 15px; }
+.scr .steps .step-title { font-size: 15px; }
+.scr .steps .step:last-child { padding-bottom: 0; }
+.scr .held-item { padding: 12px 14px; }
+.scr .slot-empty { font-size: 14px; }
+.scr .slot-empty strong { color: var(--ink); display: block; font-size: 15px; }
+.upcoming { display: grid; gap: 2px; }
+.upcoming-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 15px; }
+.upcoming-top .amt { font-family: var(--font-display); font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
+.day-big { font-family: var(--font-display); font-weight: 600; font-size: 40px; letter-spacing: -.03em; line-height: 1.05; }
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.photos figure { margin: 0; position: relative; }
+.photos img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; }
+.photos .ok { position: absolute; right: 6px; bottom: 6px; width: 22px; height: 22px; border-radius: 50%; background: var(--verified); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
+.photos .ok svg { width: 13px; height: 13px; }
+.timer { display: grid; gap: 2px; padding: 14px 16px 15px; border-radius: 14px; background: var(--wash); }
+.timer-num { font-family: var(--font-display); font-weight: 600; font-size: 44px; letter-spacing: -.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.timer-text { font-size: 15px; font-weight: 600; }
+.reasons { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.reasons li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); font-size: 14.5px; color: var(--ink-2); }
+.reasons li.on { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+.radio { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line-2); box-sizing: border-box; flex: none; }
+.on > .radio { border: 5.5px solid var(--ink); }
+.opts { display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: 18px 1fr auto; gap: 12px; align-items: center; padding: 10px 13px; border-radius: 12px; border: 1px solid var(--line); font-size: 15px; }
+.opt.on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.opt small { display: block; font-size: 12.5px; color: var(--muted); }
+.opt .amt { font-weight: 600; }
+.opt-label { font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; }
+.rows li { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: baseline; padding: 9px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.rows time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rows small { display: block; font-size: 12.5px; color: var(--muted); }
+.rows .amt { font-weight: 600; }
+.rows .rows-total { grid-template-columns: 1fr auto; border-top: 1px solid var(--ink); font-weight: 700; }
+.record { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--verified-tint); }
+.record-ic { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); color: var(--verified-ink); display: grid; place-items: center; }
+.record-ic svg { width: 22px; height: 22px; }
+.record strong { display: block; font-size: 16px; color: var(--verified-ink); }
+.record span { font-size: 13px; color: var(--ink-2); }
+.claim-line { display: grid; gap: 6px; }
+.claim-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 16px; font-weight: 600; }
+.ev { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* lock screen */
+.lock { position: absolute; inset: 0; background: var(--wash); display: grid; align-content: start; justify-items: center; padding-top: 64px; text-align: center; }
+.lock-date { font-size: 17px; font-weight: 500; color: var(--ink-2); margin: 0; }
+.lock-time { font-family: var(--font-display); font-weight: 600; font-size: 84px; letter-spacing: -.045em; line-height: 1; margin: 4px 0 0; color: var(--ink); }
+
+/* in-phone sheets (pay sheet, Lena's receipt) */
+.p-under { position: absolute; inset: 0; }
+.p-scrim { position: absolute; inset: 0; background: rgba(17, 17, 17, .34); }
+.p-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 12px; padding: 8px 20px 30px;
+  background: var(--paper); border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--sh-sheet);
+}
+.grab { width: 38px; height: 5px; border-radius: 3px; background: var(--line-2); justify-self: center; margin-bottom: 4px; }
+.p-sheet .receipt { font-size: 15px; }
+.p-sheet .rc-row { padding: 5px 0; }
+.stage[data-arrive="fwd"] .slide-up { animation: slide-up .44s var(--ease-move) both .12s; }
+.stage[data-arrive="fwd"] .p-scrim { animation: fade-in .3s linear both; }
+@keyframes slide-up { from { transform: translateY(100%); } }
+@keyframes fade-in { from { opacity: 0; } }
+.stage[data-arrive="fwd"] .tick-in { animation: tick-in .26s var(--ease-move) both; }
+@keyframes tick-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* ------------------------------------------------------------------ desktop shell: one screen, nothing scrolls */
+@media (min-width: 900px) {
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+  #hold-nav { flex: none; }
+  .demo { flex: 1; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+  .stage { overflow: hidden; }
+  .phone-label { display: none; }
+}
+@media (min-width: 900px) and (max-height: 820px) {
+  :root { --pad-x: 24px; --gap: 24px; --bar-py: 10px; --bar-amt: 30px; --bar-label: 13px; --bar-note: 12.5px; --head-title: 22px;
+    --hold-amt: 24px; --hold-text: 14.5px; --led-size: 14.5px; --stage-pt: 14px; --stage-pb: 12px; --ctl-h: 50px; --mv-h: 26px; --mv-size: 13.5px; }
+  #hold-nav .hn { --hn-h: 50px; }
+  .head { gap: 9px; padding-bottom: 12px; }
+  .held-item { padding: 11px 13px 12px; }
+  .led { padding: 10px 6px 12px; }
+  .led .ledger-row { padding: 7px 10px; }
+  .led-costs .ledger-row { padding: 5px 10px; }
+  .mcard { height: 60%; padding: 18px 0 14px; }
+  .mc-total { --amt-size: 56px; }
+  .mc-deal, .mc-year { gap: 9px; padding: 0 26px; }
+  .mc-deal .receipt, .mc-lines { font-size: 15px; }
+  .mc-deal .rc-row { padding: 4px 0; }
+}
+@media (min-width: 1700px) and (min-height: 1000px) {
+  :root { --pad-x: 40px; --gap: 40px; --bar-py: 18px; --bar-amt: 44px; --bar-label: 15px; --bar-note: 14.5px; --head-title: 32px;
+    --hold-amt: 32px; --hold-text: 16px; --led-size: 16.5px; --stage-pt: 26px; --stage-pb: 22px; --ctl-h: 64px; --mv-h: 32px; --mv-size: 15.5px; }
+  .cell-label { height: 30px; }
+  .cell-label .avatar, .vm-mark { width: 28px; height: 28px; }
+  .led-head h2 { font-size: 20px; }
+  .mc-h { font-size: 23px; }
+  .mc-total { --amt-size: 84px; }
+  .mc-deal .receipt, .mc-lines { font-size: 18px; }
+  .ctl-count, .caption { font-size: 17px; }
+}
+
+/* ------------------------------------------------------------------ stacked layout under 900px */
+@media (max-width: 899.98px) {
+  :root { --pad-x: 16px; --gap: 12px; --bar-py: 9px; --bar-amt: 21px; --bar-label: 12.5px; --head-title: 22px; --mv-h: 22px; --mv-size: 12.5px; }
+  body { padding-bottom: 64px; }
+  .bar { position: sticky; top: 0; grid-template-columns: 1fr 1fr; row-gap: 18px; }
+  .cell { gap: 0; }
+  .cell::after { left: calc(var(--gap) / -2); right: calc(var(--gap) / -2); }
+  .cell:nth-child(odd)::after { left: calc(-1 * var(--pad-x)); }
+  .cell:nth-child(even)::after { right: calc(-1 * var(--pad-x)); }
+  .cell:nth-child(-n+2)::after { bottom: -9px; }
+  .cell:nth-child(n+3)::after { top: -9px; }
+  .cell:nth-child(3)::before { content: none; }
+  .cell:nth-child(n+3) { box-shadow: 0 -9px 0 -8px var(--line); }
+  .cell-label { height: 22px; gap: 6px; }
+  .cell-label .avatar, .vm-mark { width: 20px; height: 20px; }
+  .cell-label .role { display: none; }
+  .cell-row { flex-direction: column; align-items: flex-start; min-height: 0; }
+  .lane { position: static; transform: none; flex-direction: row; min-height: var(--mv-h); margin-top: 3px; }
+  .cell-note { display: none; }
+  .stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "card" "pj" "pl" "hold" "led"; row-gap: 22px; grid-template-rows: none; padding-top: 18px; padding-bottom: 24px; }
+  .head { padding-bottom: 0; }
+  .pwrap { display: grid; justify-items: center; }
+  .phone-label { justify-self: start; margin-bottom: 10px; }
+  .mcard { position: static; grid-area: card; height: auto; grid-template-columns: 1fr; padding: 18px 0; border-radius: var(--r-panel); box-shadow: var(--sh-panel); }
+  .mc-deal, .mc-year { padding: 0 18px; }
+  .mc-year { border-left: 0; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+  .mc-grid { grid-template-columns: 1fr; gap: 12px; }
+  .mc-total { --amt-size: 52px; }
+  .led { max-height: none; overflow: visible; }
+  .controls { position: fixed; left: 0; right: 0; bottom: 0; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); min-height: 0; }
+  .ctl-mid, .controls kbd, .ctl-keys [data-act="damage"], .ctl-keys [data-act="caption"] { display: none; }
+  .ctl-nav { gap: 6px; }
+  .ctl-count { min-width: 0; font-size: 14px; }
+  .ctl-count .w { display: none; }
+  .controls .btn { min-height: 40px; padding: 0 12px; }
+  .ctl-keys .btn { padding: 0 8px; }
+}
+
+/* ------------------------------------------------------------------ reduced motion: jump to the end state */
+@media (prefers-reduced-motion: reduce) {
+  .amt-swap, .stage[data-arrive="fwd"] .mcard, .stage[data-arrive="fwd"] .slide-up, .stage[data-arrive="fwd"] .p-scrim,
+  .stage[data-arrive="fwd"] .tick-in { animation: none !important; }
+  .cell::after, .pwrap .phone, .mc-prem { transition: none; }
+}
+</style>
+</head>
+<body>
+<div id="hold-nav"><span class="tag-test">Test money</span></div>
+
+<main class="demo" id="demo">
+  <section class="bar" id="bar" aria-label="Where the money is"></section>
+
+  <section class="stage" id="stage" data-arrive="none" aria-label="The two phones">
+    <div class="head">
+      <p class="date-chip" id="dateChip"></p>
+      <h1 class="head-title" id="title" tabindex="-1"></h1>
+    </div>
+    <div class="hold" id="hold" aria-label="Held by Verimate"></div>
+    <figure class="pwrap pj" id="pj">
+      <figcaption class="phone-label" id="pjLabel"></figcaption>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status"><span id="timeJ">9:20</span><span class="phone-icons" aria-hidden="true"></span></div>
+        <div class="phone-body" id="scrJ"></div>
+        <div class="phone-home"></div>
+      </div></div>
+    </figure>
+    <figure class="pwrap pl" id="pl">
+      <figcaption class="phone-label" id="plLabel"></figcaption>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status"><span id="timeL">9:20</span><span class="phone-icons" aria-hidden="true"></span></div>
+        <div class="phone-body" id="scrL"></div>
+        <div class="phone-home"></div>
+      </div></div>
+    </figure>
+    <section class="led panel" id="led" aria-label="Verimate ledger"></section>
+    <section class="mcard sheet" id="mcard" hidden aria-label="What this deal earned, and year 1"></section>
+  </section>
+
+  <footer class="controls" id="controls" aria-label="Presenter controls">
+    <div class="ctl-nav">
+      <button class="btn btn-secondary btn-sm" type="button" data-act="back" id="backBtn">Back <kbd>PgUp</kbd></button>
+      <span class="ctl-count" id="count" aria-live="off"></span>
+      <button class="btn btn-ink btn-sm" type="button" data-act="next" id="nextBtn"><span id="nextLabel">Next</span> <kbd>PgDn</kbd></button>
+    </div>
+    <div class="ctl-mid">
+      <ol class="ticks" id="ticks" aria-label="Jump to a beat"></ol>
+      <p class="caption" id="caption" hidden></p>
+    </div>
+    <div class="ctl-keys">
+      <button class="btn btn-quiet btn-sm" type="button" data-act="whatif" aria-pressed="false">What if <kbd>B</kbd></button>
+      <button class="btn btn-quiet btn-sm" type="button" data-act="damage" aria-pressed="false">Damage <kbd>D</kbd></button>
+      <button class="btn btn-quiet btn-sm" type="button" data-act="caption" aria-pressed="false">Caption <kbd>C</kbd></button>
+      <button class="btn btn-quiet btn-sm" type="button" data-act="reset">Reset <kbd>R</kbd></button>
+    </div>
+  </footer>
+</main>
+<div class="sr-only" aria-live="polite" id="live"></div>
+
+<script src="assets/hold-data.js"></script>
+<script src="assets/hold-nav.js"></script>
+<script>
+(function () {
+  'use strict';
+  const H = window.HOLD;
+  if (!H) { document.getElementById('title').textContent = 'The demo data (assets/hold-data.js) did not load.'; return; }
+
+  /* ------------------------------------------------------------------ shorthands */
+  const m = H.money, d = H.date, D = H.deal, DL = D.deadlines, T = H.totals, V = H.vocab;
+  const J = H.people.renter, L = H.people.lister, O = H.people.owner;
+  const WI = H.branches.whatIf, DM = H.branches.damage;
+  const FROZEN = WI.states[0], REFUND = WI.states[1], CLAIM = DM.states[0];
+  const b = (n) => H.beat(n);
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const desk = matchMedia('(min-width: 900px)');
+  const clock = (at) => d(at, 'time').replace(/\s?[AP]M$/, '');
+  const dayAt = (at) => d(at, 'day') + ' at ' + d(at, 'time');
+  const UP = D.upfront.total, FEE = D.listerFee, RATE = Math.round(H.fees.listerRate * 100) + '%';
+  const hero = (c) => H.moneyHTML(c, { hero: true });
+
+  /* ------------------------------------------------------------------ icons (24 viewBox, stroke) */
+  const svg = (p, extra) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>';
+  const I = {
+    cap: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.46V16h2V8.5z"/><path d="M5.5 12.6v3.6c0 1.6 2.9 3.3 6.5 3.3s6.5-1.7 6.5-3.3v-3.6L12 16z"/></svg>',
+    face: svg('<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16 9.6"/>', ' stroke-width="2.2"'),
+    house: svg('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/>'),
+    ret: svg('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
+    check: svg('<path d="m5 12.5 4.5 4.5L19 7.5"/>', ' stroke-width="2.6"'),
+    checkCircle: svg('<circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><path d="m7.8 12.3 2.8 2.8 5.6-5.8" stroke="#fff" stroke-width="2.2"/>'),
+    back: svg('<path d="m15 18-6-6 6-6"/>', ' stroke-width="2.2"'),
+    chev: svg('<path d="m9 18 6-6-6-6"/>', ' stroke-width="2.2"'),
+    share: svg('<path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>')
+  };
+  const MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>';
+  const BADGE = {
+    'Student verified': ['badge-student', I.cap],
+    'Face verified': ['badge-verified', I.face],
+    'Owner approved sublet': ['badge-owner', I.house],
+    'Deposits returned on time': ['badge-owner', I.ret]
+  };
+  const badge = (label, small) => { const k = BADGE[label] || ['', I.face]; return '<li class="badge ' + k[0] + '">' + k[1] + esc(label) + (small ? ' <small>' + esc(small) + '</small>' : '') + '</li>'; };
+
+  /* ------------------------------------------------------------------ small builders */
+  const rc = (label, cents, cls, note, opts) => '<div class="rc-row ' + (cls || '') + '"><span>' + esc(label) + (note ? '<small class="rc-note">' + esc(note) + '</small>' : '') + '</span><span class="amt">' + m(cents, opts) + '</span></div>';
+  const stepLi = (n, title, meta, cls) => '<li class="step ' + (cls || '') + '"><span class="step-dot">' + n + '</span><div class="step-body"><p class="step-title">' + esc(title) + '</p>' + (meta ? '<p class="step-meta">' + esc(meta) + '</p>' : '') + '</div></li>';
+  const dl = (rows) => '<dl class="dl">' + rows.map((r) => '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') + '</dl>';
+  const person = (p, meta) => '<div class="person"><img class="avatar" src="' + p.img + '" alt="' + esc(p.alt) + '"><div><p class="person-name">' + esc(p.name) + '</p><p class="person-meta">' + esc(meta) + '</p></div></div>';
+  const btn = (label, act, cls) => '<button class="btn ' + cls + '" type="button" data-act="' + act + '">' + esc(label) + '</button>';
+  const scr = (main, foot, before) => (before || '') + '<div class="scr"><div class="scr-main">' + main + '</div>' + (foot ? '<div class="scr-foot">' + foot + '</div>' : '') + '</div>';
+  const appBar = (t) => '<div class="app-bar">' + I.back + '<span>' + esc(t) + '</span></div>';
+  const shortLabel = (s) => s.replace(/\s*\(.*\)$/, '');
+
+  /* ------------------------------------------------------------------ steps
+   * Each step is one presenter state. Beats 1-10 follow final-model.md section H; beat 3 has a pay-sheet step first
+   * so the money only moves when Pay is tapped. `from` + `moves` = money that travels when arriving from that step. */
+  const payState = Object.assign({}, b(2), { at: b(3).at, dateLabel: b(3).dateLabel, timeLabel: b(3).timeLabel });
+  const MAIN = ['beat-1', 'beat-2', 'beat-3-pay', 'beat-3', 'beat-4', 'beat-5', 'beat-6', 'beat-7', 'beat-8', 'beat-9', 'beat-10'];
+  const STEPS = {
+    'beat-1': { beat: 1, st: b(1), j: 'lock', l: 'list', idle: 'j' },
+    'beat-2': { beat: 2, st: b(2), j: 'listing', l: 'live', idle: 'l' },
+    'beat-3-pay': { beat: 3, st: payState, j: 'pay', l: 'live', idle: 'l', title: 'Jamie books with Hold', say: b(3).say },
+    'beat-3': { beat: 3, st: b(3), j: 'paid', l: 'booked', from: 'beat-3-pay', moves: [['jamie', 'held', 'held']] },
+    'beat-4': { beat: 4, st: b(4), j: 'tracker', l: 'booked', idle: 'l' },
+    'beat-5': { beat: 5, st: b(5), j: 'movein', l: 'waiting', idle: 'l' },
+    'beat-6': { beat: 6, st: b(6), j: 'released', l: 'receipt', from: 'beat-5', moves: [['held', 'lena', 'rel'], ['held', 'verimate', 'fee']] },
+    'beat-7': { beat: 7, st: b(7), j: 'rent', l: 'rent', from: 'beat-6', moves: [['jamie', 'lena', 'direct']] },
+    'beat-8': { beat: 8, st: b(8), j: 'movedout', l: 'moveout' },
+    'beat-9': { beat: 9, st: b(9), j: 'returned', l: 'returned', from: 'beat-8', moves: [['held', 'jamie', 'ret']] },
+    'beat-10': { beat: 10, st: b(10), j: 'returned', l: 'returned', card: true },
+    'what-if': { branch: 'whatif', st: FROZEN, j: 'frozen', l: 'frozen', say: WI.say },
+    'what-if-refund': { branch: 'whatif', st: REFUND, j: 'refunded', l: 'refunded', title: m(UP) + ' refunded to Jamie', from: 'what-if', moves: [['held', 'jamie', 'ret']], say: WI.say },
+    'damage': { branch: 'damage', st: CLAIM, j: 'claim', l: 'claim', from: 'beat-8', moves: [['held', 'jamie', 'ret']], say: DM.say }
+  };
+  const SLOTS = ['jamie', 'held', 'lena', 'verimate'];
+  const slotVal = (st, k) => k === 'jamie' ? st.renterBack - st.renterPaid : k === 'held' ? st.held : k === 'lena' ? st.listerReceived : st.verimateEarned;
+  Object.keys(STEPS).forEach((id) => {
+    const S = STEPS[id];
+    S.id = id;
+    S.title = S.title || S.st.title;
+    S.say = S.say || S.st.say;
+    if (S.moves) {   // amount of each move = change of the receiving slot, straight from the data
+      const P = STEPS[S.from].st;
+      S.moves = S.moves.map((x, i) => ({ i, from: x[0], to: x[1], kind: x[2], cents: Math.abs(slotVal(S.st, x[1]) - slotVal(P, x[1])) }));
+    }
+    const k = MAIN.indexOf(id);
+    if (k >= 0) { S.prev = MAIN[k - 1] || null; S.next = MAIN[k + 1] || null; }
+  });
+  STEPS['what-if'].next = 'what-if-refund';
+  STEPS['what-if-refund'].prev = 'what-if';
+
+  /* ------------------------------------------------------------------ the money bar */
+  const NOTE = {
+    jamie: (S) => {
+      const st = S.st;
+      if (!st.renterPaid) return 'Nothing paid yet';
+      if (S.id === 'what-if-refund') return 'All of it back. Fees ' + m(0);
+      if (S.id === 'damage') return m(st.renterBack) + ' of the deposit back';
+      if (st.renterBack) return 'Rent only. Fees ' + m(0);
+      return st.renterPaid === UP ? 'Paid first month and deposit' : 'Paid ' + m(st.renterPaid) + ' in all';
+    },
+    held: (S) => {
+      const st = S.st;
+      if (S.id === 'what-if') return 'Frozen until Verimate decides';
+      if (S.id === 'damage') return 'Broken blind, under review';
+      if (st.held === UP) return 'First month and deposit';
+      if (st.held === D.deposit) return S.id === 'beat-8' ? 'Deposit, Day 0 of 14' : 'Deposit';
+      return st.renterPaid ? 'Nothing held' : 'Nothing held yet';
+    },
+    lena: (S) => {
+      const st = S.st;
+      if (S.id === 'beat-1') return 'Listing is free';
+      if (S.id === 'beat-2' || S.id === 'beat-3-pay') return 'No booking yet';
+      if (S.id === 'beat-3' || S.id === 'beat-4') return "Can't withdraw held money";
+      if (S.id === 'beat-5') return 'Paid after move-in';
+      if (S.id === 'what-if') return 'Paused, nothing paid';
+      if (S.id === 'what-if-refund') return 'No move-in, no fee';
+      if (st.listerReceived === D.listerFirstPayout) return 'First month, minus the ' + m(FEE) + ' fee';
+      return 'All rent, fee paid once';
+    },
+    verimate: (S) => {
+      const st = S.st;
+      if (S.id === 'beat-10') return 'Costs ' + m(st.verimateCosts) + ', kept ' + m(st.verimateNet);
+      if (S.id === 'what-if-refund') return 'Costs ' + m(st.verimateCosts) + ', no fee';
+      return 'Costs so far ' + m(st.verimateCosts);
+    }
+  };
+  const bar = $('#bar');
+  bar.innerHTML =
+    '<div class="cell" data-slot="jamie" role="group" aria-label="Jamie, renter"><div class="cell-label"><img class="avatar" src="' + J.img + '" alt=""><strong>' + esc(J.name) + '</strong><span class="role">' + esc(J.role) + '</span></div><div class="cell-row"><span class="cell-amt"></span><span class="lane"></span></div><div class="cell-note"></div></div>' +
+    '<div class="cell" data-slot="held" role="group" aria-label="' + esc(V.states.held) + '"><div class="cell-label hold-label"><span class="hold-dot"></span>' + esc(V.states.held) + '<span class="chip chip-frozen" hidden>' + esc(V.states.frozen) + '</span></div><div class="cell-row"><span class="cell-amt"></span><span class="lane"></span></div><div class="cell-note"></div></div>' +
+    '<div class="cell" data-slot="lena" role="group" aria-label="Lena, lister"><div class="cell-label"><img class="avatar" src="' + L.img + '" alt=""><strong>' + esc(L.name) + '</strong><span class="role">' + esc(L.role) + '</span></div><div class="cell-row"><span class="cell-amt"></span><span class="lane"></span></div><div class="cell-note"></div></div>' +
+    '<div class="cell" data-slot="verimate" role="group" aria-label="Verimate earned"><div class="cell-label"><span class="vm-mark">' + MARK + '</span><strong>Verimate earned</strong></div><div class="cell-row"><span class="cell-amt"></span><span class="lane"></span></div><div class="cell-note"></div></div>';
+  const CELL = {};
+  SLOTS.forEach((k) => { const c = bar.querySelector('[data-slot="' + k + '"]'); CELL[k] = { el: c, amt: $('.cell-amt', c), lane: $('.lane', c), note: $('.cell-note', c) }; });
+
+  function setAmt(el, text, fade) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    if (fade && !reduce.matches) { el.classList.remove('amt-swap'); void el.offsetWidth; el.classList.add('amt-swap'); }
+  }
+  const pill = (mv, sign) => '<span class="mv mv-' + mv.kind + '" data-i="' + mv.i + '">' + (sign ? '+' : '') + m(mv.cents) + '</span>';
+
+  function renderBar(S, o) {
+    const st = S.st;
+    SLOTS.forEach((k) => {
+      const src = o.holdSlots && o.holdSlots.indexOf(k) >= 0 ? o.fromSt : st;
+      setAmt(CELL[k].amt, m(slotVal(src, k)), o.fade);
+      CELL[k].note.textContent = NOTE[k](S);
+      CELL[k].lane.innerHTML = '';
+    });
+    (S.moves || []).forEach((mv) => {
+      CELL[mv.to].lane.insertAdjacentHTML('beforeend', pill(mv, true));
+      const p = CELL[mv.to].lane.lastElementChild;
+      p.setAttribute('aria-label', '+' + m(mv.cents) + ' from ' + (mv.from === 'held' ? V.states.held : mv.from === 'jamie' ? J.first : L.first));
+      if (o.names) p.style.viewTransitionName = 'mv-' + mv.i;
+    });
+    const held = CELL.held.el;
+    held.classList.toggle('has-money', st.held > 0 && S.id !== 'what-if');
+    held.classList.toggle('is-frozen', S.id === 'what-if');
+    $('.chip-frozen', held).hidden = S.id !== 'what-if';
+  }
+
+  /* ------------------------------------------------------------------ center column: date, what happened, what's held */
+  const item = (label, cents, text, state) => {
+    const chip = { held: ['chip-held', V.states.held], released: ['chip-released', V.states.released], returned: ['chip-returned', V.states.returned], frozen: ['chip-frozen', V.states.frozen] }[state];
+    const cls = state === 'released' || state === 'returned' ? ' is-released' : state === 'frozen' ? ' is-frozen' : '';
+    return '<div class="held-item' + cls + '"><div class="hi-top"><span class="hi-label">' + esc(label) + '</span><span class="chip ' + chip[0] + '">' + esc(chip[1]) + '</span></div><p class="hi-amt amt">' + m(cents) + '</p><p class="hi-text">' + esc(text) + '</p></div>';
+  };
+  const empty = (t) => '<div class="slot-empty">' + esc(t) + '</div>';
+  const note = (t) => '<p class="hold-note">' + esc(t) + '</p>';
+  const afterMoveOut = 'Comes back to Jamie after move-out.';
+  const HOLDC = {
+    'beat-1': () => empty('Nothing held yet.') +
+      '<div class="owner"><span class="owner-ic">' + I.house + '</span><div><p><strong>' + esc(O.role) + '</strong> ' + esc(O.name) + '</p><p class="muted">' + esc(O.note) + '</p></div></div>',
+    'beat-2': () => empty('Nothing held yet.'),
+    'beat-3-pay': () => empty('Nothing held yet. Jamie\'s ' + m(UP) + ' comes here, not to Lena.'),
+    'beat-3': () => item('First month', D.rent, 'Goes to Lena after Jamie taps All good at move-in.', 'held') + item('Deposit', D.deposit, afterMoveOut, 'held') +
+      note('Bank payment settles ' + d(DL.achSettles, 'day') + '. Nothing is released before then.'),
+    'beat-4': () => item('First month', D.rent, 'Goes to Lena after Jamie taps All good at move-in.', 'held') + item('Deposit', D.deposit, afterMoveOut, 'held') +
+      note('It sits at Stripe, apart from Verimate\'s own money.'),
+    'beat-5': () => item('First month', D.rent, 'Goes to Lena when Jamie taps All good, or on its own ' + dayAt(DL.autoRelease) + '.', 'held') + item('Deposit', D.deposit, afterMoveOut, 'held'),
+    'beat-6': () => item('First month', D.rent, 'Released ' + d(DL.moveInConfirmed, 'dayStamp') + '. ' + m(D.listerFirstPayout) + ' to Lena, ' + m(FEE) + ' lister fee.', 'released') + item('Deposit', D.deposit, afterMoveOut, 'held'),
+    'beat-7': () => item('Deposit', D.deposit, afterMoveOut, 'held') +
+      note('February to May rent, ' + m(D.directRent) + ', goes straight to Lena. Verimate never holds it and charges ' + m(0) + '.'),
+    'beat-8': () => item('Deposit', D.deposit, 'Day 0 of 14. Lena can return it until ' + d(DL.returnBy, 'day') + '. If she does nothing, it comes back on ' + d(DL.autoReturn, 'day') + '. New York deadline ' + d(DL.nyDeadline, 'day') + '.', 'held'),
+    'beat-9': () => item('Deposit', D.deposit, 'Returned to Jamie ' + d(DL.returned, 'dayStamp') + ', 1 day after move-out.', 'returned') + empty('The hold is empty.'),
+    'beat-10': () => HOLDC['beat-9'](),
+    'what-if': () => item('First month and deposit', UP, 'Lena answers by ' + d(FROZEN.deadlines.listerAnswer, 'dayStamp') + '. Verimate decides by ' + d(FROZEN.deadlines.decision, 'day') + '.', 'frozen') +
+      '<div class="decide"><p class="decide-who">Verimate decides</p><p class="decide-note">Full refund, partial refund, or release. ' + esc(WI.reason) + ' is one of the 4 reasons, and nothing was paid out yet.</p>' +
+      btn(REFUND.button, 'next', 'btn-primary btn-block') + '</div>',
+    'what-if-refund': () => item('First month and deposit', UP, 'Refunded to Jamie ' + d(REFUND.at, 'dayStamp') + '. No move-in, no fee.', 'returned') + empty('The hold is empty.'),
+    'damage': () => item(DM.claim.label, DM.claim.cents, 'Under review. Jamie can accept or dispute until ' + d(CLAIM.deadlines.renterReply, 'dayStamp') + '. Decided by ' + d(CLAIM.deadlines.decidedBy, 'day') + '.', 'held') +
+      item('Rest of the deposit', CLAIM.renterBack, 'Returned to Jamie the moment Lena filed.', 'returned')
+  };
+
+  /* ------------------------------------------------------------------ Jamie's phone */
+  const J_SCR = {
+    lock: (S) => '<div class="lock"><p class="lock-date">' + esc(d(S.st.at, 'long').replace(/, \d{4}$/, '')) + '</p><p class="lock-time">' + esc(clock(S.st.at)) + '</p></div>',
+    listing: () => scr(
+      '<img class="scr-photo" src="' + D.img + '" alt="' + esc(D.imgAlt) + '">' +
+      '<div><h2 class="scr-title">' + esc(D.address) + '</h2><p class="scr-sub">' + esc(D.unit) + ', ' + D.walkMinutes + ' min walk to campus</p></div>' +
+      '<div class="price-row"><span class="price">' + m(D.rent, { cents: false }) + '<small>/mo</small></span><span class="scr-sub">' + esc(D.datesLabel) + '</span></div>' +
+      '<div class="hr"></div>' + person(L, L.year + ', ' + L.school + '. ' + L.note) +
+      '<ul class="badges">' + L.badges.map((x) => badge(x, x === L.record.before.label ? L.record.before.detail : '')).join('') + '</ul>',
+      btn(V.buttons.book, 'next', 'btn-primary btn-lg btn-block') + '<p class="foot-note">Rent waits until you move in.</p>'),
+    pay: (S) => '<div class="p-under" inert>' + J_SCR.listing(S) + '</div><div class="p-scrim"></div>' +
+      '<div class="p-sheet slide-up" role="dialog" aria-label="Confirm and pay"><div class="grab"></div>' +
+      '<h2 class="scr-title">Confirm and pay</h2>' +
+      '<div class="mini"><img src="' + D.img + '" alt=""><div><strong>' + esc(D.address) + '</strong><span>' + esc(D.datesLabel) + '</span></div></div>' +
+      '<div class="receipt">' + rc('First month', D.upfront.firstMonth) + rc('Deposit', D.upfront.deposit, '', 'Held by Verimate until move-out') +
+      rc('Verimate fee', D.upfront.verimateFee, 'rc-zero') + rc('Total', D.upfront.total, 'rc-total') + '</div>' +
+      '<p class="opt-label">Pay with</p><div class="opts" role="radiogroup" aria-label="Pay with">' +
+      '<div class="opt on" role="radio" aria-checked="true"><span class="radio"></span><span>Bank account<small>Free</small></span><span class="amt">' + m(0) + '</span></div>' +
+      '<div class="opt" role="radio" aria-checked="false"><span class="radio"></span><span>Card<small>Card cost, shown before you pay</small></span><span class="amt">' + m(D.cardCost, { sign: true }) + '</span></div></div>' +
+      btn(V.buttons.pay, 'next', 'btn-primary btn-lg btn-block') + '</div>',
+    paid: () => scr(appBar('Your booking') +
+      '<span class="chip chip-held chip-lg">' + esc(V.states.held) + '</span>' +
+      '<div>' + hero(UP) + '<p class="scr-sub" style="margin-top:4px">Paid by bank, ' + esc(d(DL.booked, 'dayStamp')) + '</p></div>' +
+      '<div class="receipt">' + rc('First month', D.rent, '', 'Goes to Lena after you tap All good') + rc('Deposit', D.deposit, '', 'Comes back after you move out') + rc('Verimate fee', 0, 'rc-zero') + '</div>' +
+      '<button class="row-btn" type="button" data-act="next"><span><strong>Where is my money?</strong><small>Who holds it, and when it moves</small></span>' + I.chev + '</button>',
+      '<p class="receipt-ref">Ref ' + esc(D.ref) + '</p>'),
+    tracker: (S) => scr(appBar('Your booking') +
+      '<h2 class="scr-title">Where is my money?</h2>' +
+      '<div>' + hero(UP) + '<p class="scr-text" style="margin-top:6px">Held at Stripe for Verimate</p></div>' +
+      '<ul class="checks">' + S.st.jamie.slice(1).map((t) => '<li>' + I.checkCircle + '<span>' + esc(t) + '</span></li>').join('') + '</ul>' +
+      '<div class="hr"></div>' +
+      '<ol class="steps">' + stepLi(1, S.st.tracker[0], d(DL.booked, 'stamp'), 'is-done') + stepLi(2, S.st.tracker[1], 'Until you move in, ' + d(DL.moveIn, 'day'), 'is-now') +
+      stepLi(3, S.st.tracker[2], 'Rent goes to Lena after you tap All good') + '</ol>',
+      btn('Share with a parent', 'none', 'btn-secondary btn-block')),
+    movein: (S) => scr(
+      '<div><h2 class="scr-title">Move-in check</h2><p class="scr-sub">' + esc(D.address) + ', ' + esc(d(DL.moveIn, 'day')) + '</p></div>' +
+      '<div class="photos">' + ['img/u-room-sofa.jpg', 'img/u-living.jpg', 'img/u-kitchen.jpg'].map((src, i) =>
+        '<figure><img src="' + src + '" alt="' + ['Bedroom', 'Living room', 'Kitchen'][i] + ' photo, checked"><span class="ok">' + I.check + '</span></figure>').join('') + '</div>' +
+      '<p class="scr-text"><strong>' + esc(S.st.jamie[0]) + '.</strong> Signed by you and Lena as the move-in condition record.</p>' +
+      '<div class="timer"><span class="timer-num">' + esc(S.st.timer.display) + '</span><span class="timer-text">' + esc(S.st.jamie[2]) + '</span>' +
+      '<span class="scr-sub">Rent goes to Lena ' + esc(dayAt(S.st.timer.end)) + '</span></div>',
+      btn(V.buttons.allGood, 'next', 'btn-primary btn-lg btn-block') + btn(V.buttons.report, 'whatif', 'btn-secondary btn-block')),
+    released: () => scr(appBar('Your booking') +
+      '<span class="chip chip-released chip-lg">Rent released</span>' +
+      '<div><h2 class="scr-title">Rent released to Lena</h2><p class="scr-sub" style="margin-top:4px">You tapped All good, ' + esc(d(DL.moveInConfirmed, 'dayStamp')) + '</p></div>' +
+      '<ol class="steps">' + H.tracker.map((t, i) => stepLi(i + 1, t.label, i < 4 ? d(t.at, 'stamp') : i === 4 ? 'Lease ends ' + d(D.end, 'day') : '', i < 4 ? 'is-done' : '')).join('') + '</ol>' +
+      '<div class="held-item"><div class="hi-top"><span class="hi-label">Deposit</span><span class="amt" style="font-weight:600">' + m(D.deposit) + '</span></div><p class="scr-sub">Still held by Verimate. Comes back after you move out.</p></div>'),
+    rent: () => scr(
+      '<div><h2 class="scr-title">Rent</h2><p class="scr-sub" style="margin-top:4px">Paid straight to Lena. Verimate isn\'t in the middle and charges ' + m(0) + '.</p></div>' +
+      '<ol class="rows">' + D.schedule.filter((x) => x.via === 'direct').map((x) => '<li><time>' + esc(d(x.due, 'short')) + '</time><span>' + esc(shortLabel(x.label)) + '</span><span class="amt">' + m(x.cents) + '</span></li>').join('') +
+      '<li class="rows-total"><span>Paid to Lena</span><span class="amt">' + m(D.directRent) + '</span></li></ol>' +
+      '<div class="held-item"><div class="hi-top"><span class="hi-label">Deposit</span><span class="amt" style="font-weight:600">' + m(D.deposit) + '</span></div><p class="scr-sub">Held by Verimate. Comes back after you move out.</p></div>',
+      btn(V.buttons.movedOut, 'next', 'btn-primary btn-lg btn-block') + '<p class="foot-note">Lease ends ' + esc(d(D.end, 'day')) + '</p>'),
+    movedout: (S) => scr(appBar('Your deposit') +
+      '<span class="chip chip-held chip-lg">' + esc(V.states.held) + '</span>' +
+      '<div><p class="day-big">Day 0 of 14</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
+      '<p class="scr-sub">You moved out ' + esc(d(DL.movedOut, 'dayStamp')) + '. Photos attached.</p>' +
+      '<div class="upcoming"><div class="upcoming-top"><span>Deposit</span><span class="amt">' + m(D.deposit) + '</span></div></div>' +
+      dl([['Lena can return it until', d(DL.returnBy, 'day')], ['Comes back on its own', d(DL.autoReturn, 'day')], ['New York deadline', d(DL.nyDeadline, 'day')]])),
+    returned: (S) => scr(appBar('Your deposit') +
+      '<span class="chip chip-returned chip-lg">' + esc(V.results.returnDeposit) + '</span>' +
+      '<div>' + hero(D.deposit) + '<p class="scr-text" style="margin-top:6px"><strong>' + esc(S.st.jamie ? S.st.jamie[2] : b(9).jamie[2]) + '</strong></p>' +
+      '<p class="scr-sub">Arrives in your bank ' + esc(d(DL.jamieBankArrives[0], 'day')) + ' to ' + esc(d(DL.jamieBankArrives[1], 'day')) + '</p></div>' +
+      '<div class="receipt">' + rc('Rent you paid', T.renterNet) + rc('Verimate fees', T.renterFees, 'rc-zero') + rc('Deposit back', T.renterGotBack, 'rc-total') + '</div>',
+      '<button class="btn btn-secondary btn-block" type="button" data-act="none">' + I.share.replace('<svg', '<svg width="18" height="18"') + 'Share receipt</button>'),
+    frozen: (S) => scr(appBar('Move-in check') +
+      '<span class="chip chip-frozen chip-lg">' + esc(V.states.frozen) + '</span>' +
+      '<h2 class="scr-title">Problem reported</h2>' +
+      '<ul class="reasons">' + WI.reasons.map((r) => '<li class="' + (r === WI.reason ? 'on' : '') + '"><span class="radio"></span>' + esc(r) + '</li>').join('') + '</ul>' +
+      '<div class="upcoming"><div class="upcoming-top"><span>' + esc(S.st.jamie[0].replace(/^\S+\s/, '')) + '</span><span class="amt">' + m(S.st.held) + '</span></div></div>' +
+      dl([['Lena answers by', d(S.st.deadlines.listerAnswer, 'stamp')], ['Decision by', d(S.st.deadlines.decision, 'day')]])),
+    refunded: (S) => scr(appBar('Your booking') +
+      '<span class="chip chip-returned chip-lg">Refunded</span>' +
+      '<div>' + hero(S.st.renterBack) + '<p class="scr-text" style="margin-top:6px"><strong>Returned to you.</strong> ' + esc(S.st.jamie[1]) + '.</p>' +
+      '<p class="scr-sub">' + esc(d(S.st.at, 'dayStamp')) + '</p></div>' +
+      '<div class="receipt">' + rc('First month', D.rent) + rc('Deposit', D.deposit) + rc('Verimate fee', 0, 'rc-zero') + rc('Refunded', S.st.renterBack, 'rc-total') + '</div>'),
+    claim: (S) => scr(appBar('Your deposit') +
+      '<span class="chip chip-returned chip-lg">Returned now</span>' +
+      '<div>' + hero(S.st.renterBack) + '<p class="scr-text" style="margin-top:6px">Back to you the moment Lena filed her claim.</p></div>' +
+      '<div class="held-item"><div class="hi-top"><span class="hi-label">' + esc(DM.claim.label) + '</span><span class="amt" style="font-weight:600">' + m(-DM.claim.cents) + '</span></div>' +
+      '<p class="scr-sub">' + esc(DM.claim.evidence.join(' and ')) + ' attached. Held by Verimate until decided, by ' + esc(d(S.st.deadlines.decidedBy, 'day')) + '.</p></div>' +
+      '<p class="scr-sub">Accept or dispute by ' + esc(d(S.st.deadlines.renterReply, 'dayStamp')) + '. Saying nothing means you accept.</p>',
+      btn('Dispute ' + m(DM.claim.cents), 'none', 'btn-secondary btn-block'))
+  };
+
+  /* ------------------------------------------------------------------ Lena's phone */
+  const L_SCR = {
+    list: (S) => scr(
+      '<h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2>' +
+      '<div class="mini"><img src="' + D.img + '" alt="' + esc(D.imgAlt) + '"><div><strong>' + esc(D.unit) + '</strong><span>' + m(D.rent, { cents: false }) + '/mo, ' + esc(D.datesLabel) + '</span></div></div>' +
+      '<ul class="checks">' +
+      '<li>' + I.checkCircle + '<span>Student, ID and face check</span></li>' +
+      '<li>' + I.checkCircle + '<span>Your lease uploaded</span></li>' +
+      '<li>' + I.checkCircle + '<span>Owner\'s written OK<small>' + esc(O.name) + '</small></span></li></ul>' +
+      '<div class="box"><p class="box-title">' + esc(S.st.lena[1]) + '</p><div class="receipt">' +
+      rc('First month\'s rent', D.rent) + rc('Lister fee, ' + RATE, -FEE, 'rc-sub', 'Only after your renter moves in') +
+      rc('You\'ll receive', D.listerFirstPayout, 'rc-total', 'of your first ' + m(D.rent)) + '</div></div>',
+      btn('Publish', 'next', 'btn-primary btn-lg btn-block')),
+    live: () => scr(appBar('Your listing') +
+      '<span class="chip chip-quiet chip-lg">Live</span>' +
+      '<div><h2 class="scr-title">734 Comstock is live</h2><p class="scr-sub" style="margin-top:4px">Listed ' + esc(d(DL.listed, 'dayStamp')) + '</p></div>' +
+      '<ul class="badges">' + L.badges.slice(0, 3).map((x) => badge(x)).join('') + '</ul>' +
+      '<div class="box"><p class="scr-text">Listing is free. You pay ' + RATE + ' of the first month, ' + m(FEE) + ', only after your renter moves in.</p></div>' +
+      '<p class="scr-sub">No bookings yet.</p>'),
+    booked: (S) => scr(appBar('Your listing') +
+      '<span class="chip chip-quiet chip-lg">' + esc(S.st.id === 'beat-3' ? b(3).lena[0] : 'Booked') + '</span>' +
+      '<h2 class="scr-title">Jamie booked your room</h2>' +
+      person(J, J.year + ', ' + J.school) +
+      '<div class="held-item"><div class="hi-top"><span class="hi-label">' + m(UP) + ' held</span><span class="chip chip-held">' + esc(V.states.held) + '</span></div><p class="scr-sub">' + esc(b(3).lena[2]) + '. First month and deposit.</p></div>' +
+      '<div class="upcoming"><div class="upcoming-top"><span>First payout</span><span class="amt amt-held">' + m(D.listerFirstPayout) + '</span></div><p class="scr-sub">After Jamie moves in, ' + esc(d(DL.moveIn, 'day')) + '</p></div>' +
+      '<div class="slot-empty"><strong>Deposit ' + m(D.deposit) + '</strong>Held by Verimate, not you.</div>'),
+    waiting: (S) => scr(appBar('Your listing') +
+      '<span class="chip chip-quiet chip-lg">Move-in day</span>' +
+      '<h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2>' +
+      '<div class="upcoming"><div class="upcoming-top"><span>First payout</span><span class="amt amt-held">' + m(D.listerFirstPayout) + '</span></div><p class="scr-sub">Releases on its own ' + esc(dayAt(DL.autoRelease)) + '</p></div>' +
+      '<div class="slot-empty"><strong>Deposit ' + m(D.deposit) + '</strong>Held by Verimate, not you.</div>'),
+    receipt: (S) => '<div class="p-under" inert>' + L_SCR.waiting(STEPS['beat-5']) + '</div><div class="p-scrim"></div>' +
+      '<div class="p-sheet slide-up" role="dialog" aria-label="Rent released"><div class="grab"></div>' +
+      '<span class="chip chip-released chip-lg" style="justify-self:start">Rent released</span>' +
+      '<div><p class="scr-sub">You receive</p>' + hero(D.listerFirstPayout) + '</div>' +
+      '<div class="receipt">' + S.st.receipt.map((x) => rc(x.label, x.cents, x.total ? 'rc-total' : x.cents < 0 ? 'rc-sub' : '')).join('') + '</div>' +
+      '<p class="scr-text">In your bank ' + esc(d(DL.lenaBankArrives, 'day')) + '</p>' +
+      '<p class="receipt-ref">Ref ' + esc(D.ref) + ', ' + esc(d(DL.moveInConfirmed, 'stamp')) + '</p></div>',
+    rent: () => scr(
+      '<div><h2 class="scr-title">Rent received</h2>' + hero(T.listerReceived).replace('amt-hero', 'amt-hero" style="--amt-size:40px') + '</div>' +
+      '<ol class="rows">' + D.schedule.map((x, i) => '<li class="' + (i ? 'tick-in' : '') + '" style="animation-delay:' + (i * 0.11).toFixed(2) + 's"><time>' + esc(d(x.due, 'short')) + '</time><span>' + esc(shortLabel(x.label)) +
+        '<small>Verimate fee ' + m(-x.fee) + '</small></span><span class="amt">' + m(x.cents - x.fee) + '</span></li>').join('') + '</ol>' +
+      '<p class="scr-sub">One fee, on the first month. Months 2 to 5 come straight from Jamie.</p>'),
+    moveout: () => scr(appBar('Your listing') +
+      '<span class="chip chip-needs chip-lg">' + esc(V.states.needs) + '</span>' +
+      '<div><h2 class="scr-title">Jamie moved out</h2><p class="scr-sub" style="margin-top:4px">' + esc(d(DL.movedOut, 'dayStamp')) + '</p></div>' +
+      '<div><p class="day-big">Day 0 of 14</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
+      dl([['Return by', d(DL.returnBy, 'day')], ['Auto-returns', d(DL.autoReturn, 'day')], ['NY deadline', d(DL.nyDeadline, 'day')]]) +
+      '<div class="slot-empty"><strong>Deposit ' + m(D.deposit) + '</strong>Held by Verimate, not you.</div>',
+      btn(V.buttons.returnDeposit, 'next', 'btn-primary btn-lg btn-block') + btn(V.buttons.claim, 'damage', 'btn-quiet')),
+    returned: () => scr(appBar('Your listing') +
+      '<span class="chip chip-returned chip-lg">' + esc(V.results.returnDeposit) + '</span>' +
+      '<div><h2 class="scr-title">Deposit returned</h2><p class="scr-sub" style="margin-top:4px">' + m(D.deposit) + ' to Jamie, ' + esc(d(DL.returned, 'dayStamp')) + '</p></div>' +
+      '<div class="record"><span class="record-ic">' + I.ret + '</span><div><strong>' + esc(L.record.after.label) + '</strong><span>' + esc(L.record.after.detail) + '. Shown on your profile.</span></div></div>' +
+      '<div class="receipt">' + rc('Rent received', T.listerReceived) + rc('Lister fee, paid once', T.listerPaid, '', T.listerPaidPctOfLease + ' of your lease') + '</div>'),
+    frozen: (S) => scr(appBar('Your listing') +
+      '<span class="chip chip-frozen chip-lg">' + esc(V.states.frozen) + '</span>' +
+      '<div><h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2><p class="scr-sub" style="margin-top:4px">Jamie reported it ' + esc(d(S.st.at, 'dayStamp')) + ', with photos.</p></div>' +
+      dl([['Answer by', d(S.st.deadlines.listerAnswer, 'stamp')], ['Verimate decides by', d(S.st.deadlines.decision, 'day')]]) +
+      '<div class="upcoming"><div class="upcoming-top"><span>First payout</span><span class="amt amt-strike">' + m(D.listerFirstPayout) + '</span></div><p class="scr-sub">Paused until Verimate decides</p></div>'),
+    refunded: (S) => scr(appBar('Your listing') +
+      '<span class="chip chip-quiet chip-lg">Cancelled</span>' +
+      '<div><h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2><p class="scr-sub" style="margin-top:4px">' + esc(d(S.st.at, 'dayStamp')) + '</p></div>' +
+      '<div class="receipt">' + rc('Lister fee', 0, 'rc-zero') + rc('You paid', 0, 'rc-total') + '</div>' +
+      '<p class="scr-text">No move-in, no fee.</p>'),
+    claim: (S) => scr(appBar('Your listing') +
+      '<span class="chip chip-quiet chip-lg">' + esc(V.results.claim) + '</span>' +
+      '<h2 class="scr-title">Claim deductions</h2>' +
+      '<div class="box claim-line"><div class="claim-top"><span>' + esc(DM.claim.label) + '</span><span class="amt">' + m(-DM.claim.cents) + '</span></div>' +
+      '<p class="scr-sub">' + esc(DM.claim.reason) + '</p><div class="ev">' + DM.claim.evidence.map((x) => '<span class="chip chip-quiet">' + esc(x) + '</span>').join('') + '</div></div>' +
+      '<div class="receipt">' + rc('Deposit', D.deposit) + rc(DM.claim.label, -DM.claim.cents, 'rc-sub') + rc('Returned to Jamie now', S.st.renterBack, 'rc-total') + '</div>' +
+      '<p class="scr-sub">' + esc(S.st.lena[2]) + '. Decided by ' + esc(d(S.st.deadlines.decidedBy, 'day')) + '.</p>')
+  };
+
+  /* ------------------------------------------------------------------ Verimate ledger */
+  function costGroups(rows) {
+    const g = [{ label: 'ID and face checks', cents: 0, n: 0 }, { label: 'Stripe', cents: 0, parts: [] }, { label: 'Risk reserve', cents: 0 }];
+    rows.filter((r) => r.kind === 'cost').forEach((r) => {
+      if (r.id.indexOf('id-') === 0) { g[0].cents += r.cents; g[0].n++; }
+      else if (r.id === 'reserve') g[2].cents += r.cents;
+      else { g[1].cents += r.cents; g[1].parts.push(r.id === 'ach-in' ? 'bank in' : r.id.indexOf('pay') === 0 ? 'payout' : 'account'); }
+    });
+    g[0].note = g[0].n === 2 ? 'Lena and Jamie' : 'Lena';
+    const cnt = (w) => g[1].parts.filter((p) => p === w).length;
+    g[1].note = ['bank in', 'payout', 'account'].filter(cnt).map((w) => cnt(w) > 1 ? w + 's' : w).join(', ');
+    g[1].note = g[1].note.charAt(0).toUpperCase() + g[1].note.slice(1);
+    return g.filter((x) => x.cents !== 0);
+  }
+  function ledgerHTML(S, prevSt, fresh) {
+    const st = S.st, rows = st.ledgerRows;
+    const old = new Set(prevSt ? prevSt.ledgerRows.map((r) => r.id) : []);
+    const isNew = (r) => fresh && prevSt && !old.has(r.id);
+    const fees = rows.filter((r) => r.kind !== 'cost');
+    const groups = costGroups(rows), oldGroups = prevSt ? costGroups(prevSt.ledgerRows) : [];
+    const gNew = (g) => fresh && prevSt && !oldGroups.some((x) => x.label === g.label && x.cents === g.cents);
+    return '<div class="led-head"><h2>Verimate ledger</h2><span class="receipt-ref">' + esc(D.ref) + '</span></div>' +
+      '<ol class="ledger">' + (fees.length ? fees.map((r) =>
+        '<li class="ledger-row ' + (r.kind === 'fee' ? 'is-fee' : 'is-zero') + (isNew(r) ? ' is-new' : '') + '"><time class="ledger-when" datetime="' + r.at + '">' + esc(d(r.at, 'short')) + '</time>' +
+        '<span class="ledger-what">' + esc(r.label) + (r.note ? '<small>' + esc(r.note) + '</small>' : '') + '</span><span class="ledger-amt amt">' + m(r.cents) + '</span></li>').join('')
+        : '<li class="ledger-row led-none">No fees yet. Lena pays only after move-in.</li>') + '</ol>' +
+      '<p class="led-sub">Costs</p><ol class="ledger led-costs">' + groups.map((g) =>
+        '<li class="ledger-row is-cost' + (gNew(g) ? ' is-new' : '') + '"><span class="ledger-what">' + esc(g.label) + '<small>' + esc(g.note || 'ACH returns, disputes') + '</small></span><span class="ledger-amt amt">' + m(g.cents) + '</span></li>').join('') + '</ol>' +
+      '<div class="ledger-total"><span>' + (S.id === 'beat-10' ? 'Kept on this deal' : 'Kept so far') + '</span><span class="amt">' + m(st.verimateNet) + '</span></div>';
+  }
+
+  /* ------------------------------------------------------------------ beat 10: model card */
+  const B10 = b(10), RUN = B10.run, Y1 = H.year1;
+  const CARD_NOTE = {
+    "Jamie's fees": 'Rent only, ' + m(T.renterNet),
+    'Verimate costs': 'Stripe ' + m(T.stripe) + ', ID checks ' + m(T.idChecks) + ', reserve ' + m(T.riskReserve),
+    'Verimate kept': T.verimateMargin + ' of the fee'
+  };
+  const mcard = $('#mcard');
+  mcard.innerHTML =
+    '<div class="mc-deal"><h2 class="mc-h">This deal, ' + esc(D.address) + '</h2><div class="receipt">' +
+    B10.card.map((x) => rc(x.label, x.cents, x.total ? 'rc-total' : x.cents === 0 ? 'rc-zero' : '', x.note || CARD_NOTE[x.label])).join('') + '</div></div>' +
+    '<div class="mc-year"><div class="mc-yhead"><h2 class="mc-h">' + esc(RUN.label) + '</h2><span>' + esc(Y1.period) + '</span></div>' +
+    '<div class="mc-grid"><div><p class="mc-deals"><b id="mcDeals">' + RUN.toDeals + '</b> deals</p><span class="amt amt-hero mc-total" id="mcTotal"></span><p class="mc-total-label">Revenue, year 1</p></div>' +
+    '<div class="receipt mc-lines"><div class="rc-row"><span id="mcFeeLabel"></span><span class="amt" id="mcFees"></span></div>' +
+    '<div class="rc-row mc-prem" id="mcPrem"><span>' + esc(Y1.lines[1].label) + '</span><span class="amt">' + m(RUN.premium, { cents: false }) + '</span></div>' +
+    '<div class="rc-row rc-sub"><span>Break-even before salaries</span><span class="amt">about ' + Y1.breakEvenWithPremium + ' deals</span></div></div></div>' +
+    '<p class="mc-foot">' + esc(Y1.assumptions[0].value.replace(/^280 = /, RUN.toDeals + ' deals is ')) + '. Same fee at ' + H.threeYear[1].campuses + ' campuses in year 2: ' +
+    m(H.threeYear[1].revenue, { k: true }) + '. At ' + H.threeYear[2].campuses + ' in year 3: ' + m(H.threeYear[2].revenue, { k: true }) + '.</p></div>';
+  const mc = { deals: $('#mcDeals'), total: $('#mcTotal'), feeLabel: $('#mcFeeLabel'), fees: $('#mcFees'), prem: $('#mcPrem') };
+  let countRAF = 0;
+  function setCount(n, prem, showPrem) {
+    const fees = n * RUN.perDeal;
+    mc.deals.textContent = n.toLocaleString('en-US');
+    mc.feeLabel.textContent = 'Lister fees, ' + n.toLocaleString('en-US') + ' × ' + m(RUN.perDeal, { cents: false });
+    mc.fees.textContent = m(fees, { cents: false });
+    mc.total.innerHTML = H.moneyHTML(fees + prem, { cents: false }).replace(/^<span class="amt">|<\/span>$/g, '');
+    mc.prem.classList.toggle('is-off', !showPrem);
+  }
+  function runCount() {
+    cancelAnimationFrame(countRAF);
+    if (reduce.matches) { setCount(RUN.toDeals, RUN.premium, true); return; }
+    setCount(RUN.fromDeals, 0, false);
+    const ease = (p) => 1 - Math.pow(1 - p, 3);
+    const t0 = performance.now() + 520, T1 = 1800, T2 = 520;
+    const tick = (now) => {
+      const t = now - t0;
+      if (t >= T1 + T2) { setCount(RUN.toDeals, RUN.premium, true); return; }
+      if (t >= T1) setCount(RUN.toDeals, Math.round(RUN.premium * ease((t - T1) / T2)), true);
+      else if (t > 0) setCount(Math.max(RUN.fromDeals, Math.round(RUN.fromDeals + (RUN.toDeals - RUN.fromDeals) * ease(t / T1))), 0, false);
+      countRAF = requestAnimationFrame(tick);
+    };
+    countRAF = requestAnimationFrame(tick);
+  }
+  setCount(RUN.toDeals, RUN.premium, true);
+  // The counter must land exactly on the data's year-1 revenue.
+  if (RUN.toDeals * RUN.perDeal + RUN.premium !== RUN.total || RUN.total !== Y1.revenue) console.error('hold.html: beat 10 counter does not match HOLD.year1.revenue');
+
+  /* ------------------------------------------------------------------ controls */
+  const stage = $('#stage'), title = $('#title'), live = $('#live');
+  const ticks = $('#ticks'), caption = $('#caption'), count = $('#count');
+  ticks.innerHTML = H.beats.map((x) => '<li><button class="tick" type="button" data-act="go:beat-' + x.n + '" aria-label="Go to beat ' + x.n + ': ' + esc(x.title) + '"><span></span></button></li>').join('');
+  $('#pjLabel').innerHTML = '<img class="avatar" src="' + J.img + '" alt=""><span><strong>' + esc(J.name) + '</strong> ' + esc(J.role) + '</span>';
+  $('#plLabel').innerHTML = '<img class="avatar" src="' + L.img + '" alt=""><span><strong>' + esc(L.name) + '</strong> ' + esc(L.role) + '</span>';
+  const pj = $('#pj'), pl = $('#pl'), scrJ = $('#scrJ'), scrL = $('#scrL');
+
+  let cur = null, nav = 0, active = null, captionOn = false, cardHidden = false;
+  const origin = { whatif: 'beat-5', damage: 'beat-8' };
+
+  function renderControls(S) {
+    const n = S.beat;
+    count.innerHTML = n ? '<span class="w">Beat </span>' + n + ' of 10' : S.branch === 'whatif' ? (S.id === 'what-if' ? 'What if, 1 of 2' : 'What if, 2 of 2') : 'Damage claim';
+    const ob = n || (STEPS[origin[S.branch]] || {}).beat || 0;
+    Array.prototype.forEach.call(ticks.querySelectorAll('.tick'), (t, i) => {
+      t.classList.toggle('is-done', i + 1 < ob || (!n && i + 1 === ob));
+      t.classList.toggle('is-now', !!n && i + 1 === n);
+      if (n && i + 1 === n) t.setAttribute('aria-current', 'step'); else t.removeAttribute('aria-current');
+    });
+    $('#backBtn').disabled = !S.prev && !S.branch;
+    const atEnd = S.id === 'beat-10';
+    $('#nextLabel').textContent = atEnd ? (cardHidden ? 'Show card' : 'Run again') : 'Next';
+    $('#nextBtn').disabled = !atEnd && !S.next;
+    document.querySelector('[data-act="whatif"]').setAttribute('aria-pressed', String(S.branch === 'whatif'));
+    document.querySelector('[data-act="damage"]').setAttribute('aria-pressed', String(S.branch === 'damage'));
+    document.querySelector('[data-act="caption"]').setAttribute('aria-pressed', String(captionOn));
+    caption.textContent = S.say || '';
+    caption.hidden = !captionOn;
+    ticks.hidden = captionOn;
+  }
+
+  /* ------------------------------------------------------------------ render one step */
+  function render(id, o) {
+    o = o || {};
+    const S = STEPS[id], st = S.st;
+    const focusWasIn = stage.contains(document.activeElement);
+    document.documentElement.dataset.step = id;
+    stage.dataset.arrive = o.arrive === 'fwd' && !reduce.matches ? 'fwd' : 'none';
+    renderBar(S, o);
+    $('#dateChip').innerHTML = esc(st.dateLabel) + (st.timeLabel ? '<span class="date-chip-time">' + esc(st.timeLabel) + '</span>' : '');
+    title.textContent = S.title;
+    $('#hold').innerHTML = HOLDC[id](S);
+    scrJ.innerHTML = J_SCR[S.j](S);
+    scrL.innerHTML = L_SCR[S.l](S);
+    scrJ.scrollTop = 0; scrL.scrollTop = 0;
+    $('#timeJ').textContent = clock(st.at);
+    $('#timeL').textContent = clock(st.at);
+    pj.classList.toggle('is-idle', S.idle === 'j');
+    pl.classList.toggle('is-idle', S.idle === 'l');
+    $('#led').innerHTML = ledgerHTML(S, o.prevSt, o.arrive === 'fwd');
+    mcard.hidden = !(S.card && !cardHidden);
+    renderControls(S);
+    live.textContent = count.textContent + '. ' + S.title + '. ' + V.states.held + ' ' + m(st.held) + '. Verimate earned ' + m(st.verimateEarned) + '.';
+    if (focusWasIn && (!document.activeElement || document.activeElement === document.body)) title.focus({ preventScroll: true });
+  }
+
+  /* ------------------------------------------------------------------ navigation with the travelling amounts */
+  function finishActive() {
+    if (!active) return;
+    const a = active; active = null;
+    if (a.vt) { try { a.vt.skipTransition(); } catch (e) { /* already done */ } }
+    if (a.anims) a.anims.forEach((x) => x.cancel());
+    a.land();
+  }
+
+  function go(id, how) {
+    if (!STEPS[id]) return;
+    finishActive();
+    cancelAnimationFrame(countRAF);
+    const prevId = cur, A = prevId ? STEPS[prevId] : null, S = STEPS[id];
+    const token = ++nav;
+    let moves = [], dir = 'none';
+    if (how !== 'jump' && A && S.from === prevId && S.moves) { moves = S.moves; dir = 'fwd'; }
+    else if (how !== 'jump' && A && A.from === id && A.moves) { moves = A.moves.map((x) => ({ i: x.i, from: x.to, to: x.from, kind: x.kind, cents: x.cents })); dir = 'back'; }
+    cur = id;
+    if (id === 'beat-10') cardHidden = false;
+    if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+    const prevSt = A ? A.st : null;
+    const base = { arrive: dir === 'fwd' || (A && MAIN.indexOf(id) === MAIN.indexOf(prevId) + 1) ? 'fwd' : 'none', prevSt: prevSt, fade: !!A };
+    const animate = moves.length && !reduce.matches && A;
+    const after = () => { if (S.card && !cardHidden) runCount(); };
+    if (!animate) { render(id, base); after(); return; }
+
+    const arrivals = moves.map((x) => x.to);
+    const opts = Object.assign({}, base, { holdSlots: arrivals, fromSt: prevSt });
+    const land = () => {
+      if (token !== nav) return;
+      SLOTS.forEach((k) => setAmt(CELL[k].amt, m(slotVal(S.st, k)), true));
+      document.querySelectorAll('.lane .mv').forEach((p) => { p.style.viewTransitionName = ''; });
+      document.querySelectorAll('.lane .mv-temp').forEach((p) => p.remove());
+      after();
+    };
+    // Back: the reverse pills land and disappear. Forward: the pill stays as the "+amount" next to the new balance.
+    const addBackPills = (named) => moves.forEach((x) => {
+      CELL[x.to].lane.insertAdjacentHTML('beforeend', pill(x, false));
+      const p = CELL[x.to].lane.lastElementChild; p.classList.add('mv-temp');
+      if (named) p.style.viewTransitionName = 'mv-' + x.i;
+    });
+
+    if (document.startViewTransition) {
+      // Old snapshot: the amount sits in the paying slot.
+      if (dir === 'fwd') moves.forEach((x) => { CELL[x.from].lane.insertAdjacentHTML('beforeend', pill(x, false)); CELL[x.from].lane.lastElementChild.style.viewTransitionName = 'mv-' + x.i; });
+      else moves.forEach((x) => { const p = CELL[x.from].lane.querySelector('.mv[data-i="' + x.i + '"]'); if (p) p.style.viewTransitionName = 'mv-' + x.i; });
+      let vt;
+      try {
+        vt = document.startViewTransition(() => {
+          if (token !== nav) return;
+          render(id, Object.assign({}, opts, { names: dir === 'fwd' }));
+          if (dir === 'back') addBackPills(true);
+        });
+      } catch (e) { vt = null; }
+      if (vt) {
+        active = { vt: vt, land: land };
+        vt.finished.finally(() => { if (active && active.vt === vt) { active = null; land(); } });
+        return;
+      }
+    }
+    // Fallback without View Transitions: measure, render, then slide each pill from where it started (transform only).
+    const starts = moves.map((x) => {
+      const lane = CELL[x.from].lane;
+      let p = dir === 'back' ? lane.querySelector('.mv[data-i="' + x.i + '"]') : null, tmp = null;
+      if (!p) { lane.insertAdjacentHTML('beforeend', pill(x, false)); p = tmp = lane.lastElementChild; }
+      const r = p.getBoundingClientRect(); if (tmp) tmp.remove();
+      return r;
+    });
+    render(id, opts);
+    if (dir === 'back') addBackPills(false);
+    const anims = moves.map((x, k) => {
+      const p = dir === 'back' ? CELL[x.to].lane.querySelector('.mv-temp[data-i="' + x.i + '"]') : CELL[x.to].lane.querySelector('.mv[data-i="' + x.i + '"]');
+      if (!p) return null;
+      const r = p.getBoundingClientRect(), s = starts[k];
+      return p.animate([{ transform: 'translate(' + (s.right - r.right) + 'px,' + (s.top - r.top) + 'px)' }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }).filter(Boolean);
+    active = { anims: anims, land: land };
+    Promise.all(anims.map((x) => x.finished)).then(() => { if (active && active.anims === anims) { active = null; land(); } }, () => {});
+  }
+
+  const isMain = (id) => MAIN.indexOf(id) >= 0;
+  function next() {
+    const S = STEPS[cur];
+    if (cur === 'beat-10') { if (cardHidden) { cardHidden = false; render(cur, {}); } runCount(); renderControls(S); return; }
+    if (S.next) go(S.next);
+  }
+  function back() {
+    const S = STEPS[cur];
+    if (S.branch) { go(S.id === 'what-if-refund' ? 'what-if' : origin[S.branch]); return; }
+    if (S.prev) go(S.prev);
+  }
+  function whatIf() {
+    const S = STEPS[cur];
+    if (S.branch === 'whatif') { go(origin.whatif, 'jump'); return; }
+    origin.whatif = isMain(cur) ? cur : 'beat-5';
+    go('what-if', 'jump');
+  }
+  function damage() {
+    const S = STEPS[cur];
+    if (S.branch === 'damage') { go(origin.damage, 'jump'); return; }
+    origin.damage = isMain(cur) ? cur : 'beat-8';
+    if (cur === 'beat-8') { go('damage'); return; }
+    // Rewind to move-out first, then let Lena's claim move the money.
+    go('beat-8', 'jump');
+    const t = nav;
+    setTimeout(() => { if (nav === t) go('damage'); }, reduce.matches ? 0 : 420);
+  }
+  function reset() { cardHidden = false; go('beat-1', 'jump'); }
+  function toggleCaption() { captionOn = !captionOn; renderControls(STEPS[cur]); }
+  function escape() {
+    const S = STEPS[cur];
+    if (S.card && !cardHidden) { cardHidden = true; mcard.hidden = true; cancelAnimationFrame(countRAF); renderControls(S); return; }
+    if (S.branch) go(origin[S.branch], 'jump');
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-act]');
+    if (!t || t.disabled) return;
+    const a = t.dataset.act;
+    if (a === 'next') next();
+    else if (a === 'back') back();
+    else if (a === 'whatif') whatIf();
+    else if (a === 'damage') damage();
+    else if (a === 'reset') reset();
+    else if (a === 'caption') toggleCaption();
+    else if (a.indexOf('go:') === 0) go(a.slice(3), 'jump');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+    const t = e.target;
+    if (t.closest && t.closest('input, textarea, select, [contenteditable]')) return;
+    const onButton = t.closest && t.closest('button, a');
+    const k = e.key;
+    if (k === 'PageDown' || k === 'ArrowRight' || ((k === ' ' || k === 'Enter' || k === 'Spacebar') && !onButton)) { e.preventDefault(); next(); }
+    else if (k === 'PageUp' || k === 'ArrowLeft') { e.preventDefault(); back(); }
+    else if (k === 'b' || k === 'B') whatIf();
+    else if (k === 'd' || k === 'D') damage();
+    else if (k === 'r' || k === 'R') reset();
+    else if (k === 'c' || k === 'C') toggleCaption();
+    else if (k === 'Escape') escape();
+  });
+
+  function fromHash() {
+    const h = decodeURIComponent(location.hash.replace(/^#/, '')).toLowerCase();
+    const mm = h.match(/^(?:beat|step)-(\d+)$/);
+    if (mm && STEPS['beat-' + mm[1]]) return 'beat-' + mm[1];
+    if (h === 'what-if-frozen') return 'what-if';
+    if (h === 'what-if-refunded' || h === 'refund') return 'what-if-refund';
+    if (h === 'pay') return 'beat-3-pay';
+    return STEPS[h] ? h : null;
+  }
+  addEventListener('hashchange', () => { const id = fromHash(); if (id && id !== cur) go(id, 'jump'); });
+
+  /* ------------------------------------------------------------------ fit the phones to the stage */
+  const PHONE_W = 360, PHONE_H = 680;
+  const phones = [$('.phone', pj), $('.phone', pl)];
+  function fit() {
+    if (!desk.matches) { phones.forEach((p) => p.style.removeProperty('--phone-scale')); return; }
+    const cs = getComputedStyle(stage);
+    const h = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const gap = parseFloat(cs.columnGap) || 0;
+    const w = (stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 3 * gap) / 4;
+    const s = Math.max(0.45, Math.min(h / PHONE_H, w / PHONE_W, 1.25));
+    phones.forEach((p) => p.style.setProperty('--phone-scale', s.toFixed(4)));
+  }
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else addEventListener('resize', fit);
+  desk.addEventListener('change', fit);
+
+  go(fromHash() || 'beat-1', 'jump');
+  fit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+})();
+</script>
+</body>
+</html>

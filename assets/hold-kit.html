@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
+<title>Hold kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="hold.css" />
+<style>
+  /* Kit page layout only. Not part of the system. */
+  .kit { max-width: 1160px; margin: 0 auto; padding: 40px 28px 96px; box-sizing: border-box; }
+  .kit-head { display: grid; gap: 8px; margin-bottom: 40px; max-width: 70ch; }
+  .kit-head h1 { font-size: 34px; }
+  .kit-head p { margin: 0; color: var(--ink-2); }
+  .kit-sec { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 36px 0; border-top: 1px solid var(--line); }
+  .kit-sec > h2 { font-size: 19px; }
+  .kit-sec > h2 small { display: block; margin-top: 6px; font-family: var(--font-ui); font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0; line-height: 1.45; }
+  .kit-body { min-width: 0; display: grid; gap: 22px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .sw { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+  .sw i { width: 34px; height: 34px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .sw b { display: block; font-weight: 600; }
+  .sw span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .cap { font-size: 12.5px; color: var(--muted); margin: 0 0 8px; }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--wash); padding: 1px 5px; border-radius: 4px; }
+  .bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .bar .balance { padding: 16px 18px; }
+  .bar .balance + .balance { border-left: 1px solid var(--line); }
+  .checkbox { padding: 18px 20px; }
+  .check-ok { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+  .check-list { margin: 14px 0 0; padding: 0; list-style: none; columns: 2; column-gap: 28px; font-size: 13px; }
+  .check-list li { break-inside: avoid; display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .check-list li.bad { color: var(--flagged-ink); font-weight: 600; }
+  .phones { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+  .scr { padding: 6px 20px 28px; display: grid; gap: 16px; }
+  .scr h3 { font-size: 22px; }
+  .listing { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .listing img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
+  .track { position: relative; height: 72px; border-radius: var(--r-panel); background: var(--wash); overflow: hidden; }
+  .track .money-token { position: absolute; left: 14px; top: 20px; }
+  .track-ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 8px; }
+  table.beats { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  table.beats th { text-align: right; font-weight: 500; color: var(--muted); padding: 8px 7px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+  table.beats td { text-align: right; padding: 8px 7px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.beats th:nth-child(-n+2), table.beats td:nth-child(-n+2) { text-align: left; }
+  .scrollx { overflow-x: auto; }
+  @media (max-width: 860px) {
+    .kit { padding: 28px 16px 72px; }
+    .kit-sec { grid-template-columns: 1fr; gap: 16px; padding: 28px 0; }
+    .two { grid-template-columns: 1fr; }
+    .bar { grid-template-columns: 1fr 1fr; }
+    .bar .balance:nth-child(3) { border-left: 0; }
+    .bar .balance:nth-child(n+3) { border-top: 1px solid var(--line); }
+    .check-list { columns: 1; }
+    .phones { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div id="hold-nav"><span class="tag-test">Test money</span></div>
+
+<main class="kit">
+  <header class="kit-head">
+    <h1>Verimate Hold kit</h1>
+    <p>Reference for page builders. Not linked from the site. Every amount below is read from <code>window.HOLD</code> in <code>assets/hold-data.js</code>; every style comes from <code>assets/hold.css</code>.</p>
+  </header>
+
+  <section class="kit-sec" id="check">
+    <h2>Self-check<small><code>HOLD.check()</code> runs on load. A failed sum prints a console error.</small></h2>
+    <div class="kit-body"><div class="panel checkbox" id="checkOut"></div></div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Tokens<small>Brand red is for Verimate, the hold and the one primary button. Never set an amount in red.</small></h2>
+    <div class="kit-body"><div class="swatches" id="swatches"></div></div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Amounts<small><code>.amt</code> everywhere money shows. <code>HOLD.moneyHTML(c, {hero:true})</code> for the one big number.</small></h2>
+    <div class="kit-body">
+      <div class="row" style="align-items:flex-end;gap:36px">
+        <div><p class="cap">Hero, 56px</p><div id="heroAmt"></div></div>
+        <div><p class="cap">.amt-lg</p><span class="amt amt-lg" id="lgAmt"></span></div>
+        <div><p class="cap">Held (grey) and released (ink)</p><span class="amt amt-held" id="heldAmt"></span>&nbsp;&nbsp;<span class="amt amt-done" id="doneAmt"></span></div>
+      </div>
+      <div>
+        <p class="cap">Money bar after beat 6, built from <code>HOLD.beats[5]</code></p>
+        <div class="bar" id="bar"></div>
+      </div>
+      <p class="cap" id="fmtDemo" style="margin:0"></p>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Status chips<small>Always a word, never colour alone.</small></h2>
+    <div class="kit-body">
+      <div class="row">
+        <span class="chip chip-held">Held by Verimate</span>
+        <span class="chip chip-released">Released</span>
+        <span class="chip chip-returned">Returned</span>
+        <span class="chip chip-needs">Needs you</span>
+        <span class="chip chip-frozen">Frozen</span>
+        <span class="chip chip-quiet">Booked</span>
+        <span class="chip chip-held chip-lg">Held by Verimate</span>
+      </div>
+      <div class="row">
+        <span class="badge badge-student"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1.5 8.5 12 14l8.5-4.46V16h2V8.5z"/><path d="M5.5 12.6v3.6c0 1.6 2.9 3.3 6.5 3.3s6.5-1.7 6.5-3.3v-3.6L12 16z"/></svg>Student verified</span>
+        <span class="badge badge-verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16 9.6"/></svg>Face verified</span>
+        <span class="badge badge-owner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>Owner approved sublet</span>
+        <span class="badge">Deposits returned on time 1/1</span>
+        <span class="tag-test">Test money</span>
+        <span class="date-chip" id="dateChip"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Buttons<small>One primary per screen. The result uses the same verb: Return $875.00 leads to Deposit returned.</small></h2>
+    <div class="kit-body">
+      <div class="row">
+        <button class="btn btn-primary btn-lg" type="button" id="payBtn"></button>
+        <button class="btn btn-secondary" type="button">Report a problem</button>
+        <button class="btn btn-quiet" type="button">Claim deductions</button>
+        <button class="btn btn-secondary btn-sm" type="button">Share</button>
+        <button class="btn btn-primary" type="button" disabled>All good</button>
+      </div>
+      <div>
+        <p class="cap">Presenter key hints</p>
+        <div class="keyhints">
+          <span class="keyhint"><kbd>PgDn</kbd><kbd>&rarr;</kbd>Next</span>
+          <span class="keyhint"><kbd>PgUp</kbd><kbd>&larr;</kbd>Back</span>
+          <span class="keyhint"><kbd>B</kbd>What if</span>
+          <span class="keyhint"><kbd>D</kbd>Damage</span>
+          <span class="keyhint"><kbd>R</kbd>Reset</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Stepper<small>The money timeline is a real sequence, so numbers are fine here. <code>.steps-h</code> stacks under 560px.</small></h2>
+    <div class="kit-body">
+      <ol class="steps steps-h" id="stepsH"></ol>
+      <div class="two">
+        <ol class="steps" id="stepsV"></ol>
+        <ol class="steps" id="stepsF"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Receipts<small>Label left, amount right, the total under an ink rule.</small></h2>
+    <div class="kit-body two">
+      <div class="panel" style="padding:18px 20px">
+        <p class="cap">Jamie's pay sheet</p>
+        <div class="receipt" id="paySheet"></div>
+      </div>
+      <div class="panel-raised" style="padding:18px 20px">
+        <p class="cap">Lena's first payout</p>
+        <div class="receipt" id="lenaReceipt"></div>
+        <p class="receipt-ref" id="ref" style="margin:12px 0 0"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Ledger<small>Verimate's ledger after beat 10. Fees bold, $0.00 rows and costs grey.</small></h2>
+    <div class="kit-body">
+      <div class="panel" style="padding:10px 8px 14px">
+        <ol class="ledger" id="ledger"></ol>
+        <div class="ledger-total"><span>Verimate kept on this deal</span><span class="amt" id="ledgerNet"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Held item<small><code>.held-item</code> for money that sits with Verimate, <code>.slot-empty</code> for "held by Verimate, not you".</small></h2>
+    <div class="kit-body two">
+      <div class="held-item">
+        <div class="row" style="justify-content:space-between"><strong>Deposit</strong><span class="chip chip-held">Held by Verimate</span></div>
+        <p style="margin:6px 0 0" class="amt amt-lg" id="heldDep"></p>
+        <p class="muted" style="margin:4px 0 0;font-size:13.5px">Returns after Lena confirms move-out, or on its own on Fri, May 28.</p>
+      </div>
+      <div class="slot-empty">
+        <strong style="color:var(--ink)">Deposit, held by Verimate, not you</strong>
+        <p style="margin:4px 0 0;font-size:13.5px">You don't hold it, so you never have to send it back by hand.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Phone frame<small>360 &times; 740, status bar, island, home bar. Set <code>--phone-scale</code> to fit.</small></h2>
+    <div class="kit-body">
+      <div class="phones">
+        <div>
+          <div class="phone-label"><img class="avatar avatar-sm" id="jImg" alt="" /><span><strong id="jName"></strong> Renter</span></div>
+          <div class="phone"><div class="phone-screen">
+            <div class="phone-status"><span>2:14</span><span class="phone-icons" aria-hidden="true"></span></div>
+            <div class="phone-body"><div class="scr">
+              <h3>Confirm and pay</h3>
+              <div class="listing"><img id="dealImg" alt="" /><div><strong id="dealAddr"></strong><div class="muted" style="font-size:13px" id="dealDates"></div></div></div>
+              <div class="receipt" id="phonePay"></div>
+              <p class="muted" style="font-size:13px;margin:0">Rent goes to Lena after you tap All good. Your deposit comes back in one tap after move-out.</p>
+              <button class="btn btn-primary btn-lg btn-block" type="button" id="phoneBtn"></button>
+            </div></div>
+            <div class="phone-home"></div>
+          </div></div>
+        </div>
+        <div>
+          <div class="phone-label"><img class="avatar avatar-sm" id="lImg" alt="" /><span><strong id="lName"></strong> Lister</span></div>
+          <div class="phone" style="--phone-scale:.86"><div class="phone-screen">
+            <div class="phone-status"><span>3:12</span><span class="phone-icons" aria-hidden="true"></span></div>
+            <div class="phone-body"><div class="scr">
+              <span class="chip chip-released" style="justify-self:start">Released</span>
+              <div id="lenaHero"></div>
+              <div class="receipt" id="phoneLena"></div>
+              <div class="held-item"><div class="row" style="justify-content:space-between"><span>Deposit</span><span class="amt" id="lenaDep"></span></div><p class="muted" style="margin:2px 0 0;font-size:13px">Held by Verimate, not you</p></div>
+            </div></div>
+            <div class="phone-home"></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Money token<small>The one signature motion. Respects reduced motion (jumps to the end).</small></h2>
+    <div class="kit-body">
+      <div>
+        <div class="track" id="track"><span class="money-token is-held" id="token"></span></div>
+        <div class="track-ends"><span>Held by Verimate</span><span>Lena</span></div>
+      </div>
+      <div class="row"><button class="btn btn-secondary btn-sm" type="button" id="moveBtn">Release rent</button><span class="muted" id="moveState" style="font-size:13.5px">Rent held</span></div>
+    </div>
+  </section>
+
+  <section class="kit-sec">
+    <h2>Beats<small><code>HOLD.beats</code>: the money bar after each beat, plus the two branches.</small></h2>
+    <div class="kit-body scrollx">
+      <table class="beats" id="beats"></table>
+    </div>
+  </section>
+</main>
+
+<script src="hold-data.js"></script>
+<script src="hold-nav.js"></script>
+<script>
+(function () {
+  const H = window.HOLD, m = H.money, $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* Self-check */
+  const r = H.check();
+  $('#checkOut').innerHTML =
+    '<div class="check-ok"><span class="chip ' + (r.ok ? 'chip-released' : 'chip-frozen') + '">' + (r.ok ? 'All sums check' : r.failed.length + ' failed') + '</span>' +
+    '<span>' + r.passed + ' of ' + r.total + ' checks pass</span></div>' +
+    '<details style="margin-top:10px"><summary style="cursor:pointer;font-size:13.5px;color:var(--ink-2)">Show every check</summary><ul class="check-list">' +
+    r.results.map(x => '<li class="' + (x.ok ? '' : 'bad') + '"><span>' + esc(x.name) + '</span><span>' + (x.ok ? 'OK' : esc(x.got) + ' / ' + esc(x.want)) + '</span></li>').join('') +
+    '</ul></details>';
+
+  /* Tokens */
+  const cs = getComputedStyle(document.documentElement);
+  $('#swatches').innerHTML = ['ink', 'ink-2', 'muted', 'faint', 'line', 'soft', 'brand', 'brand-deep', 'brand-tint', 'verified', 'verified-ink', 'verified-tint', 'student', 'flagged', 'flagged-tint']
+    .map(t => { const v = cs.getPropertyValue('--' + t).trim(); return '<div class="sw"><i style="background:' + v + '"></i><div><b>--' + t + '</b><span>' + v + '</span></div></div>'; }).join('');
+
+  /* Amounts */
+  const D = H.deal, b6 = H.beats[5];
+  $('#heroAmt').innerHTML = H.moneyHTML(D.upfront.total, { hero: true });
+  $('#lgAmt').textContent = m(H.totals.listerReceived);
+  $('#heldAmt').textContent = m(D.deposit);
+  $('#doneAmt').textContent = m(D.listerFirstPayout);
+  const cell = (label, c, cls, note) => '<div class="balance ' + (cls || '') + '"><span class="balance-label">' + label + '</span><span class="balance-amt">' + c + '</span>' + (note ? '<span class="balance-note">' + note + '</span>' : '') + '</div>';
+  $('#bar').innerHTML =
+    cell('Jamie', m(-b6.renterPaid + b6.renterBack), '', 'paid in') +
+    cell('Held by Verimate', m(b6.held), 'is-hold', 'deposit') +
+    cell('Lena', m(b6.listerReceived), '', 'received') +
+    cell('Verimate earned', m(b6.verimateEarned), '', 'lister fee');
+  $('#fmtDemo').innerHTML = 'Formats: <code>money(-8750)</code> ' + m(-8750) + ', <code>{sign:true}</code> ' + m(78750, { sign: true }) +
+    ', <code>{cents:false}</code> ' + m(87500, { cents: false }) + '/mo, <code>{k:true}</code> ' + m(H.year1.revenue, { k: true }) +
+    ', <code>date(iso,\'dayStamp\')</code> ' + H.date(D.deadlines.moveInConfirmed, 'dayStamp') + '.';
+  $('#dateChip').innerHTML = esc(b6.dateLabel) + '<span class="date-chip-time">' + esc(b6.timeLabel) + '</span>';
+
+  /* Buttons */
+  $('#payBtn').textContent = 'Pay ' + m(D.upfront.total);
+  $('#phoneBtn').textContent = 'Pay ' + m(D.upfront.total);
+
+  /* Steppers */
+  const stepLi = (n, title, meta, cls) => '<li class="step ' + (cls || '') + '"><span class="step-dot">' + n + '</span><div class="step-body"><p class="step-title">' + esc(title) + '</p>' + (meta ? '<p class="step-meta">' + esc(meta) + '</p>' : '') + '</div></li>';
+  const nowIdx = 4; // after "Rent released", waiting on move-out
+  $('#stepsH').innerHTML = H.tracker.map((t, i) => stepLi(i + 1, t.label,
+    i < nowIdx ? H.date(t.at, 'short') : i === nowIdx ? 'May 20' : '', i < nowIdx ? 'is-done' : i === nowIdx ? 'is-now' : '')).join('');
+  $('#stepsV').innerHTML = H.tracker.slice(0, 4).map((t, i) => stepLi(i + 1, t.label,
+    i < 2 ? H.date(t.at, 'stamp') : i === 2 ? 'Tap All good, or it releases on its own ' + H.date(D.deadlines.autoRelease, 'dayStamp') : '', i < 2 ? 'is-done' : i === 2 ? 'is-now' : '')).join('');
+  $('#stepsF').innerHTML = stepLi(1, 'Paid', H.date(D.deadlines.booked, 'stamp'), 'is-done') +
+    stepLi(2, 'Frozen: No access', 'Lena answers by ' + H.date(H.branches.whatIf.states[0].deadlines.listerAnswer, 'dayStamp'), 'is-frozen') +
+    stepLi(3, 'Verimate decides', 'By ' + H.date(H.branches.whatIf.states[0].deadlines.decision, 'day'));
+
+  /* Receipts */
+  const rc = (label, c, cls, note) => '<div class="rc-row ' + (cls || '') + '"><span>' + esc(label) + (note ? '<small class="rc-note">' + esc(note) + '</small>' : '') + '</span><span class="amt">' + m(c) + '</span></div>';
+  const pay = rc('First month', D.upfront.firstMonth) + rc('Deposit', D.upfront.deposit, '', 'Held by Verimate until move-out') +
+    rc('Verimate fee', D.upfront.verimateFee, 'rc-zero') + rc('Total', D.upfront.total, 'rc-total');
+  $('#paySheet').innerHTML = pay + '<div class="rc-sep"></div>' + rc('Card instead of bank', D.cardCost, 'rc-sub rc-zero', 'Card cost, shown before you pay. Bank is free.');
+  $('#phonePay').innerHTML = pay;
+  const lena = b6.receipt.map(x => rc(x.label, x.cents, x.total ? 'rc-total' : (x.cents < 0 ? 'rc-sub' : ''))).join('');
+  $('#lenaReceipt').innerHTML = lena;
+  $('#phoneLena').innerHTML = lena;
+  $('#ref').textContent = 'Ref ' + D.ref + ', ' + H.date(D.deadlines.moveInConfirmed, 'stamp');
+
+  /* Ledger */
+  const b10 = H.beats[9];
+  $('#ledger').innerHTML = b10.ledgerRows.map((x, i, a) =>
+    '<li class="ledger-row is-' + (x.kind === 'fee' ? 'fee' : x.kind === 'nofee' ? 'zero' : 'cost') + (i === a.length - 1 ? ' is-new' : '') + '">' +
+    '<time class="ledger-when" datetime="' + x.at + '">' + H.date(x.at, 'short') + '</time>' +
+    '<span class="ledger-what">' + esc(x.label) + (x.note ? '<small>' + esc(x.note) + '</small>' : '') + '</span>' +
+    '<span class="ledger-amt amt">' + m(x.cents) + '</span></li>').join('');
+  $('#ledgerNet').textContent = m(b10.verimateNet);
+
+  $('#heldDep').textContent = m(D.deposit);
+
+  /* Phones */
+  const J = H.people.renter, Ln = H.people.lister;
+  $('#jImg').src = '../' + J.img; $('#jName').textContent = J.name;
+  $('#lImg').src = '../' + Ln.img; $('#lName').textContent = Ln.name;
+  $('#dealImg').src = '../' + D.img; $('#dealImg').alt = D.imgAlt;
+  $('#dealAddr').textContent = D.address; $('#dealDates').textContent = D.unitShort + ', ' + D.datesLabel;
+  $('#lenaHero').innerHTML = '<p class="cap" style="margin:0 0 2px">You receive</p>' + H.moneyHTML(D.listerFirstPayout, { hero: true });
+  $('#lenaHero').querySelector('.amt-hero').style.setProperty('--amt-size', '48px');
+  $('#lenaDep').textContent = m(D.deposit);
+
+  /* Token */
+  const tok = $('#token'), track = $('#track');
+  tok.textContent = m(D.rent);
+  let moved = false;
+  $('#moveBtn').addEventListener('click', () => {
+    moved = !moved;
+    const dx = track.clientWidth - tok.offsetWidth - 28;
+    tok.style.transform = moved ? 'translateX(' + dx + 'px)' : '';
+    tok.classList.toggle('is-held', !moved); tok.classList.toggle('is-released', moved);
+    $('#moveBtn').textContent = moved ? 'Reset' : 'Release rent';
+    $('#moveState').textContent = moved ? 'Rent released' : 'Rent held';
+  });
+
+  /* Beats table */
+  const states = H.beats.map(b => [b.id, b]).concat(
+    H.branches.whatIf.states.map(s => ['what-if: ' + s.id, s]), H.branches.damage.states.map(s => ['damage: ' + s.id, s]));
+  $('#beats').innerHTML = '<thead><tr><th>State</th><th>Date</th><th>Jamie paid</th><th>Back</th><th>Held</th><th>Lena</th><th>Earned</th><th>Costs</th><th>Rows</th></tr></thead><tbody>' +
+    states.map(([id, s]) => '<tr><td>' + esc(id) + '</td><td>' + esc(s.dateLabel) + (s.timeLabel ? ', ' + esc(s.timeLabel) : '') + '</td><td>' + m(s.renterPaid) + '</td><td>' + m(s.renterBack) +
+      '</td><td>' + m(s.held) + '</td><td>' + m(s.listerReceived) + '</td><td>' + m(s.verimateEarned) + '</td><td>' + m(s.verimateCosts) + '</td><td>' + s.ledgerRows.length + '</td></tr>').join('') + '</tbody>';
+})();
+</script>
+</body>
+</html>

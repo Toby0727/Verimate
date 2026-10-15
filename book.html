@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Confirm and pay | Verimate</title>
+<meta name="description" content="Book 734 Comstock Ave with Verimate Hold, then see where your money is at every step." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/hold.css" />
+<style>
+  /* book.html: the renter's desktop flow. Tokens come from assets/hold.css; nothing new is coloured here. */
+
+  /* Only the two money tokens animate between states. The rest of the page swaps in place. */
+  :root { view-transition-name: none; }
+  ::view-transition { pointer-events: none; }
+  ::view-transition-group(tok-rent), ::view-transition-group(tok-dep) {
+    animation-duration: var(--dur-move); animation-timing-function: var(--ease-move);
+  }
+
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+  #app { flex: 1 0 auto; }
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 32px; box-sizing: border-box; }
+  .page-title { font-size: 34px; font-weight: 600; letter-spacing: -.03em; }
+  .page-title:focus { outline: none; }
+  .link { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+  .link:hover { text-decoration-color: currentColor; }
+  p { margin: 0; }
+  svg { flex: none; }
+
+  /* Signed-in renter, right end of the shared bar */
+  .me { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .me img { width: 32px; height: 32px; }
+
+  /* ---------------------------------------------------------------- demo clock (presenter layer) */
+  .demo { background: var(--wash); border-bottom: 1px solid var(--line); }
+  .demo .wrap { display: flex; align-items: center; gap: 12px 14px; min-height: 54px; }
+  .demo-label { font-size: 13px; color: var(--muted); }
+  .demo .date-chip { font-size: 15px; padding: 6px 13px; }
+  .demo-name { font-size: 14px; font-weight: 500; color: var(--ink-2); }
+  .demo-ctl { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .demo-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+  .icon-btn {
+    width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid var(--line-2); background: var(--paper);
+    color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: border-color .15s;
+  }
+  .icon-btn:hover:not(:disabled) { border-color: var(--ink); }
+  .icon-btn:disabled { opacity: .35; cursor: default; }
+  .demo .keyhints { margin-left: 12px; }
+
+  /* ---------------------------------------------------------------- pay: Airbnb-style checkout */
+  .pay { padding: 34px 0 96px; }
+  .pay-grid { display: grid; grid-template-columns: minmax(0, 1fr) 416px; gap: 80px; align-items: start; }
+  .pay-head { display: flex; align-items: center; gap: 10px; margin: 0 0 30px -10px; }
+  .back { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); flex: none; }
+  .back:hover { background: var(--soft); }
+  .sec { padding: 30px 0; border-top: 1px solid var(--line); }
+  .sec.first { border-top: 0; padding-top: 0; }
+  .sec > h2 { font-size: 22px; font-weight: 600; margin-bottom: 20px; }
+  .facts { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 20px 24px; margin: 0; }
+  .facts dt { font-weight: 600; }
+  .facts dd { margin: 0; min-width: 0; }
+  .facts .sub { display: block; margin-top: 2px; font-size: 14px; color: var(--muted); }
+  .lister .person { margin-bottom: 16px; }
+  .lister .person-name { font-size: 16px; }
+  .lister .person-meta { font-size: 14px; }
+  .badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }
+  .badges li { display: grid; gap: 2px; min-width: 0; }
+  .badges .badge { font-size: 14px; font-weight: 600; white-space: normal; }
+  .badges small { padding-left: 22px; font-size: 13px; color: var(--muted); }
+
+  .pm { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; min-width: 0; }
+  .pm-opt {
+    display: grid; grid-template-columns: 20px 40px minmax(0, 1fr) auto; gap: 0 14px; align-items: start;
+    padding: 18px 20px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--paper); cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .pm-opt:hover { border-color: var(--ink-2); }
+  .pm-opt:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .pm-opt:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .radio {
+    appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 10px 0 0; border-radius: 50%;
+    border: 1.5px solid var(--faint); background: var(--paper); cursor: pointer; box-sizing: border-box;
+  }
+  .radio:checked { border: 6px solid var(--ink); }
+  .radio:focus-visible { outline: none; }
+  .pm-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--wash); display: grid; place-items: center; color: var(--ink); }
+  .pm-txt strong { display: block; font-size: 16px; font-weight: 600; line-height: 1.3; margin-top: 1px; }
+  .pm-txt small { display: block; margin-top: 3px; font-size: 14px; color: var(--muted); line-height: 1.45; }
+  .pm-cost { font-weight: 600; font-size: 15px; padding-top: 1px; }
+
+  .seq { margin-bottom: 6px; }
+  .seq .step { padding-bottom: 24px; }
+  .seq .step-dot { border-color: var(--ink); color: var(--ink); }
+  .seq .step-title { color: var(--ink); font-size: 16px; }
+  .seq .step-meta { margin-top: 4px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: 60ch; }
+  .note { font-size: 14.5px; color: var(--ink-2); }
+  .note + .note { margin-top: 10px; }
+  .plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-width: 64ch; }
+  .plain li { color: var(--ink-2); }
+  .plain strong { color: var(--ink); font-weight: 600; }
+
+  .sum { position: sticky; top: 24px; padding: 22px 24px 20px; border-radius: 20px; }
+  .lst { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .lst img { width: 92px; height: 92px; border-radius: 12px; object-fit: cover; display: block; }
+  .lst-title { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -.02em; line-height: 1.2; margin-bottom: 4px; }
+  .lst-sub { font-size: 14px; color: var(--muted); line-height: 1.4; }
+  .sum .lst { padding-bottom: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .sum-h { font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+  .sum .receipt { margin-bottom: 18px; }
+  .sum .rc-row { padding: 6px 0; }
+  .sum .rc-total { padding-top: 12px; }
+  .pay-btn[aria-busy="true"] { pointer-events: none; background: var(--brand-deep); }
+  .sum-fine { margin-top: 12px; text-align: center; font-size: 13px; color: var(--muted); }
+  .m-only { display: none; }
+
+  /* ---------------------------------------------------------------- tracker */
+  .trk { padding: 34px 0 96px; }
+  .trk-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: start; }
+  .col { min-width: 0; }
+  .trk-head { margin-bottom: 24px; }
+  .trk-status { margin-top: 10px; font-size: 18px; line-height: 1.45; color: var(--ink-2); max-width: 60ch; text-wrap: pretty; }
+
+  /* The money rail: where each held amount is, and what moves it */
+  .rail { background: var(--wash); border-radius: 20px; padding: 24px 28px 20px; }
+  .stations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: end; margin-bottom: 18px; }
+  .station { display: grid; gap: 3px; min-width: 0; }
+  .st-hold { justify-items: center; text-align: center; }
+  .st-lena { justify-items: end; text-align: right; }
+  .st-who { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .st-who img { width: 26px; height: 26px; }
+  .vm-mark { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
+  .st-amt { font-family: var(--font-display); font-weight: 600; font-size: 26px; letter-spacing: -.025em; line-height: 1.1; }
+  .st-hold .amt-hero { --amt-size: 48px; }
+  .st-note { font-size: 13px; color: var(--muted); }
+  .lane { padding: 16px 0 18px; border-top: 1px solid var(--line-2); }
+  .lane-track { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; min-height: 40px; }
+  .lane-track::before { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--line-2); }
+  .lane-node { position: absolute; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; box-sizing: border-box; background: var(--wash); border: 2px solid var(--line-2); }
+  .n-you { left: 4px; } .n-hold { left: 50%; margin-left: -5px; } .n-lena { right: 4px; }
+  .lane .money-token { position: relative; z-index: 1; grid-row: 1; height: 36px; padding: 0 15px; gap: 8px; font-size: 14px; }
+  .lane-track[data-at="you"] .money-token { grid-column: 1; justify-self: start; }
+  .lane-track[data-at="hold"] .money-token { grid-column: 2; justify-self: center; }
+  .lane-track[data-at="lena"] .money-token { grid-column: 3; justify-self: end; }
+  .tk-l { font-weight: 500; opacity: .85; }
+  .tk-a { font-weight: 700; }
+  .money-token.is-frozen { background: var(--paper); color: var(--flagged-ink); box-shadow: inset 0 0 0 1.5px var(--flagged); }
+  .money-token.is-frozen::before { content: ""; width: 8px; height: 10px; border-left: 2.5px solid currentColor; border-right: 2.5px solid currentColor; box-sizing: border-box; }
+  .lane-info { margin-top: 12px; display: grid; gap: 8px; justify-items: start; }
+  .lane-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .lane-text { font-size: 15px; color: var(--ink-2); max-width: 66ch; }
+  .lane-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+  .countdown { font-size: 14px; color: var(--ink-2); }
+  .countdown .amt { font-weight: 700; color: var(--ink); }
+  .rail-cap { padding-top: 14px; border-top: 1px solid var(--line-2); font-size: 13.5px; color: var(--muted); }
+
+  /* State detail under the rail */
+  .det { margin-top: 44px; }
+  .det h2, .act h2, .side h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+  .det h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .det-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
+  .det .panel { padding: 16px 20px 18px; }
+  .det .receipt-ref { margin-top: 12px; }
+  .det-text { display: grid; gap: 12px; font-size: 15px; color: var(--ink-2); }
+  .det-text strong { color: var(--ink); font-weight: 600; }
+  .det-foot { margin-top: 18px; font-size: 14.5px; color: var(--ink-2); max-width: 70ch; }
+  .choices { display: grid; grid-template-columns: 150px minmax(0, 1fr); margin: 0; border-top: 1px solid var(--ink); }
+  .choices dt, .choices dd { padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .choices dt { font-weight: 600; }
+  .choices dd { margin: 0; color: var(--ink-2); }
+  .sched { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .sched th { text-align: left; font-weight: 500; font-size: 13px; color: var(--muted); padding: 0 0 8px; border-bottom: 1px solid var(--ink); }
+  .sched td { padding: 10px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+  .sched th + th, .sched td + td { padding-left: 12px; }
+  .sched .r { text-align: right; white-space: nowrap; }
+  .sched .when { color: var(--muted); white-space: nowrap; }
+  .sched .fee { color: var(--muted); }
+  .sched tfoot td { font-weight: 700; border-bottom: 0; }
+  .record { display: grid; gap: 6px; }
+  .record .badge { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .record small { font-size: 13.5px; color: var(--muted); padding-left: 22px; }
+
+  /* New York 14-day clock */
+  .clock { position: relative; margin: 6px 0 4px; }
+  .clk-lab { position: relative; height: 42px; }
+  .clk-m { position: absolute; bottom: 0; display: grid; font-size: 13px; line-height: 1.3; white-space: nowrap; }
+  .clk-below .clk-m { top: 0; bottom: auto; }
+  .clk-m b { font-weight: 600; color: var(--ink); }
+  .clk-m span { color: var(--muted); }
+  .clk-m.end { transform: translateX(-100%); text-align: right; }
+  .clk-line { position: relative; height: 22px; margin: 6px 0; }
+  .clk-line::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--line-2); border-radius: 2px; }
+  .clk-fill { position: absolute; left: 0; top: 10px; height: 2px; background: var(--ink); border-radius: 2px; }
+  .clk-tick { position: absolute; top: 7px; width: 1px; height: 8px; background: var(--line-2); }
+  .clk-dot { position: absolute; top: 5px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; box-sizing: border-box; background: var(--paper); border: 2px solid var(--line-2); }
+  .clk-dot.now { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-tint); }
+  .clk-dot.done { background: var(--ink); border-color: var(--ink); }
+  .clk-dot.ok { background: var(--verified); border-color: var(--verified); }
+
+  /* Activity log */
+  .act { margin-top: 44px; }
+  .act-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .act-row {
+    display: grid; grid-template-columns: 124px minmax(0, 1fr) auto 140px; gap: 4px 18px; align-items: baseline;
+    padding: 13px 8px; border-bottom: 1px solid var(--line); font-size: 14.5px;
+  }
+  .act-row.is-new { animation: hold-row-in 1.2s var(--ease-move) both; }
+  .act-when { color: var(--muted); font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .act-what { min-width: 0; }
+  .act-what small { display: block; color: var(--muted); font-size: 13px; }
+  .act-amt { text-align: right; font-weight: 600; }
+  .act-state { justify-self: end; }
+
+  /* Aside */
+  .side { display: grid; gap: 40px; }
+  .side .steps .step { padding-bottom: 20px; }
+  .side .steps .step:last-child { padding-bottom: 0; }
+  .bk { display: grid; gap: 16px; }
+  .bk-lst { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .bk-lst img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; display: block; }
+  .bk-t { font-weight: 600; line-height: 1.3; }
+  .bk-s { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+  .bk-dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; }
+  .bk-dl dt { color: var(--muted); }
+  .bk-dl dd { margin: 0; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .bk-links { list-style: none; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 14.5px; }
+
+  /* ---------------------------------------------------------------- report a problem (small bottom sheet) */
+  .report {
+    width: min(560px, 100vw); max-width: 100vw; max-height: calc(100dvh - 16px); box-sizing: border-box;
+    margin: auto auto 0; padding: 0; border: 0; overflow: auto; overscroll-behavior: contain;
+    border-radius: var(--r-sheet) var(--r-sheet) 0 0; background: var(--paper); color: var(--ink); box-shadow: var(--sh-sheet);
+    opacity: 0; translate: 0 32px;
+    transition-property: opacity, translate, display, overlay;
+    transition-duration: .26s; transition-timing-function: var(--ease-move);
+    transition-behavior: allow-discrete;
+  }
+  .report[open] { opacity: 1; translate: 0 0; }
+  @starting-style { .report[open] { opacity: 0; translate: 0 32px; } }
+  .report::backdrop {
+    background-color: rgb(17 17 17 / 0);
+    transition-property: background-color, display, overlay; transition-duration: .26s; transition-behavior: allow-discrete;
+  }
+  .report[open]::backdrop { background-color: rgb(17 17 17 / .38); }
+  @starting-style { .report[open]::backdrop { background-color: rgb(17 17 17 / 0); } }
+  .rp { display: grid; gap: 18px; padding: 10px 24px 22px; }
+  .rp-grab { width: 40px; height: 4px; margin: 0 auto; border-radius: 4px; background: var(--line-2); }
+  .rp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .rp-head h2 { font-size: 23px; font-weight: 600; }
+  .rp-head p { margin-top: 6px; font-size: 14.5px; color: var(--ink-2); }
+  .rp-x { width: 36px; height: 36px; margin: -2px -8px 0 0; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--ink); flex: none; }
+  .rp-x:hover { background: var(--soft); }
+  .rp-reasons { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+  .rp-opt {
+    display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 1px 12px; align-items: start; padding: 11px 14px;
+    border: 1px solid var(--line-2); border-radius: 12px; cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  }
+  .rp-opt:hover { border-color: var(--ink-2); }
+  .rp-opt:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .rp-opt:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .rp-opt .radio { grid-row: span 2; margin-top: 1px; }
+  .rp-opt strong { font-weight: 600; font-size: 15px; }
+  .rp-opt small { grid-column: 2; font-size: 13.5px; color: var(--muted); }
+  .rp-next { background: var(--wash); border-radius: 14px; padding: 16px 18px; }
+  .rp-next h3 { font-family: var(--font-ui); font-size: 15px; font-weight: 600; letter-spacing: 0; margin-bottom: 14px; }
+  .rp-next .step { padding-bottom: 14px; }
+  .rp-next .step:last-child { padding-bottom: 0; }
+  .rp-next .step-dot { background: var(--paper); }
+  .rp-next .step-title { color: var(--ink); font-size: 14.5px; }
+  .rp-next .step-meta { font-size: 13.5px; }
+  .rp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+
+  .foot { border-top: 1px solid var(--line); }
+  .foot .wrap { padding-top: 22px; padding-bottom: 28px; font-size: 13.5px; color: var(--muted); }
+
+  /* ---------------------------------------------------------------- smaller screens */
+  @media (max-width: 1100px) {
+    .pay-grid { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; }
+    .trk-grid { grid-template-columns: minmax(0, 1fr) 270px; gap: 40px; }
+  }
+  @media (max-width: 960px) {
+    .demo .keyhints, .demo-label { display: none; }
+    .pay-grid, .trk-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .sum { position: static; margin-top: 8px; }
+    .m-only { display: grid; }
+    .d-only { display: none; }
+    .pay-main > .lst { margin-bottom: 28px; }
+    /* Tracker reads top to bottom: rail, progress, detail, activity, booking */
+    .trk-grid { display: flex; flex-direction: column; }
+    .col { display: contents; }
+    .trk-head { order: 1; } .rail { order: 2; } .side-prog { order: 3; margin-top: 40px; }
+    .det { order: 4; } .act { order: 5; } .side-bk { order: 6; margin-top: 44px; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 16px; }
+    .demo .wrap { gap: 10px; }
+    .demo-name, .demo-count { display: none; }
+    .demo .date-chip { font-size: 14px; padding: 6px 12px; }
+    .me-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .me img { width: 28px; height: 28px; }
+    .page-title { font-size: 27px; }
+    .pay, .trk { padding-top: 22px; }
+    .pay-head { margin-bottom: 20px; }
+    .facts { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .facts dd + dt { margin-top: 14px; }
+    .badges { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .pm-opt { grid-template-columns: 20px minmax(0, 1fr) auto; padding: 16px; }
+    .pm-ic { display: none; }
+    .sum { padding: 18px 16px 16px; border-radius: 16px; }
+    .lst { grid-template-columns: 76px minmax(0, 1fr); }
+    .lst img { width: 76px; height: 76px; }
+    .trk-status { font-size: 16.5px; }
+    .rail { padding: 18px 16px 16px; margin: 0 -4px; border-radius: 16px; }
+    .stations { gap: 8px; }
+    .st-who { font-size: 13px; gap: 6px; }
+    .st-who img, .vm-mark { width: 22px; height: 22px; }
+    .st-amt { font-size: 19px; }
+    .st-hold .amt-hero { --amt-size: 30px; }
+    .st-note { font-size: 12px; }
+    .lane .money-token { height: 32px; padding: 0 11px; gap: 6px; font-size: 13px; }
+    .lane-text { font-size: 14.5px; }
+    .lane-actions .btn { flex: 1 1 auto; }
+    .det-cols { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .choices { grid-template-columns: minmax(0, 1fr); }
+    .choices dt { padding-bottom: 0; border-bottom: 0; }
+    .choices dd { padding-top: 4px; }
+    .act-row { grid-template-columns: minmax(0, 1fr) auto; padding: 12px 2px; }
+    .act-when { grid-column: 1 / -1; grid-row: 1; }
+    .act-state { grid-column: 2; }
+    .sched th:nth-child(4), .sched td:nth-child(4) { display: none; }
+    .rp { padding: 8px 16px 18px; }
+    .rp-actions .btn-primary { flex: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .report { translate: none; transition-duration: .1s; }
+    @starting-style { .report[open] { translate: none; } }
+    .act-row.is-new { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div id="hold-nav"><span class="tag-test">Test money</span><span class="me" id="me"></span></div>
+
+<div class="demo" role="region" aria-label="Demo clock">
+  <div class="wrap">
+    <span class="demo-label">Demo date</span>
+    <span class="date-chip" id="demoDate" aria-live="polite"></span>
+    <span class="demo-name" id="demoName"></span>
+    <div class="demo-ctl">
+      <span class="demo-count" id="demoCount"></span>
+      <button class="icon-btn" type="button" id="prevBtn" aria-label="Previous step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="icon-btn" type="button" id="nextBtn" aria-label="Next step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      <span class="keyhints" aria-hidden="true"><span class="keyhint"><kbd>PgUp</kbd><kbd>PgDn</kbd></span></span>
+    </div>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<footer class="foot"><div class="wrap"><p id="footLine"></p></div></footer>
+
+<dialog id="report" class="report" closedby="any" aria-labelledby="rpTitle">
+  <form method="dialog" class="rp" id="rpForm"></form>
+</dialog>
+
+<script src="assets/hold-data.js"></script>
+<script src="assets/hold-nav.js"></script>
+<script>
+(function () {
+  'use strict';
+  const app = document.getElementById('app');
+  const H = window.HOLD;
+  if (!H) { app.innerHTML = '<div class="wrap" style="padding:40px 32px"><p>The demo data did not load. Reload the page.</p></div>'; return; }
+
+  const D = H.deal, DL = D.deadlines, U = D.upfront, m = H.money, dt = H.date;
+  const J = H.people.renter, L = H.people.lister, O = H.people.owner;
+  const WI = H.branches.whatIf, FZ = WI.states[0];
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const amt = (c, o) => '<span class="amt">' + m(c, o) + '</span>';
+  const t = (iso) => dt.parse(iso).getTime();
+
+  /* ---------------------------------------------------------------- icons (stroke style matches the site) */
+  const svg = (s, body, w) => '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 2) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>';
+  const SEAL = (c, s) => '<svg class="badge-ic" width="' + (s || 16) + '" height="' + (s || 16) + '" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5 14.41 3.02 17.75 2.04 18.58 5.42 21.96 6.25 20.98 9.59 23.5 12 20.98 14.41 21.96 17.75 18.58 18.58 17.75 21.96 14.41 20.98 12 23.5 9.59 20.98 6.25 21.96 5.42 18.58 2.04 17.75 3.02 14.41 .5 12 3.02 9.59 2.04 6.25 5.42 5.42 6.25 2.04 9.59 3.02Z" fill="' + c + '" stroke="' + c + '" stroke-width="1.6" stroke-linejoin="round"/><path d="m7.6 12.3 3 3 5.8-6.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const I = {
+    house: (s) => svg(s || 16, '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/>', 2.1),
+    mark: svg(14, '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/>', 2.6),
+    ret: (s) => svg(s || 16, '<path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/>', 2.1),
+    left: svg(20, '<path d="m15 18-6-6 6-6"/>', 2.4),
+    bank: svg(20, '<path d="M3 21h18"/><path d="M5.5 18v-7M10 18v-7M14 18v-7M18.5 18v-7"/><path d="M3 8.5 12 3.5l9 5z"/>', 1.9),
+    card: svg(20, '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/>', 1.9),
+    x: svg(20, '<path d="M18 6 6 18M6 6l12 12"/>', 2.2)
+  };
+  const STUDENT = '#3B82F6', VERIFIED = '#16A34A';
+
+  /* ---------------------------------------------------------------- states
+   * Main path (PgDn / PgUp walk it): pay, tracker, move-in-day, moved-in, moved-out, returned.
+   * Branch: #problem opens the Report a problem sheet over move-in-day; submitting it leads to #frozen. */
+  const ORDER = ['pay', 'tracker', 'move-in-day', 'moved-in', 'moved-out', 'returned'];
+  const ST = {
+    'pay':         { at: '2026-12-01', noTime: true, name: 'Confirm and pay', title: 'Confirm and pay' },
+    'tracker':     { at: DL.booked, name: 'Paid, held by Verimate', bar: H.beat(4), pos: { rent: 'hold', dep: 'hold' }, hold: 'beat-4', lister: 'booked' },
+    'move-in-day': { at: DL.moveIn, name: 'Move-in day', bar: H.beat(5), pos: { rent: 'hold', dep: 'hold' }, hold: 'beat-5', lister: 'booked' },
+    'moved-in':    { at: DL.moveInConfirmed, name: 'Rent released', bar: H.beat(6), pos: { rent: 'lena', dep: 'hold' }, hold: 'beat-6', lister: 'paid' },
+    'moved-out':   { at: DL.movedOut, name: 'Moved out', bar: H.beat(8), pos: { rent: 'lena', dep: 'hold' }, hold: 'beat-8', lister: 'move-out' },
+    'returned':    { at: DL.returned, name: 'Deposit returned', bar: H.beat(9), pos: { rent: 'lena', dep: 'you' }, hold: 'beat-9', lister: 'returned' },
+    'frozen':      { at: FZ.at, name: 'What if: problem reported', bar: FZ, pos: { rent: 'hold', dep: 'hold' }, frozen: true, hold: 'what-if', lister: 'booked' }
+  };
+  const rank = (k) => (k === 'frozen' ? 2.5 : ORDER.indexOf(k));
+
+  let cur = null;               // current state key
+  let method = 'bank';          // payment method picked on #pay
+  let reason = WI.reason;       // problem reason (data default: No access)
+
+  /* ---------------------------------------------------------------- shared bits */
+  const rc = (label, c, cls, note) => '<div class="rc-row ' + (cls || '') + '"><span>' + esc(label) + (note ? '<small class="rc-note">' + esc(note) + '</small>' : '') + '</span>' + amt(c) + '</div>';
+  const total = () => U.total + (method === 'card' ? D.cardCost : 0);
+  const cardRate = (H.fees.card.rate * 100).toFixed(1).replace(/\.0$/, '') + '% + ' + H.fees.card.fixed + '¢';
+  const cancelBy = H.date.addDays(D.start, -14);
+  const firstMonthEnd = H.date.addDays(D.schedule[1].due, -1);
+  const directRows = D.schedule.filter((r) => r.via === 'direct');
+  const stepLi = (n, title, meta, cls, cur) => '<li class="step ' + (cls || '') + '"' + (cur ? ' aria-current="step"' : '') + '><span class="step-dot">' + n + '</span><div class="step-body"><p class="step-title">' + title + '</p>' + (meta ? '<p class="step-meta">' + meta + '</p>' : '') + '</div></li>';
+
+  function listingRow(cls) {
+    return '<div class="lst ' + cls + '"><img src="' + esc(D.img) + '" alt="' + esc(D.imgAlt) + '" width="92" height="92" />' +
+      '<div><p class="lst-title">' + esc(D.address) + '</p><p class="lst-sub">' + esc(D.unit) + ', furnished</p>' +
+      '<p class="lst-sub">' + esc(D.city) + '</p><p class="lst-sub">' + D.walkMinutes + ' min walk to campus</p></div></div>';
+  }
+
+  function listerBlock() {
+    const b = L.badges, rec = L.record.before;
+    return '<div class="lister">' +
+      '<div class="person"><img class="avatar avatar-lg" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" width="56" height="56" />' +
+        '<div><p class="person-name">' + esc(L.name) + '</p><p class="person-meta">' + esc(L.year) + ', ' + esc(L.school) + '. ' + esc(L.note) + '.</p></div></div>' +
+      '<ul class="badges">' +
+        '<li><span class="badge badge-student">' + SEAL(STUDENT) + esc(b[0]) + '</span></li>' +
+        '<li><span class="badge badge-verified">' + SEAL(VERIFIED) + esc(b[1]) + '</span></li>' +
+        '<li><span class="badge badge-owner">' + I.house() + esc(b[2]) + '</span><small>' + esc(O.name) + ', in writing</small></li>' +
+        '<li><span class="badge badge-owner">' + I.ret() + esc(rec.label) + '</span><small>' + esc(rec.detail) + '</small></li>' +
+      '</ul></div>';
+  }
+
+  /* ---------------------------------------------------------------- #pay */
+  function receiptRows() {
+    return rc('First month', U.firstMonth, '', dt(D.start, 'short') + ' – ' + dt(firstMonthEnd, 'short') + '. Goes to Lena after you tap All good.') +
+      rc('Deposit', U.deposit, '', "Comes back after move-out. One month, New York's limit.") +
+      rc('Verimate fee', U.verimateFee, 'rc-zero', 'Lena pays 10% of one month, after you move in.') +
+      (method === 'card' ? rc('Card cost', D.cardCost, 'rc-sub', cardRate + ', to the card network') : '') +
+      rc('Total', total(), 'rc-total');
+  }
+
+  function payView() {
+    const moveIn = dt(D.start, 'day'), moveOut = dt(D.end, 'day');
+    return '<div class="wrap pay"><div class="pay-grid">' +
+      '<div class="pay-main">' +
+        '<div class="pay-head"><a class="back" href="index.html?desktop" aria-label="Back to listings">' + I.left + '</a>' +
+          '<h1 class="page-title" tabindex="-1">Confirm and pay</h1></div>' +
+        listingRow('m-only') +
+        '<section class="sec first" aria-labelledby="h-sub"><h2 id="h-sub">Your sublease</h2><dl class="facts">' +
+          '<dt>Dates</dt><dd>' + esc(D.datesLabel) + '<span class="sub">Move in ' + moveIn + '. Move out ' + moveOut + '.</span></dd>' +
+          '<dt>Rent</dt><dd>' + esc(D.rentLabel) + '<span class="sub">' + esc(H.unit.thisDeal.months) + ', ' + amt(D.totalRent) + ' in all</span></dd>' +
+          '<dt>Lister</dt><dd>' + listerBlock() + '</dd>' +
+        '</dl></section>' +
+        '<section class="sec" aria-labelledby="h-pm"><h2 id="h-pm">Pay with</h2>' +
+          '<fieldset class="pm" id="pm"><legend class="sr-only">Payment method</legend>' +
+            '<label class="pm-opt"><input class="radio" type="radio" name="pm" value="bank"' + (method === 'bank' ? ' checked' : '') + ' />' +
+              '<span class="pm-ic">' + I.bank + '</span>' +
+              '<span class="pm-txt"><strong>Bank account</strong><small>Settles in 4 business days, by ' + dt(DL.achSettles, 'day') + '. Nothing is released before then.</small></span>' +
+              '<span class="pm-cost">Free</span></label>' +
+            '<label class="pm-opt"><input class="radio" type="radio" name="pm" value="card"' + (method === 'card' ? ' checked' : '') + ' />' +
+              '<span class="pm-ic">' + I.card + '</span>' +
+              '<span class="pm-txt"><strong>Debit or credit card</strong><small>Card cost: ' + cardRate + ' on ' + m(U.total) + '. It goes to the card network; Verimate keeps none of it.</small></span>' +
+              '<span class="pm-cost amt">' + m(D.cardCost, { sign: true }) + '</span></label>' +
+          '</fieldset></section>' +
+        '<section class="sec" aria-labelledby="h-what"><h2 id="h-what">What happens to your ' + m(U.total) + '</h2><ol class="steps seq">' +
+          stepLi(1, 'Today: it goes to the hold, not to Lena', 'Verimate holds it at Stripe. Lena can see it but can’t withdraw it.') +
+          stepLi(2, 'Move-in, ' + moveIn + ': 48 hours to check the room',
+            'Tap All good and ' + m(D.rent) + ' rent goes to Lena. Say nothing and it goes on its own ' + dt(DL.autoRelease, 'dayStamp') + '. Report a problem and it stays frozen until Verimate decides.') +
+          stepLi(3, 'Move-out, ' + moveOut + ': your deposit back in one tap',
+            'Lena taps Return and your ' + m(D.deposit) + ' comes back. If she does nothing, it comes back on its own ' + dt(DL.autoReturn, 'day') + '. New York’s 14-day deadline is ' + dt(DL.nyDeadline, 'day') + '.') +
+          '</ol>' +
+          '<p class="note">February to May rent, ' + amt(D.directRent) + ', you pay straight to Lena. Verimate charges no fee on it.</p>' +
+          '<p class="note"><a class="link" href="hold.html">See both sides of this deal in the live demo</a></p>' +
+        '</section>' +
+        '<section class="sec" aria-labelledby="h-cancel"><h2 id="h-cancel">If plans change</h2><ul class="plain">' +
+          '<li><strong>Lena cancels:</strong> all ' + m(U.total) + ' comes back to you.</li>' +
+          '<li><strong>You cancel by ' + dt(cancelBy, 'day') + ':</strong> all ' + m(U.total) + ' comes back.</li>' +
+          '<li><strong>You cancel after that:</strong> your deposit comes back in full. The first month goes to Lena, minus her 10% fee, unless she re-rents the room from ' + dt(D.start, 'short') + '.</li>' +
+        '</ul></section>' +
+      '</div>' +
+      '<aside class="sum panel-raised" aria-labelledby="h-due">' +
+        listingRow('d-only') +
+        '<h2 class="sum-h" id="h-due">Due today</h2>' +
+        '<div class="receipt" id="payRc">' + receiptRows() + '</div>' +
+        '<button class="btn btn-primary btn-lg btn-block pay-btn" type="button" id="payBtn" data-act="pay">Pay ' + m(total()) + '</button>' +
+        '<p class="sum-fine">Held by Verimate at Stripe until you move in.</p>' +
+      '</aside>' +
+    '</div></div>';
+  }
+
+  function bindPay() {
+    const pm = document.getElementById('pm');
+    pm.addEventListener('change', (e) => {
+      if (!e.target.matches('input[name="pm"]')) return;
+      method = e.target.value;
+      document.getElementById('payRc').innerHTML = receiptRows();
+      document.getElementById('payBtn').textContent = 'Pay ' + m(total());
+    });
+  }
+
+  let paying = false;
+  function pay() {
+    if (paying) return;
+    const b = document.getElementById('payBtn');
+    paying = true;
+    if (b) { b.setAttribute('aria-busy', 'true'); b.textContent = 'Paying…'; }
+    setTimeout(() => { paying = false; go('tracker'); }, 420);
+  }
+
+  /* ---------------------------------------------------------------- tracker pieces */
+  const CHIP = {
+    held: '<span class="chip chip-held">Held by Verimate</span>',
+    needs: '<span class="chip chip-needs">Needs you</span>',
+    released: '<span class="chip chip-released">Released</span>',
+    returned: '<span class="chip chip-returned">Returned</span>',
+    frozen: '<span class="chip chip-frozen">Frozen</span>'
+  };
+
+  function statusLine(k) {
+    switch (k) {
+      case 'tracker': return amt(U.total) + ' is held at Stripe for Verimate. Lena can’t touch it, and Verimate can’t spend it.';
+      case 'move-in-day': return 'You move in today. Your rent waits until you say the room is right, or until 48 hours pass.';
+      case 'moved-in': return 'Rent released to Lena. Your ' + amt(D.deposit) + ' deposit is still held by Verimate.';
+      case 'moved-out': return 'You moved out. Your ' + amt(D.deposit) + ' deposit stays held until Lena returns it, and New York’s 14-day clock has started.';
+      case 'returned': return 'Your ' + amt(D.deposit) + ' deposit is on its way back. Nothing is held anymore.';
+      case 'frozen': return 'Problem reported. All ' + amt(U.total) + ' is frozen while Verimate looks into it. Nothing goes to Lena.';
+    }
+    return '';
+  }
+
+  function laneInfo(k, lane) {
+    const rent = lane === 'rent';
+    const released = '<p class="lane-text">Released to Lena ' + dt(DL.moveInConfirmed, 'dayStamp') + '. Final. She receives ' + amt(D.listerFirstPayout) + ' after her 10% fee.</p>';
+    switch (k) {
+      case 'tracker': return rent
+        ? { chip: CHIP.held, text: 'Goes to Lena after you move in on ' + dt(DL.moveIn, 'day') + ' and tap All good, or on its own 48 hours later.' }
+        : { chip: CHIP.held, text: 'Comes back to you after move-out on ' + dt(D.moveOut, 'day') + ', when Lena taps Return. If she does nothing, it comes back on its own on Day 8.' };
+      case 'move-in-day': return rent
+        ? { chip: CHIP.needs, extra: '<span class="countdown"><span class="amt">' + esc(H.beat(5).timer.display) + '</span> left</span>',
+            text: 'Goes to Lena when you tap All good, or on its own ' + dt(DL.autoRelease, 'dayStamp') + '.',
+            actions: '<button class="btn btn-primary" type="button" data-act="all-good">All good</button><button class="btn btn-secondary" type="button" data-act="report">Report a problem</button>' }
+        : { chip: CHIP.held, text: 'Stays held through your lease. Comes back after move-out, when Lena taps Return.' };
+      case 'moved-in': return rent
+        ? { chip: CHIP.released, html: released }
+        : { chip: CHIP.held, text: 'Comes back after you move out on ' + dt(D.moveOut, 'day') + ' and Lena taps Return. If she does nothing, it comes back on its own ' + dt(DL.autoReturn, 'day') + '.',
+            actions: '<button class="btn btn-primary" type="button" data-act="moved-out">I’ve moved out</button>' };
+      case 'moved-out': return rent
+        ? { chip: CHIP.released, html: released }
+        : { chip: CHIP.held, extra: '<span class="countdown"><span class="amt">Day 0</span> of 14</span>',
+            text: 'Lena returns it by ' + dt(DL.returnBy, 'day') + ', or claims deductions with a photo and an amount for each. If she does nothing, it comes back on its own ' + dt(DL.autoReturn, 'day') + '.',
+            actions: '<a class="link" href="lister.html#move-out">See Lena’s side</a>' };
+      case 'returned': return rent
+        ? { chip: CHIP.released, html: released }
+        : { chip: CHIP.returned, text: 'Returned ' + dt(DL.returned, 'dayStamp') + ', 1 day after move-out. In your bank ' + dt(DL.jamieBankArrives[0], 'day') + ' to ' + dt(DL.jamieBankArrives[1], 'day') + '.',
+            actions: '<button class="btn btn-secondary btn-sm" type="button" data-act="copy">Copy receipt link</button>' };
+      case 'frozen': return rent
+        ? { chip: CHIP.frozen, text: 'Frozen: ' + esc(reason) + '. Lena answers by ' + dt(FZ.deadlines.listerAnswer, 'dayStamp') + '. Verimate decides by ' + dt(FZ.deadlines.decision, 'day') + '.' }
+        : { chip: CHIP.frozen, text: 'Frozen with the first month. If you get a full refund, it comes back too.' };
+    }
+    return {};
+  }
+
+  function tokenClass(k, lane, at) {
+    if (ST[k].frozen) return 'is-frozen';
+    if (at === 'hold') return 'is-held';
+    if (at === 'lena' || at === 'you') return 'is-released';
+    return '';
+  }
+
+  function lane(k, which, pos, pre) {
+    const at = pre ? 'you' : pos[which];
+    const label = which === 'rent' ? 'First month' : 'Deposit';
+    const cents = which === 'rent' ? U.firstMonth : U.deposit;
+    const info = laneInfo(k, which);
+    return '<div class="lane">' +
+      '<div class="lane-track" data-at="' + at + '" aria-hidden="true">' +
+        '<span class="lane-node n-you"></span><span class="lane-node n-hold"></span><span class="lane-node n-lena"></span>' +
+        '<span class="money-token ' + (pre ? '' : tokenClass(k, which, at)) + '" style="view-transition-name:tok-' + which + '"><span class="tk-l">' + label + '</span><span class="tk-a">' + m(cents) + '</span></span>' +
+      '</div>' +
+      '<div class="lane-info">' +
+        '<div class="lane-row"><strong class="sr-only">' + label + ', ' + m(cents) + ':</strong>' + (info.chip || '') + (info.extra || '') + '</div>' +
+        (info.html || '<p class="lane-text">' + info.text + '</p>') +
+        (info.actions ? '<div class="lane-actions">' + info.actions + '</div>' : '') +
+      '</div></div>';
+  }
+
+  function rail(k, pre) {
+    const s = ST[k], b = s.bar;
+    const released = s.pos.rent === 'lena' ? D.rent : 0;
+    return '<section class="rail" aria-labelledby="h-rail">' +
+      '<h2 id="h-rail" class="sr-only">Where your ' + m(U.total) + ' is now</h2>' +
+      '<div class="stations">' +
+        '<div class="station"><div class="st-who"><img class="avatar" src="' + esc(J.img) + '" alt="' + esc(J.alt) + '" />You</div>' +
+          '<div class="st-amt amt">' + m(b.renterBack) + '</div><div class="st-note">Back to you</div></div>' +
+        '<div class="station st-hold"><div class="st-who"><span class="vm-mark">' + I.mark + '</span>Held by Verimate</div>' +
+          '<div>' + H.moneyHTML(b.held, { hero: true }) + '</div><div class="st-note">At Stripe. Lena can’t withdraw it.</div></div>' +
+        '<div class="station st-lena"><div class="st-who">Lena<img class="avatar" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" /></div>' +
+          '<div class="st-amt amt">' + m(released) + '</div><div class="st-note">' + (released ? 'Released. She gets ' + m(D.listerFirstPayout) : 'Released to Lena') + '</div></div>' +
+      '</div>' +
+      lane(k, 'rent', s.pos, pre) + lane(k, 'dep', s.pos, pre) +
+      '<p class="rail-cap">Only your first month and deposit go through Hold. February to May rent, ' + amt(D.directRent) + ', goes straight to Lena.</p>' +
+    '</section>';
+  }
+
+  function progress(k) {
+    const P = {
+      'tracker':     { done: 2, meta: 'Move-in ' + dt(DL.moveIn, 'day') },
+      'move-in-day': { done: 2, meta: 'All good, or on its own ' + dt(DL.autoRelease, 'dayStamp') },
+      'moved-in':    { done: 4, meta: 'Move-out ' + dt(D.moveOut, 'day') },
+      'moved-out':   { done: 5, meta: 'Lena returns by ' + dt(DL.returnBy, 'day') },
+      'returned':    { done: 6 },
+      'frozen':      { done: 2, frozen: true }
+    }[k];
+    const items = H.tracker.map((x, i) => {
+      if (i < P.done) return stepLi(i + 1, esc(x.label), dt(x.at, 'stamp'), 'is-done');
+      if (i === P.done && P.frozen) return stepLi(i + 1, 'Frozen: ' + esc(reason), 'Lena answers by ' + dt(FZ.deadlines.listerAnswer, 'dayStamp'), 'is-frozen', true);
+      if (i === P.done) return stepLi(i + 1, esc(x.label), P.meta, 'is-now', true);
+      return stepLi(i + 1, esc(x.label), '', '');
+    }).join('');
+    return '<section class="side-prog" aria-labelledby="h-prog"><h2 id="h-prog">Progress</h2><ol class="steps">' + items + '</ol></section>';
+  }
+
+  function clock(marks, fillDay, label) {
+    const pos = (d) => (d / 14 * 100).toFixed(3) + '%';
+    let ticks = '';
+    for (let d = 0; d <= 14; d++) ticks += '<span class="clk-tick" style="left:' + pos(d) + '"></span>';
+    const lab = (place) => marks.filter((x) => x.place === place).map((x) =>
+      '<span class="clk-m' + (x.end ? ' end' : '') + '" style="left:' + pos(x.day) + '"><b>Day ' + x.day + '</b><span>' + x.text + '</span></span>').join('');
+    return '<div class="clock" role="group" aria-label="' + esc(label) + '">' +
+      '<div class="clk-lab clk-above">' + lab('above') + '</div>' +
+      '<div class="clk-line" aria-hidden="true">' + ticks + (fillDay ? '<span class="clk-fill" style="width:' + pos(fillDay) + '"></span>' : '') +
+        marks.map((x) => '<span class="clk-dot ' + (x.tone || '') + '" style="left:' + pos(x.day) + '"></span>').join('') + '</div>' +
+      '<div class="clk-lab clk-below">' + lab('below') + '</div></div>';
+  }
+
+  function detail(k) {
+    const ref = esc(D.ref);
+    switch (k) {
+      case 'tracker':
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">Your payment</h2><div class="det-cols">' +
+          '<div class="panel"><div class="receipt">' + rc('First month', U.firstMonth) + rc('Deposit', U.deposit) + rc('Verimate fee', U.verimateFee, 'rc-zero') +
+            (method === 'card' ? rc('Card cost', D.cardCost, 'rc-sub', 'To the card network') : '') + rc('Total paid', total(), 'rc-total') + '</div>' +
+            '<p class="receipt-ref">Ref ' + ref + ', ' + dt(DL.booked, 'stamp') + ', by ' + (method === 'card' ? 'card' : 'bank') + '</p></div>' +
+          '<div class="det-text">' +
+            (method === 'bank' ? '<p><strong>Your bank payment settles ' + dt(DL.achSettles, 'day') + '.</strong> Nothing is released before that.</p>' : '') +
+            '<p><strong>You move in ' + dt(DL.moveIn, 'day') + '.</strong> From 10:00 AM you have 48 hours to tap All good or Report a problem.</p>' +
+            '<p><strong>Plans change?</strong> Cancel by ' + dt(cancelBy, 'day') + ' and all ' + m(U.total) + ' comes back.</p>' +
+          '</div></div></section>';
+      case 'move-in-day':
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">What each choice does</h2><dl class="choices">' +
+          '<dt>All good</dt><dd>' + amt(D.rent) + ' goes to Lena now. She receives ' + amt(D.listerFirstPayout) + '; her 10% fee, ' + amt(D.listerFee) + ', goes to Verimate. Your deposit stays held.</dd>' +
+          '<dt>Say nothing</dt><dd>The same thing happens on its own ' + dt(DL.autoRelease, 'dayStamp') + '.</dd>' +
+          '<dt>Report a problem</dt><dd>All ' + amt(U.total) + ' is frozen. Lena has 24 h to answer, and Verimate decides within 3 business days.</dd>' +
+          '</dl><p class="det-foot">Your 3 move-in photos are signed by you and Lena. They are New York’s move-in condition record, and Verimate compares them with the move-out photos.</p></section>';
+      case 'moved-in':
+        return '<section class="det" aria-labelledby="h-det"><div class="det-cols">' +
+          '<div><h2 id="h-det">Rent released</h2><div class="panel"><div class="receipt">' +
+            rc('Rent, first month', D.rent) + rc('Verimate fee, paid by Lena', -D.listerFee, 'rc-sub', '10% of ' + m(D.rent) + ', once') + rc('Lena receives', D.listerFirstPayout, 'rc-total') + '</div>' +
+            '<p class="receipt-ref">Ref ' + ref + ', released ' + dt(DL.moveInConfirmed, 'stamp') + '. In Lena’s bank by ' + dt(DL.lenaBankArrives, 'day') + '.</p></div>' +
+            '<p class="det-foot">You paid ' + amt(H.totals.renterFees) + ' in fees.</p></div>' +
+          '<div><h2>Rent you pay Lena directly</h2><table class="sched"><thead><tr><th scope="col">Due</th><th scope="col">Rent</th><th scope="col" class="r">Amount</th><th scope="col" class="r">Verimate fee</th></tr></thead><tbody>' +
+            directRows.map((r) => '<tr><td class="when">' + dt(r.due, 'day') + '</td><td>' + esc(r.label) + '</td><td class="r">' + amt(r.cents) + '</td><td class="r fee">' + amt(r.fee) + '</td></tr>').join('') +
+            '</tbody><tfoot><tr><td colspan="2">Straight to Lena</td><td class="r">' + amt(D.directRent) + '</td><td class="r fee">' + amt(0) + '</td></tr></tfoot></table>' +
+            '<p class="det-foot">Verimate charges once, on the first month only.</p></div>' +
+          '</div></section>';
+      case 'moved-out':
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">New York’s 14-day clock</h2>' +
+          clock([
+            { day: 0, text: 'Moved out ' + dt(DL.movedOut, 'short'), place: 'below', tone: 'now' },
+            { day: 7, text: 'Lena returns by ' + dt(DL.returnBy, 'short'), place: 'above', end: true },
+            { day: 8, text: 'Auto-returns ' + dt(DL.autoReturn, 'short'), place: 'below' },
+            { day: 14, text: 'NY deadline ' + dt(DL.nyDeadline, 'short'), place: 'above', end: true }
+          ], 0, 'Day 0 of 14') +
+          '<p class="det-foot">Lena can claim deductions only for New York’s 4 reasons, each with a photo and an amount. Whatever she doesn’t claim comes back to you the moment she files.</p></section>';
+      case 'returned': {
+        const T = H.totals;
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">Back 1 day after move-out</h2>' +
+          clock([
+            { day: 0, text: 'Moved out ' + dt(DL.movedOut, 'short'), place: 'below', tone: 'done' },
+            { day: 1, text: 'Returned ' + dt(DL.returned, 'short'), place: 'above', tone: 'ok' },
+            { day: 14, text: 'NY deadline ' + dt(DL.nyDeadline, 'short'), place: 'above', end: true }
+          ], 1, 'Returned on day 1 of 14') +
+          '<div class="det-cols" style="margin-top:28px">' +
+            '<div class="panel"><h3>Your sublease, start to finish</h3><div class="receipt">' +
+              rc('You paid in', T.renterPaidIn, '', m(U.total) + ' at booking, then ' + m(D.directRent) + ' rent straight to Lena') +
+              rc('Deposit back', -T.renterGotBack) + rc('Verimate fees', T.renterFees, 'rc-zero') +
+              rc('Your cost, rent only', T.renterNet, 'rc-total') + '</div></div>' +
+            '<div class="det-text"><p>Lena’s profile now shows:</p><div class="record"><span class="badge">' + I.ret() + esc(L.record.after.label) + '</span><small>' + esc(L.record.after.detail) + '</small></div>' +
+              '<p>The next renter who looks at her listing sees it.</p></div>' +
+          '</div></section>';
+      }
+      case 'frozen':
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">Problem reported: ' + esc(reason) + '</h2><div class="det-cols">' +
+          '<ol class="steps">' +
+            stepLi(1, m(U.total) + ' frozen', dt(FZ.at, 'stamp'), 'is-done') +
+            stepLi(2, 'Lena answers', 'By ' + dt(FZ.deadlines.listerAnswer, 'dayStamp'), 'is-now', true) +
+            stepLi(3, 'Verimate decides', 'By ' + dt(FZ.deadlines.decision, 'day'), '') +
+          '</ol>' +
+          '<div class="det-text"><p>Verimate decides one of three: a full refund (Lena’s fee is ' + amt(0) + '), a partial refund (her fee shrinks with it), or release to Lena.</p>' +
+            '<p><strong>A full refund sends all ' + amt(U.total) + ' back to you.</strong> Nothing was paid out, so there is nothing to chase.</p></div>' +
+          '</div></section>';
+    }
+    return '';
+  }
+
+  function activityRows(k) {
+    const lim = t(ST[k].at);
+    let rows = H.activity.filter((a) => a.cents !== null && t(a.at) <= (k === 'frozen' ? t(DL.moveIn) : lim)).map((a) => Object.assign({}, a));
+    if (k === 'frozen') rows.push({ at: FZ.at, who: 'renter', text: 'You reported a problem: ' + reason, cents: U.total, state: 'frozen' });
+    if (method === 'card') {
+      rows = rows.filter((a) => !/^Bank payment settled/.test(a.text));
+      rows.forEach((a) => { if (a.at === DL.booked && a.who === 'renter') { a.text = a.text.replace('by bank', 'by card'); a.note = 'Plus ' + m(D.cardCost) + ' card cost'; } });
+    }
+    rows.forEach((a) => { if (/rent paid to Lena/.test(a.text)) { a.note = 'Straight to Lena. Verimate fee ' + m(0); a.state = null; } });
+    return rows.reverse();
+  }
+
+  function activity(k, since) {
+    const rows = activityRows(k);
+    return '<section class="act" aria-labelledby="h-act"><h2 id="h-act">Activity</h2><ol class="act-list">' +
+      rows.map((a) => '<li class="act-row' + (since !== null && t(a.at) > since ? ' is-new' : '') + '">' +
+        '<time class="act-when" datetime="' + esc(a.at) + '">' + dt(a.at, 'stamp') + '</time>' +
+        '<span class="act-what">' + esc(a.text) + (a.note ? '<small>' + esc(a.note) + '</small>' : '') + '</span>' +
+        '<span class="act-amt">' + amt(a.cents) + '</span>' +
+        '<span class="act-state">' + (a.state ? CHIP[a.state] : '') + '</span></li>').join('') +
+      '</ol></section>';
+  }
+
+  function booking(k) {
+    const s = ST[k];
+    return '<section class="side-bk bk" aria-labelledby="h-bk"><h2 id="h-bk">Your booking</h2>' +
+      '<div class="bk-lst"><img src="' + esc(D.img) + '" alt="' + esc(D.imgAlt) + '" width="60" height="60" /><div><p class="bk-t">' + esc(D.address) + '</p><p class="bk-s">' + esc(D.unitShort) + ', ' + esc(D.datesLabel) + '</p></div></div>' +
+      '<div class="person"><img class="avatar" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" /><div><p class="person-name">' + esc(L.name) + '</p><p class="person-meta">Lister, ' + esc(L.year) + '</p></div></div>' +
+      '<dl class="bk-dl"><dt>Reference</dt><dd>' + esc(D.ref) + '</dd><dt>Rent</dt><dd>' + esc(D.rentLabel) + '</dd><dt>Paid by</dt><dd>' + (method === 'card' ? 'Card' : 'Bank') + '</dd><dt>Your fees</dt><dd>' + m(H.totals.renterFees) + '</dd></dl>' +
+      '<ul class="bk-links"><li><a class="link" href="lister.html#' + s.lister + '">See Lena’s side</a></li><li><a class="link" href="hold.html#' + s.hold + '">See this step in the live demo</a></li></ul>' +
+    '</section>';
+  }
+
+  function trackerView(k, opt) {
+    opt = opt || {};
+    return '<div class="wrap trk"><div class="trk-grid">' +
+      '<div class="col col-main">' +
+        '<header class="trk-head"><h1 class="page-title" tabindex="-1">Where is my money?</h1><p class="trk-status">' + statusLine(k) + '</p></header>' +
+        rail(k, opt.pre) + detail(k) + activity(k, opt.since === undefined ? null : opt.since) +
+      '</div>' +
+      '<div class="col col-side side">' + progress(k) + booking(k) + '</div>' +
+    '</div></div>';
+  }
+
+  /* ---------------------------------------------------------------- report a problem sheet */
+  const dlg = document.getElementById('report');
+  const HINTS = {
+    'Not real or not as listed': 'The room, the photos or the terms don’t match the listing.',
+    'No access': 'You can’t get in: no keys, a wrong code, or someone else living there.',
+    'Unsafe': 'No heat, no working lock, or another hazard in the room.',
+    'Lister not allowed to sublet': 'The owner or the building says the sublet isn’t approved.'
+  };
+  function reportForm() {
+    return '<div class="rp-grab" aria-hidden="true"></div>' +
+      '<div class="rp-head"><div><h2 id="rpTitle">Report a problem</h2><p>Pick what’s wrong. Your 3 move-in photos from ' + dt(DL.moveIn, 'day') + ' are attached.</p></div>' +
+        '<button class="rp-x" type="button" data-close aria-label="Close">' + I.x + '</button></div>' +
+      '<fieldset class="rp-reasons"><legend class="sr-only">What’s wrong</legend>' +
+        WI.reasons.map((r) => '<label class="rp-opt"><input class="radio" type="radio" name="reason" value="' + esc(r) + '" /><strong>' + esc(r) + '</strong><small>' + esc(HINTS[r] || '') + '</small></label>').join('') +
+      '</fieldset>' +
+      '<div class="rp-next"><h3>What happens next</h3><ol class="steps">' +
+        stepLi(1, 'All ' + m(U.total) + ' is frozen', 'Nothing goes to Lena while Verimate looks into it.') +
+        stepLi(2, 'Lena has 24 h to answer', 'She sees your reason and your photos.') +
+        stepLi(3, 'Verimate decides within 3 business days', 'Full refund, partial refund, or release to Lena.') +
+      '</ol></div>' +
+      '<div class="rp-actions"><button class="btn btn-quiet" type="button" data-close>Cancel</button>' +
+        '<button class="btn btn-primary" type="submit" id="rpSubmit" disabled>Report a problem</button></div>';
+  }
+  const form = document.getElementById('rpForm');
+  form.innerHTML = reportForm();
+  form.addEventListener('change', () => { document.getElementById('rpSubmit').disabled = !form.querySelector('input[name="reason"]:checked'); });
+  form.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) dlg.close(); });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pick = form.querySelector('input[name="reason"]:checked');
+    if (!pick) return;
+    reason = pick.value;
+    dlg.dataset.sent = '1';
+    dlg.close();
+    go('frozen');
+  });
+  dlg.addEventListener('close', () => {
+    if (!dlg.dataset.sent && location.hash === '#problem') history.replaceState(null, '', '#move-in-day');
+    delete dlg.dataset.sent;
+  });
+  // Light dismiss for browsers without closedby (Safari): a click on the backdrop lands on the dialog itself.
+  if (!('closedBy' in HTMLDialogElement.prototype)) {
+    dlg.addEventListener('click', (e) => {
+      if (e.target !== dlg) return;
+      const r = dlg.getBoundingClientRect();
+      if (r.top <= e.clientY && e.clientY <= r.bottom && r.left <= e.clientX && e.clientX <= r.right) return;
+      dlg.close();
+    });
+  }
+  function openReport() {
+    if (dlg.open) return;
+    form.reset();
+    document.getElementById('rpSubmit').disabled = true;
+    dlg.showModal();
+    if (location.hash !== '#problem') history.replaceState(null, '', '#problem');
+  }
+
+  /* ---------------------------------------------------------------- routing and the one motion */
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  function vt(update, after) {
+    if (!document.startViewTransition || reduce.matches) { update(); if (after) after(); return; }
+    const tr = document.startViewTransition(update);
+    tr.ready.catch(() => {});
+    tr.updateCallbackDone.catch(() => {});
+    tr.finished.catch(() => {}).finally(() => { if (after) after(); });
+  }
+  function focusTitle() {
+    const a = document.activeElement;
+    if (a && a !== document.body && document.contains(a)) return;
+    const h = app.querySelector('.page-title');
+    if (h) h.focus({ preventScroll: true });
+  }
+
+  function updateBar(k) {
+    const s = ST[k], i = ORDER.indexOf(k);
+    const chip = document.getElementById('demoDate');
+    chip.innerHTML = esc(dt(s.at, 'full')) + (s.noTime ? '' : '<span class="date-chip-time">' + esc(dt(s.at, 'time')) + '</span>');
+    document.getElementById('demoName').textContent = s.name;
+    document.getElementById('demoCount').textContent = i >= 0 ? (i + 1) + ' of ' + ORDER.length : '';
+    document.getElementById('prevBtn').disabled = i === 0;
+    document.getElementById('nextBtn').disabled = k === 'frozen' || i === ORDER.length - 1;
+    document.title = (k === 'pay' ? 'Confirm and pay' : 'Where is my money?') + ' | Verimate';
+  }
+
+  function show(prev, k, initial) {
+    updateBar(k);
+    if (k === 'pay') {
+      app.innerHTML = payView();
+      bindPay();
+      if (!initial) { scrollTo(0, 0); focusTitle(); }
+      return;
+    }
+    if (initial || !prev) { app.innerHTML = trackerView(k); return; }
+    if (prev === 'pay') {
+      // Paid: draw the tracker with both amounts still on your side, then move them into the hold.
+      app.innerHTML = trackerView(k, { pre: true });
+      scrollTo(0, 0);
+      setTimeout(() => vt(() => { app.innerHTML = trackerView(k, { since: 0 }); }, focusTitle), 160);
+      return;
+    }
+    const since = rank(prev) < rank(k) ? t(ST[prev].at) : null;
+    vt(() => { app.innerHTML = trackerView(k, { since: since }); }, focusTitle);
+  }
+
+  function route(initial) {
+    let k = decodeURIComponent(location.hash.replace(/^#/, ''));
+    const problem = k === 'problem';
+    if (problem) k = 'move-in-day';
+    if (!ST[k]) k = 'pay';
+    const prev = cur;
+    cur = k;
+    if (dlg.open && !problem) dlg.close();
+    if (prev !== k || initial) show(prev, k, initial);
+    if (problem) openReport();
+  }
+
+  function go(k) {
+    if (location.hash === '#' + k) route(false);
+    else location.hash = k;
+  }
+
+  function step(dir) {
+    if (cur === 'frozen') { if (dir < 0) go('move-in-day'); return; }
+    const j = ORDER.indexOf(cur) + dir;
+    if (j >= 0 && j < ORDER.length) go(ORDER[j]);
+  }
+
+  app.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    switch (b.dataset.act) {
+      case 'pay': pay(); break;
+      case 'all-good': go('moved-in'); break;
+      case 'report': openReport(); break;
+      case 'moved-out': go('moved-out'); break;
+      case 'copy': {
+        const done = (txt) => { b.textContent = txt; setTimeout(() => { if (b.isConnected) b.textContent = 'Copy receipt link'; }, 2200); };
+        const url = location.href.split('#')[0] + '#returned';
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => done('Link copied'), () => done('Copy not allowed here'));
+        else done('Copy not allowed here');
+        break;
+      }
+    }
+  });
+  document.getElementById('prevBtn').addEventListener('click', () => step(-1));
+  document.getElementById('nextBtn').addEventListener('click', () => step(1));
+
+  addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || dlg.open) return;
+    const el = e.target, tag = el && el.tagName;
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (el && el.isContentEditable);
+    const control = typing || /^(BUTTON|A|SUMMARY)$/.test(tag);
+    const k = e.key;
+    if (k === 'PageDown' || (k === 'ArrowRight' && !typing) || ((k === ' ' || k === 'Enter') && !control)) { e.preventDefault(); step(1); }
+    else if (k === 'PageUp' || (k === 'ArrowLeft' && !typing)) { e.preventDefault(); step(-1); }
+    else if ((k === 'r' || k === 'R') && !typing) { e.preventDefault(); method = 'bank'; go('pay'); }
+  });
+  addEventListener('hashchange', () => route(false));
+
+  /* ---------------------------------------------------------------- boot */
+  document.getElementById('me').innerHTML = '<img class="avatar" src="' + esc(J.img) + '" alt="' + esc(J.alt) + '" /><span class="me-name">' + esc(J.name) + '</span>';
+  document.getElementById('footLine').textContent = H.promise.name + '. ' + H.promise.money;
+  route(true);
+})();
+</script>
+</body>
+</html>
