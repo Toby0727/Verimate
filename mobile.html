@@ -27,7 +27,7 @@
     --brand-tint: #FCE8E9;
     --verified: #16A34A;
     --verified-tint: #E7F5EC;
-    --verified-ink: #11803A;
+    --verified-ink: #0F7A36;
     --student: #3B82F6;
     --flagged: #DC2626;
     --flagged-ink: #B91C1C;
@@ -61,7 +61,7 @@
   .tabbar {
     position: absolute; left: 0; right: 0; bottom: 0; z-index: 30; height: var(--tabbar); padding-bottom: env(safe-area-inset-bottom);
     display: grid; grid-template-columns: repeat(5, 1fr); align-items: center;
-    background: rgba(250,250,250,.94); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid rgba(0,0,0,.05);
+    background: #FAFAFA; border-top: 1px solid rgba(0,0,0,.05);
   }
   .tab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: 0; font-size: 11px; font-weight: 600; color: #333; padding: 6px 0; }
   .tab svg { width: 27px; height: 27px; }
@@ -78,7 +78,7 @@
   .dot { width: 9px; height: 9px; border-radius: 99px; background: var(--flagged); box-shadow: 0 0 0 2px #fff; }
 
   /* ---------- Home ---------- */
-  .home-head { position: sticky; top: 0; z-index: 10; padding: calc(env(safe-area-inset-top) + 10px) 14px 8px; background: linear-gradient(#FFF4F4, #FBF6F6 70%, rgba(245,245,245,.96)); backdrop-filter: blur(10px); }
+  .home-head { position: sticky; top: 0; z-index: 10; padding: calc(env(safe-area-inset-top) + 10px) 14px 8px; background: linear-gradient(#FFF4F4, #FBF6F6 70%, rgba(245,245,245,.98)); }
   .top-tab { position: relative; background: none; border: 0; padding: 4px 0 8px; font-family: "Inter Tight", sans-serif; font-weight: 800; font-size: 21px; letter-spacing: -.03em; color: #9A9A9A; }
   .top-tab.on { color: var(--ink); font-size: 24px; }
   .top-tab.on::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 22px; height: 4px; margin-left: -11px; border-radius: 4px; background: var(--ink); }
@@ -155,7 +155,7 @@
     transform: translateX(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s .3s; visibility: hidden;
   }
   .page.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2,.8,.2,1); }
-  .nav-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 8px) 10px 8px; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); }
+  .nav-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 8px) 10px 8px; background: rgba(255,255,255,.98); }
   .icon-btn { width: 38px; height: 38px; border-radius: 999px; border: 0; background: transparent; display: grid; place-items: center; flex: none; }
   .float-btn { width: 36px; height: 36px; border-radius: 999px; border: 0; background: rgba(0,0,0,.42); color: #fff; display: grid; place-items: center; backdrop-filter: blur(6px); }
   .gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; aspect-ratio: 1 / 1; background: #ddd; }
@@ -173,7 +173,7 @@
   .step-n { width: 26px; height: 26px; border-radius: 999px; background: var(--brand-tint); color: var(--brand); font-weight: 800; font-size: 13px; display: grid; place-items: center; flex: none; }
   .bottom-bar {
     position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: 6px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-    background: rgba(255,255,255,.97); backdrop-filter: blur(12px); border-top: 1px solid var(--line); margin-top: 16px;
+    background: #fff; border-top: 1px solid var(--line); margin-top: 16px;
   }
   .bb-ic { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 52px; background: none; border: 0; font-size: 11px; color: #444; }
   .bb-ic.on { color: var(--brand); }
@@ -181,9 +181,11 @@
   .cta small { font-size: 11px; font-weight: 600; opacity: .85; }
   .cta.dark { background: var(--ink); }
   .cta.ghost { background: var(--soft); color: var(--ink); }
+  /* .cta grows sideways in a row (flex: 1); stacked in a column it must keep its own height. */
+  .flex-col > .cta { flex: none; height: 50px; }
 
   /* ---------- Messages ---------- */
-  .msg-head { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; padding: calc(env(safe-area-inset-top) + 14px) 14px 10px 20px; background: rgba(245,245,245,.96); backdrop-filter: blur(10px); }
+  .msg-head { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; padding: calc(env(safe-area-inset-top) + 14px) 14px 10px 20px; background: rgba(245,245,245,.98); }
   .msg-row { display: flex; gap: 14px; width: 100%; padding: 14px 16px 0 18px; background: none; border: 0; text-align: left; }
   .msg-row .av { position: relative; flex: none; width: 54px; height: 54px; }
   .msg-row .av img, .msg-row .av .sys { width: 54px; height: 54px; border-radius: 999px; object-fit: cover; display: grid; place-items: center; color: #fff; }
@@ -256,9 +258,10 @@
   .scrim.open { opacity: 1; pointer-events: auto; }
   .sheet {
     position: absolute; left: 0; right: 0; bottom: 0; z-index: 61; max-height: 88%; overflow-y: auto; background: #fff; border-radius: 22px 22px 0 0;
-    padding: 8px 16px calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.8,.2,1);
+    padding: 8px 16px calc(18px + env(safe-area-inset-bottom)); transform: translateY(105%); visibility: hidden;
+    transition: transform .32s cubic-bezier(.2,.8,.2,1), visibility 0s .32s;
   }
-  .sheet.open { transform: none; }
+  .sheet.open { transform: none; visibility: visible; transition: transform .32s cubic-bezier(.2,.8,.2,1); }
   .grab { width: 40px; height: 5px; border-radius: 9px; background: #DDD; margin: 0 auto 12px; }
   .preset { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px; border-radius: 14px; border: 0; background: var(--soft); text-align: left; }
   .preset.on { background: var(--brand); color: #fff; }
@@ -268,9 +271,9 @@
   /* ---------- Agent (tall sheet) ---------- */
   .agent {
     position: absolute; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top) + 18px); z-index: 61; background: #fff; border-radius: 22px 22px 0 0; overflow: hidden;
-    display: flex; flex-direction: column; transform: translateY(105%); transition: transform .34s cubic-bezier(.2,.8,.2,1);
+    display: flex; flex-direction: column; transform: translateY(105%); visibility: hidden; transition: transform .34s cubic-bezier(.2,.8,.2,1), visibility 0s .34s;
   }
-  .agent.open { transform: none; }
+  .agent.open { transform: none; visibility: visible; transition: transform .34s cubic-bezier(.2,.8,.2,1); }
   .agent::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--brand); }
   .mini-orb { width: 28px; height: 28px; border-radius: 999px; flex: none; background: var(--brand); display: grid; place-items: center; color: #fff; }
   .subject { background: var(--soft); border-radius: 18px; }
@@ -287,7 +290,7 @@
   .src-card.ours { background: #E6F4EA; }
   .src-card q { quotes: "\201C" "\201D"; font-size: 14.5px; font-weight: 500; line-height: 1.45; display: block; margin: 6px 0 8px; }
   .src-link { font-size: 12.5px; font-weight: 600; display: inline-flex; gap: 4px; align-items: center; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--faint); }
-  .topic { font-size: 11.5px; font-weight: 600; height: 22px; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; background: #fff; }
+  .topic { font-size: 11.5px; font-weight: 600; min-height: 22px; white-space: nowrap; display: inline-flex; align-items: center; padding: 0 9px; border-radius: 999px; background: #fff; }
   .ours-tag { font-size: 10.5px; font-weight: 700; color: #fff; background: var(--verified); padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
   .suggest { flex: none; font-size: 13px; font-weight: 600; padding: 9px 13px; border-radius: 999px; border: 0; background: var(--soft); white-space: nowrap; }
   .suggest:active { background: var(--brand); color: #fff; }
@@ -343,7 +346,7 @@
   .rail-cell[data-cell="hold"] .rail-lab { color: var(--brand-deep); }
   .rail-amt { display: block; font-size: 17px; line-height: 1.15; margin-top: 3px; transition: opacity .2s ease; }
   .rail-cell[data-cell="hold"] .rail-amt { font-size: 28px; line-height: 1.05; margin-top: 1px; }
-  .rail-amt.zero, .rail-amt.zero .c, .rail-amt.zero .cur { color: #ABABAB; }
+  .rail-amt.zero, .rail-amt.zero .c, .rail-amt.zero .cur { color: var(--muted); }
   .rail-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; min-height: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rail-v { transition: opacity .18s ease; }
   .fading { opacity: 0; }
@@ -385,18 +388,24 @@
 
   /* Pay method */
   .pm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .pm button { text-align: left; padding: 10px 12px; border-radius: 14px; border: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); line-height: 1.3; }
+  .pm button { display: flex; flex-direction: column; justify-content: flex-start; text-align: left; padding: 10px 12px; border-radius: 14px; border: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); line-height: 1.3; }
   .pm button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
   .pm b { display: block; font-size: 14.5px; }
   .pm span { display: block; font-size: 12px; color: var(--muted); }
 
   .cta.line { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px #D2D2D2; }
   .qbtn { background: none; border: 0; min-height: 44px; padding: 0 6px; font-weight: 600; font-size: 14px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #C8C8C8; }
-  .sheet-foot { position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); z-index: 2; margin: 16px -16px calc(-18px - env(safe-area-inset-bottom)); padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.97); border-top: 1px solid var(--line); }
+  .sheet-foot { position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); z-index: 2; margin: 16px -16px calc(-18px - env(safe-area-inset-bottom)); padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--line); }
   .photo-tick { position: relative; flex: 1; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #EAEAEA; }
   .photo-tick img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .photo-tick span { position: absolute; right: 6px; bottom: 6px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--verified); color: #fff; box-shadow: 0 0 0 2px #fff; }
   .clock { font-family: "Inter Tight", sans-serif; font-weight: 700; font-size: 40px; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  /* Short phones (667 px): keep the 48 h auto-release sentence above the sticky buttons. */
+  @media (max-height: 700px) {
+    .photo-tick { aspect-ratio: 3 / 2; }
+    .clock { font-size: 34px; }
+    .sheet .clock-box { padding: 12px 14px; margin-top: 12px; }
+  }
   .reason { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-radius: 14px; border: 0; background: var(--soft); text-align: left; font-weight: 600; font-size: 15px; }
   .reason + .reason { margin-top: 8px; }
 
@@ -425,10 +434,14 @@
     display: flex; gap: 9px; align-items: center; transition: all .25s ease;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  /* With a sheet or Lena's side open, the bottom holds the next button, so the toast drops in from the top instead. */
+  #page-lena.open ~ #toast { top: calc(env(safe-area-inset-top) + 66px); bottom: auto; transform: translate(-50%, -12px); }
+  #sheet.open ~ #toast { top: calc(env(safe-area-inset-top) + 14px); bottom: auto; transform: translate(-50%, -12px); }
+  #app #toast.show { transform: translate(-50%, 0); }
 
   /* Closing line, as on desktop: tap through. */
-  .closer { position: absolute; inset: 0; z-index: 100; background: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
-  .closer.open { opacity: 1; pointer-events: auto; }
+  .closer { position: absolute; inset: 0; z-index: 100; background: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .35s ease, visibility 0s .35s; }
+  .closer.open { opacity: 1; pointer-events: auto; visibility: visible; transition: opacity .35s ease; }
   .closer .lead { font-family: "Inter Tight", sans-serif; font-weight: 600; font-size: 20px; color: var(--muted); letter-spacing: -.02em; }
   /* "Safe transactions." is the longest line, so the size follows the app column, not the window. */
   #app { container-type: inline-size; }
@@ -547,13 +560,14 @@
       </div>
     </div>
 
-    <div class="me-card">
-      <div class="flex items-center justify-between">
-        <h3 class="display text-[18px] font-extrabold" style="letter-spacing:-.02em">You're verified</h3>
-        <span class="text-[12px] font-semibold" style="color:var(--muted)">Third-party checks</span>
-      </div>
-      <div class="grid grid-cols-3 gap-2 mt-3" id="threeChecks"></div>
-    </div>
+    <a class="me-card flex items-center gap-3" href="hold.html" style="text-decoration:none;color:inherit;padding:11px 14px">
+      <span class="mini-rail" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="flex-1 min-w-0">
+        <span class="block font-bold text-[15px]">Watch the money move</span>
+        <span class="block text-[12.5px] mt-0.5 truncate" style="color:var(--muted)">Live demo with both phones</span>
+      </span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--muted)" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
 
     <div class="me-card">
       <div class="flex items-baseline gap-2">
@@ -564,14 +578,13 @@
       <button class="deal-row" id="dealRow"></button>
     </div>
 
-    <a class="me-card flex items-center gap-3" href="hold.html" style="text-decoration:none;color:inherit">
-      <span class="mini-rail" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="flex-1 min-w-0">
-        <span class="block font-bold text-[15px]">Watch the money move</span>
-        <span class="block text-[12.5px] mt-0.5" style="color:var(--muted)">The live demo: Jamie's and Lena's phones side by side, from booking to the deposit coming back.</span>
-      </span>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--muted)" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-    </a>
+    <div class="me-card">
+      <div class="flex items-center justify-between">
+        <h3 class="display text-[18px] font-extrabold" style="letter-spacing:-.02em">You're verified</h3>
+        <span class="text-[12px] font-semibold" style="color:var(--muted)">Third-party checks</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-3" id="threeChecks"></div>
+    </div>
 
     <div class="me-card flex items-center gap-3">
       <span class="w-11 h-11 rounded-full grid place-items-center flex-none" style="background:var(--warm-tint);color:var(--warm)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
@@ -704,11 +717,11 @@ const PEOPLE = {
   marcus: { name: 'Jason Lin',     year: "'27", school: 'Maxwell',  img: 'img/u-jason.jpg', verified: true },
   chris:  { name: 'Chris M.',      year: null,  school: null,       img: 'img/p-1506794778.jpg', verified: false },
   aisha:  { name: 'Aisha Rahman',  year: "'27", uni: 'esf', school: 'Forestry', img: 'img/p-1524504388.jpg', verified: true },
-  noah:   { name: 'Noah Brennan',  year: "'26", school: 'ECS',      img: 'img/p-1500648767.jpg', verified: true },
+  noah:   { name: 'Noah Brennan',  year: "'27", school: 'ECS',      img: 'img/p-1500648767.jpg', verified: true },
   grace:  { name: 'Grace Liu',     year: "'28", school: 'Falk',     img: 'img/p-1534528741.jpg', verified: true },
   omar:   { name: 'Omar Haddad',   year: "'27", school: 'Whitman',  img: 'img/p-1463453091.jpg', verified: true },
   sofia:  { name: 'Sofia Marino',  year: "'27", school: 'VPA',      img: 'img/p-1494790108.jpg', verified: true },
-  ben:    { name: 'Ben Achterberg',year: "'26", school: 'Newhouse', img: 'img/p-1539571696.jpg', verified: true },
+  ben:    { name: 'Ben Achterberg',year: "'27", school: 'Newhouse', img: 'img/p-1539571696.jpg', verified: true },
 };
 
 const PERSON_CARDS = [
@@ -869,7 +882,9 @@ function popTop() {
   if (el.id === 'agent') runId++;
 }
 const back = () => (stack.length ? history.back() : null);
-addEventListener('popstate', popTop);
+// Our own entries carry a state object. A hash typed into the address bar arrives with none: that is routed by hashchange, not a close.
+addEventListener('popstate', e => { if (e.state) popTop(); });
+addEventListener('hashchange', () => { const h = location.hash; if (/^#(agent|photo)/.test(h) || ['#book', '#hold', '#move-in', '#problem', '#released', '#moved-out', '#lena', '#returned', '#closing'].includes(h)) location.reload(); });
 $('#scrim').addEventListener('click', back);
 
 function setTab(tab) {
@@ -888,12 +903,12 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
    HOME
    ===================================================================== */
 const CATS = [
-  ['Sublets', 'linear-gradient(160deg,#FF7A93,#E8436A)', `<path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M9.5 21v-6h5v6"/>`, 'mode:places'],
-  ['Roommates', 'linear-gradient(160deg,#FFB547,#F28A1B)', `<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16.5 4.8a3.2 3.2 0 0 1 0 6.4M21 20a6 6 0 0 0-3.5-5.5"/>`, 'mode:people'],
-  ['Summer', 'linear-gradient(160deg,#FFC94D,#F5A300)', `<rect x="5" y="7" width="14" height="13" rx="2.5"/><path d="M9 7V4.5h6V7M9.5 11v5M14.5 11v5"/>`, 'preset:summer'],
-  ['Abroad', 'linear-gradient(160deg,#A78BFA,#7C5CF0)', `<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.7 2.6 14.3 0 17M12 3.5c-2.6 2.7-2.6 14.3 0 17"/>`, 'preset:spring'],
-  ['By campus', 'linear-gradient(160deg,#60A5FA,#2F74E8)', `<rect x="5" y="4" width="14" height="13" rx="3"/><path d="M5 11h14M8.5 20l1.5-3M15.5 20 14 17"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/>`, 'filter:walk'],
-  ['Whole place', 'linear-gradient(160deg,#4ADE80,#16A34A)', `<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 4v16"/>`, 'filter:whole'],
+  ['Sublets', '#E8436A', `<path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z"/><path d="M9.5 21v-6h5v6"/>`, 'mode:places'],
+  ['Roommates', '#F28A1B', `<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16.5 4.8a3.2 3.2 0 0 1 0 6.4M21 20a6 6 0 0 0-3.5-5.5"/>`, 'mode:people'],
+  ['Summer', '#F5A300', `<rect x="5" y="7" width="14" height="13" rx="2.5"/><path d="M9 7V4.5h6V7M9.5 11v5M14.5 11v5"/>`, 'preset:summer'],
+  ['Abroad', '#0E9384', `<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.7 2.6 14.3 0 17M12 3.5c-2.6 2.7-2.6 14.3 0 17"/>`, 'preset:spring'],
+  ['By campus', '#2F74E8', `<rect x="5" y="4" width="14" height="13" rx="3"/><path d="M5 11h14M8.5 20l1.5-3M15.5 20 14 17"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/>`, 'filter:walk'],
+  ['Whole place', '#16A34A', `<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 12h16M12 4v16"/>`, 'filter:whole'],
 ];
 $('#cats').innerHTML = CATS.map(c => `<button class="cat" data-act="${c[3]}"><i style="background:${c[1]}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${c[2]}</svg></i>${c[0]}</button>`).join('');
 
@@ -1243,6 +1258,9 @@ function when(iso, style = 'day') {
 const pad2 = (n) => String(n).padStart(2, '0');
 const isoDay = (dt, n = 0) => { const x = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + n); return `${x.getFullYear()}-${pad2(x.getMonth() + 1)}-${pad2(x.getDate())}`; };
 const asDate = (iso) => new Date(iso.slice(0, 10) + 'T00:00');
+// n business days after a date (Saturday and Sunday don't count), as an ISO day. Bank arrivals and Verimate's decision use it.
+const bizDay = (dt, n) => { const x = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()); while (n > 0) { x.setDate(x.getDate() + 1); if (x.getDay() % 6) n--; } return isoDay(x); };
+const POSS = { lena: 'her', marcus: 'his', chris: 'their', aisha: 'her', noah: 'his', grace: 'her', omar: 'his', sofia: 'her', ben: 'his' };
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const FEE = HO ? HO.fees : { listerFee: (c) => Math.round(c * 0.1), cardCost: (c) => Math.round(c * 0.029) + 30 };
 const RENTER = HO ? HO.people.renter : { name: 'Jamie Walsh', first: 'Jamie' };
@@ -1275,14 +1293,14 @@ function dealFor(id) {
   const fee = D ? D.listerFee : FEE.listerFee(rent);
   const sched = D ? D.schedule : rentSchedule(l, rent);
   const direct = D ? D.directRent : sched.filter(x => x.via === 'direct').reduce((a, x) => a + x.cents, 0);
-  const s = l.start, e = l.end;
+  const s = l.start, e = l.end, backOn = asDate(isoDay(e, 1));
   const dl = D ? D.deadlines : { booked: isoDay(s, -40) + 'T14:14', moveIn: isoDay(s) + 'T10:00', autoRelease: isoDay(s, 2) + 'T10:00', moveInConfirmed: isoDay(s) + 'T15:12',
-    lenaBankArrives: isoDay(s, 2), movedOut: isoDay(e) + 'T11:30', returnBy: isoDay(e, 7), autoReturn: isoDay(e, 8), nyDeadline: isoDay(e, 14),
-    returned: isoDay(e, 1) + 'T09:40', jamieBankArrives: [isoDay(e, 4), isoDay(e, 5)] };
+    lenaBankArrives: bizDay(s, 2), movedOut: isoDay(e) + 'T11:30', returnBy: isoDay(e, 7), autoReturn: isoDay(e, 8), nyDeadline: isoDay(e, 14),
+    returned: isoDay(e, 1) + 'T09:40', jamieBankArrives: [bizDay(backOn, 1), bizDay(backOn, 2)] };
   const W = HO && id === 'comstock' ? HO.branches.whatIf.states : null;
   const prob = { at: W ? W[0].at : isoDay(s) + 'T11:05', answerBy: W ? W[0].deadlines.listerAnswer : isoDay(s, 1) + 'T11:05',
-    decideBy: W ? W[0].deadlines.decision : isoDay(s, 3), refundedAt: W ? W[1].at : isoDay(s, 2) + 'T16:20' };
-  return (DEALS[id] = { id, l, p, first: p.name.split(' ')[0],
+    decideBy: W ? W[0].deadlines.decision : bizDay(s, 3), refundedAt: W ? W[1].at : isoDay(s, 2) + 'T16:20' };
+  return (DEALS[id] = { id, l, p, first: p.name.split(' ')[0], her: POSS[l.lister] || 'their',
     ref: D ? D.ref : `VM-${String(s.getFullYear()).slice(2)}-${String(115 + LISTINGS.indexOf(l)).padStart(4, '0')}`,
     rent, deposit, fee, payout: rent - fee, up: D ? D.upfront.total : rent + deposit, upFee: D ? D.upfront.verimateFee : 0,
     card: D ? D.cardCost : FEE.cardCost(rent + deposit), sched, direct, totalRent: rent + direct, dl, prob,
@@ -1316,7 +1334,7 @@ if (HO) {
 }
 // The amount that travels on the rail for each change of state.
 function moveFor(d, to) {
-  return { held: { from: 'you', to: 'hold', cents: d.up, tone: 'in' }, moved: { from: 'hold', to: 'lena', cents: d.rent, tone: 'out' },
+  return { held: { from: 'you', to: 'hold', cents: d.up, tone: 'in' }, moved: { from: 'hold', to: 'lena', cents: d.payout, tone: 'out' },
     returned: { from: 'hold', to: 'you', cents: d.deposit, tone: 'out' }, refunded: { from: 'hold', to: 'you', cents: d.up, tone: 'out' }, out: { fadeOnly: true } }[to] || null;
 }
 
@@ -1345,8 +1363,8 @@ function holdSteps(l) {
   return `<div class="sect">
       <div class="flex items-center justify-between gap-2"><h3>Verimate Hold</h3><span class="hchip done">Free for you</span></div>
       <div class="flex flex-col gap-3 mt-3">
-        <div class="flex gap-3"><span class="step-n">1</span><p class="text-[13.5px]"><b>Pay Verimate, not ${F}.</b> <span style="color:var(--ink-2)">First month and a one-month deposit, ${cash(d.up)} in all. Your Verimate fee is ${cash(d.upFee)}.</span></p></div>
-        <div class="flex gap-3"><span class="step-n">2</span><p class="text-[13.5px]"><b>Move in, then tap All good.</b> <span style="color:var(--ink-2)">That's when rent goes to ${F}. Say nothing and it goes after 48 h. Report a problem and it stays frozen.</span></p></div>
+        <div class="flex gap-3"><span class="step-n">1</span><p class="text-[13.5px]"><b>Pay into Verimate Hold, not to ${F}.</b> <span style="color:var(--ink-2)">First month and a one-month deposit, ${cash(d.up)} in all. Your Verimate fee is ${cash(d.upFee)}.</span></p></div>
+        <div class="flex gap-3"><span class="step-n">2</span><p class="text-[13.5px]"><b>Move in, then tap All good.</b> <span style="color:var(--ink-2)">That's when rent goes to ${F}. Say nothing and it goes after 48&nbsp;h. Report a problem and it stays frozen.</span></p></div>
         <div class="flex gap-3"><span class="step-n">3</span><p class="text-[13.5px]"><b>Move out, get the deposit back.</b> <span style="color:var(--ink-2)">${F} returns it in one tap. If ${F} does nothing, it comes back on its own 8 days after move-out.</span></p></div>
       </div>
       <p class="text-[12.5px] mt-3" style="color:var(--muted)">${F} pays Verimate 10% of the first month, ${cash(d.fee)}, once, after you move in.</p>
@@ -1375,7 +1393,7 @@ function paySheetHTML(id) {
     { label: 'Problem at move-in', text: 'Report a problem within 48 h and the money stays frozen until Verimate decides, within 3 business days.' },
     { label: 'Deposit', text: 'Comes back in one tap after Lena confirms move-out. If she does nothing, it returns on its own on Day 8.' },
     { label: 'New York 14-day rule', text: 'Any deduction needs a photo and an amount, and is settled by Day 14 after move-out.' }])
-    .map(r => ({ label: r.label, text: F === 'Lena' ? r.text : r.text.replace(/Lena/g, F).replace(/\bshe\b/g, F) }));
+    .map(r => ({ label: r.label, text: (F === 'Lena' ? r.text : r.text.replace(/Lena/g, F).replace(/\bshe\b/g, F)).replace(/(\d+) h\b/g, '$1&nbsp;h') }));
   return `
     <div class="flex items-center justify-between gap-3">
       <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">Book with Hold</h2>
@@ -1411,16 +1429,18 @@ function transition(id, to, o = {}) {
   const from = c.deal || null;
   c.deal = to;
   switch (to) {
-    case 'held':
+    case 'held': {
+      const card = (c.method = o.method || 'bank') === 'card';
       c.when = when(dl.booked, 'short');
-      msgs.push({ me: `${cash(d.rent)} first month and ${cash(d.deposit)} deposit, held by Verimate until I move in on ${when(dl.moveIn, 'short')}.`, title: `I paid ${cash(d.up)}` });
+      msgs.push({ me: `${cash(d.rent)} first month and ${cash(d.deposit)} deposit, held by Verimate until I move in on ${when(dl.moveIn, 'short')}.${card ? ` Plus ${cash(d.card)} card cost.` : ''}`, title: `I paid ${cash(d.up + (card ? d.card : 0))}` });
       msgs.push({ protect: `${cash(d.up)} held by Verimate`, sub: `${F} sees Booked, ${cash(d.up)} held. ${F} can't withdraw it, and Verimate can't spend it.`, act: `hold:${id}`, btn: 'Where is my money?' });
       msgs.push({ them: `Got it, thank you! Keys will be ready on ${when(dl.moveIn, 'day')}.` });
       break;
+    }
     case 'moved':
       c.when = when(dl.moveInConfirmed, 'short');
       msgs.push({ me: 'Moved in. The room matches the photos.', title: 'All good' });
-      msgs.push({ sys: `Rent released to ${F}, ${cash(d.rent)}. Your ${cash(d.deposit)} deposit is still held by Verimate.` });
+      msgs.push({ sys: `Your ${cash(d.rent)} rent released to ${F}. ${F} gets ${cash(d.payout)} after Verimate's 10% fee. Your ${cash(d.deposit)} deposit is still held by Verimate.` });
       msgs.push({ them: 'Welcome home! Text me if anything breaks.' });
       break;
     case 'frozen':
@@ -1459,8 +1479,7 @@ function refreshViews() {
   }
 }
 function doPay(id) {
-  const { key, d } = transition(id, 'held');
-  CHATS[key].method = payMethod;
+  const { key, d } = transition(id, 'held', { method: payMethod });
   sysState.deposits.badge = 1;
   CHAT_ORDER.splice(CHAT_ORDER.indexOf(key), 1); CHAT_ORDER.unshift(key);
   const chatEl = $('#page-chat');
@@ -1481,8 +1500,18 @@ function advance(id, to, o) {
   const lena = $('#page-lena');
   if (to === 'returned' && lena.classList.contains('open')) {
     const run = () => { renderLena(id); playRail(lena, d, moneyAt(d, from), moneyAt(d, to), moveFor(d, to)); };
-    if (stack[stack.length - 1] === $('#sheet')) { back(); setTimeout(run, 340); } else run();
-  } else openHold(id, from);
+    // Bring the money rail back into view first, so the deposit visibly travels back to the renter.
+    const toRail = () => {
+      if (lena.scrollTop < 2 || RM.matches) { lena.scrollTop = 0; return run(); }
+      lena.scrollTo({ top: 0, behavior: 'smooth' });
+      const t0 = performance.now();
+      const watch = () => (lena.scrollTop < 2 || performance.now() - t0 > 700) ? (lena.scrollTop = 0, setTimeout(run, 60)) : requestAnimationFrame(watch);
+      requestAnimationFrame(watch);
+    };
+    if (stack[stack.length - 1] === $('#sheet')) { back(); setTimeout(toRail, 340); } else toRail();
+    return;
+  }
+  openHold(id, from);
   toast(`${to === 'frozen' ? '' : ICON.check(14, 3) + ' '}${TOASTS[to](d)}`);
 }
 
@@ -1496,10 +1525,11 @@ function swapSheet(html, after) {
 }
 
 /* ---------- The money rail ---------- */
+const paidByCard = (d) => (liveDeal(d.id) || {}).method === 'card';
 function railVals(d, m, who) {
   const L = who === 'lena';
   return [
-    { k: 'you', lab: L ? `${RENTER.first} paid` : 'You paid', c: m.paid, sub: m.back ? `${cash(m.back)} back` : '', on: m.back > 0 },
+    { k: 'you', lab: L ? `${RENTER.first} paid` : 'You paid', c: m.paid, sub: m.back ? `${cash(m.back)} back` : paidByCard(d) ? `+${cash(d.card)} card cost` : '', on: m.back > 0 },
     { k: 'hold', lab: 'Held by Verimate', c: m.held, sub: '', on: m.held > 0 },
     { k: 'lena', lab: L ? 'You received' : `${d.first} received`, c: m.lena, sub: m.fee ? `after ${cash(m.fee)} fee` : '', on: m.lena > 0 },
   ];
@@ -1540,20 +1570,23 @@ function playRail(root, d, fromM, toM, move) {
 }
 
 /* ---------- "Where is my money?" ---------- */
-function heldItems(d, st) {
-  const F = d.first, dl = d.dl;
-  const item = (label, cents, chip, why, cls = '') => `<div class="held-it ${cls}">
+const heldItem = (label, cents, chip, why, cls = '') => `<div class="held-it ${cls}">
       <div class="flex items-center gap-2"><p class="font-semibold text-[14.5px]">${label}</p>${chip}<span class="ml-auto amt font-semibold text-[15px]">${cash(cents)}</span></div>
       <p class="why">${why}</p></div>`;
-  const H = '<span class="hchip held">Held</span>', R = (t) => `<span class="hchip done">${t}</span>`, Z = '<span class="hchip frozen">Frozen</span>';
+const doneChip = (t) => `<span class="hchip done">${t}</span>`;
+function releasedItems(d, st) {
+  return st === 'moved' ? heldItem("First month's rent", d.rent, doneChip('Released'), `Released to ${d.first} ${when(d.dl.moveInConfirmed, 'stamp')}. ${d.first} gets ${cash(d.payout)} after Verimate's 10% fee. Final.`, 'done') : '';
+}
+function heldItems(d, st) {
+  const F = d.first, dl = d.dl, item = heldItem;
+  const H = '<span class="hchip held">Held</span>', R = doneChip, Z = '<span class="hchip frozen">Frozen</span>';
   switch (st) {
     case 'held': return item("First month's rent", d.rent, H, `Goes to ${F} when you tap All good, or on its own ${when(dl.autoRelease, 'dayStamp')}.`)
       + item('Deposit', d.deposit, H, `Comes back after you move out. ${F} taps Return, or it returns on its own 8 days after move-out.`);
     case 'frozen': return item("First month's rent", d.rent, Z, `Frozen since ${when(d.prob.at, 'stamp')}. It moves only after Verimate decides.`, 'frozen')
       + item('Deposit', d.deposit, Z, 'Frozen with the rent. A full refund includes it.', 'frozen');
     case 'refunded': return item('First month and deposit', d.up, R('Returned'), `Refunded ${when(d.prob.refundedAt, 'stamp')}. Nothing was paid out.`, 'done');
-    case 'moved': return item('Deposit', d.deposit, H, `Comes back after you move out. Your lease ends ${leaseEnd(d)}.`)
-      + item("First month's rent", d.rent, R('Released'), `Released to ${F} ${when(dl.moveInConfirmed, 'stamp')}. Final.`, 'done');
+    case 'moved': return item('Deposit', d.deposit, H, `Comes back after you move out. Your lease ends ${leaseEnd(d)}.`);
     case 'out': return item('Deposit', d.deposit, H, `${F} returns it by ${when(dl.returnBy, 'day')}. If ${F} does nothing, it comes back on its own ${when(dl.autoReturn, 'day')}.`);
     case 'returned': return item('Deposit', d.deposit, R('Returned'), `Returned ${when(dl.returned, 'stamp')}. In your bank ${bankRange(d)}.`, 'done');
   }
@@ -1576,7 +1609,7 @@ function trackHTML(d, st, c) {
       ['done', 'Paid', S(dl.booked)],
       ['done', 'Held by Verimate', S(dl.booked)],
       [i >= 1 ? 'done' : 'now', 'Move-in confirmed', i >= 1 ? S(dl.moveInConfirmed) : '', i >= 1 ? '' : `Move-in is ${when(dl.moveIn, 'dayStamp')}. Then you have 48 h.`],
-      [i >= 1 ? 'done' : '', 'Rent released', i >= 1 ? S(dl.moveInConfirmed) : '', i === 1 ? `${cash(d.rent)} to ${F}, in ${F}'s bank by ${when(dl.lenaBankArrives, 'day')}.` : ''],
+      [i >= 1 ? 'done' : '', 'Rent released', i >= 1 ? S(dl.moveInConfirmed) : '', i === 1 ? `Your ${cash(d.rent)} rent released. ${F} gets ${cash(d.payout)} after Verimate's 10% fee, in ${d.her} bank by ${when(dl.lenaBankArrives, 'day')}.` : ''],
       [i >= 2 ? 'done' : i === 1 ? 'now' : '', 'Moved out', i >= 2 ? S(dl.movedOut) : '', i === 1 ? `Tap I've moved out when you leave. Lease ends ${leaseEnd(d)}.` : ''],
       [i >= 3 ? 'done' : i === 2 ? 'now' : '', 'Deposit returned', i >= 3 ? S(dl.returned) : '', i === 2 ? `${F} has until ${when(dl.returnBy, 'day')}. New York's deadline is ${when(dl.nyDeadline, 'day')}.` : i === 3 ? `${cash(d.deposit)}, 1 day after move-out.` : ''],
     ];
@@ -1601,13 +1634,14 @@ function holdSheetHTML(id) {
   return `
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0"><h2 class="display text-[21px] font-extrabold leading-tight" style="letter-spacing:-.03em">Where is my money?</h2>
-        <p class="text-[12.5px] mt-1" style="color:var(--muted)">${d.l.address}, booking ${d.ref}</p></div>
+        <p class="text-[12.5px] mt-1" style="color:var(--muted)">${d.l.address}, <span style="white-space:nowrap">booking ${d.ref}</span></p></div>
       <span class="hchip ${S[0]} mt-1">${S[1]}</span>
     </div>
     <div class="mt-4">${railHTML(d, m, 'jamie')}</div>
     <p class="text-[13.5px] mt-2" style="color:var(--ink-2)">${S[2]}</p>
     <p class="sec-t mt-5">${m.held ? 'Held now' : 'Back to you'}</p>
     <div class="mt-2">${heldItems(d, st)}</div>
+    ${releasedItems(d, st) ? `<p class="sec-t mt-5">Released</p><div class="mt-2">${releasedItems(d, st)}</div>` : ''}
     <p class="sec-t mt-5">Timeline</p>
     <ol class="trk mt-3">${trackHTML(d, st, c)}</ol>
     <div class="sheet-foot">
@@ -1645,14 +1679,14 @@ function moveInSheetHTML(id) {
     <p class="text-[13.5px] mt-1" style="color:var(--ink-2)">You're in ${d.l.address}. Does it match the listing?</p>
     <div class="mt-3">${photoTicks([d.l.img, EXTRA_PHOTOS[0], EXTRA_PHOTOS[1]], 'Move-in')}</div>
     <p class="text-[12.5px] mt-2" style="color:var(--muted)">3 room photos, signed by you and ${F}. They are New York's move-in condition record.</p>
-    <div class="mt-4 rounded-[16px] p-4" style="background:var(--soft)">
+    <div class="clock-box mt-4 rounded-[16px] p-4" style="background:var(--soft)">
       <p class="clock" id="clock">${clock}</p>
       <p class="text-[13px] mt-2" style="color:var(--ink-2)">left to check. If you say nothing, rent goes to ${F} on its own ${when(dl.autoRelease, 'dayStamp')}.</p>
     </div>
     <div class="sheet-foot">
       <button class="cta w-full" style="height:52px" data-act="allgood:${id}">All good</button>
       <button class="cta line w-full mt-2" style="height:48px" data-act="report:${id}">Report a problem</button>
-      <p class="text-[12px] mt-2 text-center" style="color:var(--muted)">All good sends ${cash(d.rent)} to ${F} now. Report a problem freezes all ${cash(d.up)}.</p>
+      <p class="text-[12px] mt-2 text-center" style="color:var(--muted)">All good releases your ${cash(d.rent)} rent to ${F} now. Report a problem freezes all ${cash(d.up)}.</p>
     </div>`;
 }
 function reportSheetHTML(id) {
@@ -1688,7 +1722,8 @@ function moveOutSheetHTML(id) {
 /* ---------- Deposit-returned receipt ---------- */
 function receiptHTML(id) {
   const d = dealFor(id), F = d.first, dl = d.dl, T = HO && id === 'comstock' ? HO.totals : null;
-  const paidIn = T ? T.renterPaidIn : d.up + d.direct, back = T ? T.renterGotBack : d.deposit, net = T ? T.renterNet : paidIn - back;
+  const card = paidByCard(d) ? d.card : 0;
+  const paidIn = (T ? T.renterPaidIn : d.up + d.direct) + card, back = T ? T.renterGotBack : d.deposit, net = (T ? T.renterNet : d.up + d.direct - back) + card;
   const rec = HO && d.l.lister === 'lena' ? HO.people.lister.record.after.label : 'Deposits returned on time 1/1';
   return `
     <div class="flex items-center justify-between gap-2"><span class="hchip done">Returned</span><span class="text-[12.5px]" style="color:var(--muted)">${d.ref}</span></div>
@@ -1703,9 +1738,9 @@ function receiptHTML(id) {
     <p class="text-[12.5px] mt-1" style="color:var(--muted)">In your bank ${bankRange(d)}.</p>
     <p class="sec-t mt-5">Your whole lease</p>
     <div class="rc mt-1">
-      <div class="rc-row"><span>You paid in<small>First month, deposit, then rent to ${F}</small></span><span>${cash(paidIn)}</span></div>
+      <div class="rc-row"><span>You paid in<small>First month, deposit, then rent to ${F}${card ? ', plus the card cost' : ''}</small></span><span>${cash(paidIn)}</span></div>
       <div class="rc-row"><span>Deposit back</span><span>${cash(-back)}</span></div>
-      <div class="rc-row rc-total"><span>Your cost<small style="font-weight:400">Rent only</small></span><span>${cash(net)}</span></div>
+      <div class="rc-row rc-total"><span>Your cost<small style="font-weight:400">${card ? `Rent, plus ${cash(card)} card cost you chose at booking` : 'Rent only'}</small></span><span>${cash(net)}</span></div>
       <div class="rc-row rc-zero"><span>Verimate fees</span><span>${cash(0)}</span></div>
     </div>
     <div class="flex items-center gap-2.5 mt-4 p-3 rounded-[14px]" style="background:var(--soft)">${ICON.badge('#16A34A', 18)}<p class="text-[13px]"><b>${F}'s record:</b> ${rec.charAt(0).toLowerCase() + rec.slice(1)}</p></div>
@@ -1723,8 +1758,8 @@ function howHoldSheet() {
     <h2 class="display text-[21px] font-extrabold" style="letter-spacing:-.03em">How Verimate Hold works</h2>
     <p class="text-[14px] mt-1" style="color:var(--ink-2)">${HO ? HO.promise.renter : "Your rent waits until you're in. Your deposit comes back in one tap."}</p>
     <div class="flex flex-col gap-3 mt-4">
-      <div class="flex gap-3"><span class="step-n">1</span><p class="text-[14px]"><b>You pay Verimate, not the lister.</b> First month and a one-month deposit. Your Verimate fee is ${cash(0)}.</p></div>
-      <div class="flex gap-3"><span class="step-n">2</span><p class="text-[14px]"><b>Rent waits for you.</b> It goes to the lister when you tap All good, or on its own 48 h after move-in. Report a problem and it stays frozen.</p></div>
+      <div class="flex gap-3"><span class="step-n">1</span><p class="text-[14px]"><b>You pay into Verimate Hold, not to the lister.</b> First month and a one-month deposit. Your Verimate fee is ${cash(0)}.</p></div>
+      <div class="flex gap-3"><span class="step-n">2</span><p class="text-[14px]"><b>Rent waits for you.</b> It goes to the lister when you tap All good, or on its own 48&nbsp;h after move-in. Report a problem and it stays frozen.</p></div>
       <div class="flex gap-3"><span class="step-n">3</span><p class="text-[14px]"><b>Your deposit comes back in one tap.</b> The lister taps Return after you move out. If nothing happens, it comes back on Day 8.</p></div>
     </div>
     <p class="text-[12.5px] mt-3" style="color:var(--muted)">The lister pays Verimate 10% of the first month, once, after you move in.</p>
@@ -1746,19 +1781,48 @@ function renderLena(id) {
     out: ['needs', 'Needs you', `${R} moved out ${S(dl.movedOut)}. Day 0 of 14, New York law.`],
     returned: ['done', 'Deposit returned', `You returned ${R}'s deposit ${S(dl.returned)}, 1 day after move-out.`],
   }[st];
-  const upcoming = !st || st === 'held' || st === 'frozen';
+  const upcoming = !st || st === 'held' || st === 'frozen', frozen = st === 'frozen';
+  const grey = upcoming ? 'color:var(--muted)' : '';
+  // Frozen: nothing releases on its own while Verimate decides, and a refund before move-in means no fee.
+  const payNote = frozen ? `Frozen while Verimate decides, by ${when(d.prob.decideBy, 'day')}. If ${R} is refunded, you pay ${cash(0)}.`
+    : upcoming ? `After ${R} taps All good, or on its own ${when(dl.autoRelease, 'dayStamp')}.`
+    : `In your bank by ${when(dl.lenaBankArrives, 'day')}. Rent after the first month comes from ${R} directly, with no Verimate fee.`;
   const receipt = st === 'refunded' ? '' : `<div class="sect">
-      <div class="flex items-baseline justify-between gap-2"><h3>${upcoming ? 'Your first payout' : 'Rent released'}</h3><span class="text-[12.5px]" style="color:var(--muted)">${upcoming ? 'Upcoming' : S(dl.moveInConfirmed)}</span></div>
+      <div class="flex items-center justify-between gap-2"><h3>${upcoming ? 'Your first payout' : 'Rent released'}</h3>${frozen ? '<span class="hchip frozen">Frozen</span>' : `<span class="text-[12.5px]" style="color:var(--muted)">${upcoming ? 'Upcoming' : S(dl.moveInConfirmed)}</span>`}</div>
       <div class="rc mt-2">
-        <div class="rc-row"><span>Rent, first month</span><span style="${upcoming ? 'color:var(--muted)' : ''}">${cash(d.rent)}</span></div>
-        <div class="rc-row"><span>Verimate fee (10%)<small>Once, only after your renter moves in</small></span><span style="${upcoming ? 'color:var(--muted)' : ''}">${cash(-d.fee)}</span></div>
-        <div class="rc-row rc-total"><span>${upcoming ? "You'll receive" : 'You receive'}</span><span style="${upcoming ? 'color:var(--muted)' : ''}">${cash(d.payout)}</span></div>
+        <div class="rc-row"><span>Rent, first month</span><span style="${grey}">${cash(d.rent)}</span></div>
+        <div class="rc-row"><span>Verimate fee (10%)<small>Once, only after your renter moves in</small></span><span style="${grey}">${cash(-d.fee)}</span></div>
+        <div class="rc-row rc-total"><span>${frozen ? "You'd receive" : upcoming ? "You'll receive" : 'You receive'}</span><span style="${grey}">${cash(d.payout)}</span></div>
       </div>
-      <p class="text-[12.5px] mt-2" style="color:var(--muted)">${upcoming ? `After ${R} taps All good, or on its own ${when(dl.autoRelease, 'dayStamp')}.` : `In your bank by ${when(dl.lenaBankArrives, 'day')}. Rent after the first month comes from ${R} directly, with no Verimate fee.`}</p>
+      <p class="text-[12.5px] mt-2" style="color:var(--muted)">${payNote}</p>
     </div>`;
   const slot = (st && st !== 'refunded' && st !== 'returned') ? `<div class="sect"><div class="slot-empty">
       <div class="flex items-center justify-between gap-2"><p class="font-semibold text-[14.5px]">Deposit</p><span class="amt font-semibold" style="color:var(--muted)">${cash(d.deposit)}</span></div>
-      <p class="text-[12.5px] mt-1" style="color:var(--ink-2)">Held by Verimate, not you. It goes back to ${R} after move-out, so you never return it by hand.</p></div></div>` : '';
+      <p class="text-[12.5px] mt-1" style="color:var(--ink-2)">${frozen ? 'Frozen with the rent. A full refund includes it.' : `Held by Verimate, not you. It goes back to ${R} after move-out, so you never return it by hand.`}</p></div></div>` : '';
+  // At move-out the receipt and the Return button matter most, so the profile shrinks to two lines.
+  const rec = info ? info.record : null, compact = st === 'out' || st === 'returned';
+  const recLine = st === 'returned'
+    ? `<span class="inline-flex items-center gap-1 font-semibold" style="color:var(--verified-ink)">${ICON.check(12, 3.2)}${rec ? rec.after.label : 'Deposits returned on time 1/1'}</span>`
+    : `${rec ? rec.before.label : 'Deposits returned on time'}: none yet`;
+  const yearLine = info ? info.year : `${UNI[P.uni || 'su'].short} ${P.year}`;
+  const profile = compact ? `<div class="sect" style="margin-top:6px;padding:10px 14px">
+        <div class="flex items-center gap-3">
+          <img src="${P.img}" alt="${P.name}" class="rounded-full object-cover flex-none" style="width:40px;height:40px" />
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-[15px] flex items-center gap-1.5">${P.name}${ICON.badge('#3B82F6', 15)}${ICON.badge('#16A34A', 15)}<span class="text-[12.5px] font-medium" style="color:var(--muted)">${yearLine}</span></p>
+            <p class="text-[12.5px] truncate" style="color:var(--muted)">${recLine}</p>
+          </div>
+        </div>
+      </div>` : `<div class="sect" style="margin-top:6px">
+        <div class="flex items-center gap-3">
+          <img src="${P.img}" alt="${P.name}" class="w-12 h-12 rounded-full object-cover flex-none" />
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-[15.5px] flex items-center gap-1.5">${P.name}${ICON.badge('#3B82F6', 16)}${ICON.badge('#16A34A', 16)}</p>
+            <p class="text-[12.5px]" style="color:var(--muted)">${yearLine}, ${P.school}</p>
+          </div>
+        </div>
+        ${listerBadges(d.l)}
+      </div>`;
   const moveOut = st === 'out' ? `<div class="sect">
       <h3>Return ${R}'s deposit</h3>
       <ul class="mt-2">${[[7, dl.returnBy, 'Return by'], [8, dl.autoReturn, 'Returns on its own if you do nothing'], [14, dl.nyDeadline, 'New York deadline']].map(([n, iso, t]) => `<li class="flex items-baseline gap-3 py-2.5" style="border-top:1px solid var(--line)"><span class="w-[50px] flex-none text-[12.5px] font-bold amt">Day ${n}</span><span class="flex-1 text-[13px]">${t}</span><span class="text-[12.5px] amt" style="color:var(--muted)">${when(iso, 'day')}</span></li>`).join('')}</ul>
@@ -1785,27 +1849,19 @@ function renderLena(id) {
       <span class="hchip wait">Lister</span>
     </div>
     <div style="flex:1 0 auto;padding-bottom:6px">
-      <div class="sect" style="margin-top:6px">
-        <div class="flex items-center gap-3">
-          <img src="${P.img}" alt="${P.name}" class="w-12 h-12 rounded-full object-cover flex-none" />
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-[15.5px] flex items-center gap-1.5">${P.name}${ICON.badge('#3B82F6', 16)}${ICON.badge('#16A34A', 16)}</p>
-            <p class="text-[12.5px]" style="color:var(--muted)">${info ? info.year : `${UNI[P.uni || 'su'].short} ${P.year}`}, ${P.school}</p>
-          </div>
-        </div>
-        ${listerBadges(d.l)}
-      </div>
+      ${profile}
       <div class="sect">
         <div class="flex items-center justify-between gap-2"><h3 class="min-w-0 truncate">${d.l.address}</h3><span class="hchip ${head[0]}">${head[1]}</span></div>
         <div class="mt-3">${railHTML(d, m, 'lena')}</div>
         <p class="text-[13.5px] mt-2" style="color:var(--ink-2)">${head[2]}</p>
       </div>
-      ${moveOut}${lease}${receipt}${slot}
+      ${receipt}${moveOut}${lease}${slot}
     </div>
     ${bar}`;
 }
 function openLena(id) {
   renderLena(id);
+  $('#toast').classList.remove('show');   // a toast from Jamie's phone would sit on Lena's name
   const page = $('#page-lena');
   page.scrollTop = 0;
   if (stack[stack.length - 1] === page) return;
@@ -1835,7 +1891,7 @@ function dealBarHTML(l, c) {
       <img src="${l.img}" alt="" />
       <div class="min-w-0">
         <p class="price" style="font-size:20px"><small>$</small>${l.price.toLocaleString()}<small>/mo</small></p>
-        <p class="text-[12.5px] mt-1" style="color:#555">${l.unit} · ${fmt(l.start)} – ${fmt(l.end)}</p>
+        <p class="text-[12.5px] mt-1" style="color:#555">${l.unit}, <span style="white-space:nowrap">${fmt(l.start)} – ${fmt(l.end)}</span></p>
       </div>
       <button class="pill" data-act="reserve:${l.id}">Book with Hold</button>
     </div>`;
@@ -1877,10 +1933,10 @@ function holdRoute(h) {
    MESSAGES TAB
    ===================================================================== */
 const SYS = {
-  deposits: { name: 'Deposits & payments', color: 'linear-gradient(160deg,#F0573F,#D81E28)', icon: ICON.shield(26) },
-  tracker:  { name: 'Lease tracker', color: 'linear-gradient(160deg,#FFB547,#F28A1B)', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>` },
-  agent:    { name: 'Verimate Agent', color: 'linear-gradient(160deg,#FF6B81,#C2185B)', icon: ICON.spark(26) },
-  alerts:   { name: 'Price alerts', color: 'linear-gradient(160deg,#4ADE80,#16A34A)', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>` },
+  deposits: { name: 'Deposits & payments', color: '#D81E28', icon: ICON.shield(26) },
+  tracker:  { name: 'Lease tracker', color: '#F28A1B', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>` },
+  agent:    { name: 'Verimate Agent', color: '#111111', icon: ICON.spark(26) },
+  alerts:   { name: 'Price alerts', color: '#16A34A', icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>` },
 };
 const sysState = { deposits: { pv: 'How Verimate Hold works', tm: 'Today', badge: 0 }, tracker: { dot: true }, agent: { badge: 1 }, alerts: { dot: true } };
 function sysRow(k, pv, tm, mark, act, svc) {

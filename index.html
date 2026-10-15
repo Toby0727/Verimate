@@ -179,11 +179,15 @@
   .cover-track { position: relative; height: 4px; border-radius: 4px; background: var(--soft); overflow: hidden; }
   .cover-fill { position: absolute; top: 0; bottom: 0; background: var(--brand); border-radius: 4px; }
   .cover-note { font-size: 11.5px; color: var(--muted); }
-  /* Verimate Hold on listing cards: one quiet line on photo-verified places, one booking link on the demo listing. */
-  .hold-note { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--muted); line-height: 1.3; }
+  /* Verimate Hold on listing cards: one quiet line on photo-verified places (outline mark, no fill, so it never
+     competes with the red date line), and on the demo listing a booking link placed right under the price so it
+     sits above the fold at 1280x720. */
+  .hold-note { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+  .hold-note svg { color: var(--muted); }
   .hold-btn {
-    width: 100%; height: 42px; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 700; font-size: 14px;
+    width: 100%; height: 44px; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 700; font-size: 15px;
     display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap;
+    transition: background .15s;
   }
   .hold-btn:hover { background: var(--brand-deep); }
   .vcheck { display: inline-grid; place-items: center; flex: none; }
@@ -259,6 +263,15 @@
   .campus-box { display: flex; align-items: center; gap: 10px; height: 48px; width: 270px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #D4D4D4; background: #fff; flex: none; }
   .campus-box svg { flex: none; }
   .campus-box input { min-width: 0; border: 0; outline: none; flex: 1; font-size: 15px; font-weight: 500; background: transparent; }
+  /* The search row is fixed-width pieces; at the 1280 projector size it used to run past the window and slice the
+     Filters chip. Below 1380 the campus box drops its clear icon and the chips tighten, which frees about 110px. */
+  @media (max-width: 1380px) {
+    .filter-row { column-gap: 8px; }
+    .campus-box { width: 214px; gap: 8px; }
+    .campus-box .clear { display: none; }
+    #chips { gap: 6px; }
+    #chips .chip, #moreFilters { padding: 0 12px; }
+  }
   .sort-btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid #D4D4D4; background: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer; }
   .map-card { width: 36%; max-width: 540px; min-width: 400px; margin: 18px 18px 18px 6px; border-radius: 18px; border: 1px solid var(--line); background: #EEF0EA; }
   .map-pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; background: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 2px 10px rgba(0,0,0,.14); cursor: pointer; white-space: nowrap; }
@@ -372,11 +385,11 @@
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-2.5 mt-1.5">
+      <div class="filter-row flex items-center gap-2.5 mt-1.5">
         <label class="campus-box">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <input value="Syracuse University" aria-label="Campus or neighborhood" />
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--muted)"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          <svg class="clear" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--muted)"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </label>
         <div class="relative">
           <button id="datePill" class="date-pill" aria-haspopup="dialog" aria-expanded="false" aria-label="Change your dates">
@@ -432,7 +445,7 @@
         <svg id="map" class="absolute inset-0 w-full h-full" viewBox="0 0 400 900" preserveAspectRatio="xMidYMid slice"></svg>
         <div id="axo" class="absolute inset-0" style="opacity:0;transition:opacity .4s"></div>
         <label class="absolute top-3 left-1/2 -translate-x-1/2 z-10 map-pill"><input type="checkbox" checked style="accent-color:var(--brand)" />Search as I move the map</label>
-        <div class="absolute bottom-3 left-3 z-10 rounded-[14px] px-3 py-2.5 flex flex-col gap-1.5 text-[11.5px] font-medium" style="background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.06)">
+        <div id="mapLegend" class="absolute bottom-3 left-3 z-10 rounded-[14px] px-3 py-2.5 flex flex-col gap-1.5 text-[11.5px] font-medium" style="background:rgba(255,255,255,.96);box-shadow:0 2px 10px rgba(0,0,0,.06)">
           <span class="flex items-center gap-2"><i class="w-3 h-3 rounded" style="background:var(--brand)"></i>Photos verified</span>
           <span class="flex items-center gap-2"><i class="w-3 h-3 rounded border" style="background:#fff;border-color:#B9BAB5"></i>Check in progress</span>
           <span class="flex items-center gap-2"><i class="w-3 h-3 rounded" style="background:#fff;border:1.5px solid var(--flagged)"></i>Photos flagged</span>
@@ -494,7 +507,7 @@
 <script src="assets/hold-data.js"></script>
 <script>
 /* =====================================================================
-   DATA — everything the demo shows is hardcoded here.
+   DATA — the demo's places and people are hardcoded here; 734 Comstock's rent and dates come from HOLD.
    ===================================================================== */
 const Y = 2027;
 const d = (m, day, y = Y) => new Date(y, m - 1, day);
@@ -506,9 +519,16 @@ const PRESETS = [
   { id: 'year', name: 'Academic year', start: d(8, 24, 2026), end: d(5, 20), title: 'Full year housing near Syracuse University' },
 ];
 
+/* 734 Comstock is the Verimate Hold demo deal, and its card links straight into book.html, so its rent, dates and
+   walk time come from assets/hold-data.js (the same numbers every Hold page shows). The literals are only a
+   fallback for when the data file fails to load. */
+const isoDay = (s) => { const [yy, mm, dd] = s.split('-').map(Number); return new Date(yy, mm - 1, dd); };
+const DEAL = window.HOLD ? HOLD.deal : null;
 const LISTINGS = [
-  { id: 'comstock', address: '734 Comstock Ave', unit: 'Room in a 4-bed', price: 875, start: d(1,10), end: d(5,20),
-    img: 'img/u-room-sofa.jpg', ratio: 1.3, prov: 'ok', lister: 'lena', reviews: 4, walk: 6, furnished: true, map: [224, 585], ll: [-76.13015, 43.0318] },
+  { id: 'comstock', address: DEAL ? DEAL.address : '734 Comstock Ave', unit: DEAL ? DEAL.unitShort : 'Room in a 4-bed',
+    price: DEAL ? DEAL.rent / 100 : 875, start: DEAL ? isoDay(DEAL.start) : d(1,10), end: DEAL ? isoDay(DEAL.end) : d(5,20),
+    img: DEAL ? DEAL.img : 'img/u-room-sofa.jpg', ratio: 1.12, prov: 'ok', lister: 'lena', reviews: 4, walk: DEAL ? DEAL.walkMinutes : 6,
+    furnished: true, map: [224, 585], ll: [-76.13015, 43.0318] },
   { id: 'euclid', address: '812 Euclid Ave', unit: 'Room in a 3-bed', price: 850, start: d(1,3), end: d(5,31),
     img: 'img/u-living.jpg', ratio: 0.8, prov: 'ok', lister: 'marcus', reviews: 4, walk: 9, furnished: true, map: [288, 540], ll: [-76.1263, 43.0369] },
   { id: 'ackerman', address: '419 Ackerman Ave', unit: 'Private suite', price: 690, start: d(1,8), end: d(5,22),
@@ -539,11 +559,11 @@ const PEOPLE = {
   marcus: { name: 'Jason Lin',     year: "'27", school: 'Maxwell',  img: 'img/u-jason.jpg', verified: true },
   chris:  { name: 'Chris M.',      year: null,  school: null,       img: 'img/p-1506794778.jpg', verified: false },
   aisha:  { name: 'Aisha Rahman',  year: "'27", uni: 'esf', school: 'Forestry',  img: 'img/p-1524504388.jpg', verified: true },
-  noah:   { name: 'Noah Brennan',  year: "'26", school: 'ECS',      img: 'img/p-1500648767.jpg', verified: true },
+  noah:   { name: 'Noah Brennan',  year: "'27", school: 'ECS',      img: 'img/p-1500648767.jpg', verified: true },
   grace:  { name: 'Grace Liu',     year: "'28", school: 'Falk',     img: 'img/p-1534528741.jpg', verified: true },
   omar:   { name: 'Omar Haddad',   year: "'27", school: 'Whitman',  img: 'img/p-1463453091.jpg', verified: true },
   sofia:  { name: 'Sofia Marino',  year: "'27", school: 'VPA',      img: 'img/p-1494790108.jpg', verified: true },
-  ben:    { name: 'Ben Achterberg',year: "'26", school: 'Newhouse', img: 'img/p-1539571696.jpg', verified: true },
+  ben:    { name: 'Ben Achterberg',year: "'27", school: 'Newhouse', img: 'img/p-1539571696.jpg', verified: true },
 };
 
 const PERSON_CARDS = [
@@ -651,8 +671,6 @@ const ICON = {
   chat: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   spark: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2.5c.4 3.9 2.6 6.1 6.5 6.5-3.9.4-6.1 2.6-6.5 6.5-.4-3.9-2.6-6.1-6.5-6.5 3.9-.4 6.1-2.6 6.5-6.5z"/><path d="M18 13c.2 2 1.3 3.1 3.3 3.3-2 .2-3.1 1.3-3.3 3.3-.2-2-1.3-3.1-3.3-3.3 2-.2 3.1-1.3 3.3-3.3z"/></svg>`,
   info: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 8h.01M12 12v5"/></svg>`,
-  // The Verimate mark (red circle, white house-check), small enough to sit in a line of text: "held by Verimate".
-  mark: (s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="12" fill="#D81E28"/><g transform="translate(5 5) scale(.58)" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></g></svg>`,
   houseCheck: (s = 16) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m8.5 14 2.5 2.5 4.5-5"/></svg>`,
 };
 
@@ -662,9 +680,6 @@ const HOLD_DEAL_ADDRESS = window.HOLD ? HOLD.deal.address : '734 Comstock Ave';
 const HOLD_BOOK_LABEL = window.HOLD ? HOLD.vocab.buttons.book : 'Book with Hold';
 const holdLine = (l) => l.prov === 'ok';                      // photo-verified places show "Rent held until you move in"
 const holdBook = (l) => l.address === HOLD_DEAL_ADDRESS;      // 734 Comstock: Book with Hold, to book.html
-/* Masonry height estimate: a listing card grows by the Hold line (24px) and the booking link (56px), both measured.
-   The base 200 is unchanged; it keeps the columns closest to even at 1440 and 1280 wide. */
-const HOLD_LINE_H = 24, HOLD_BOOK_H = 56;
 
 function coverage(l) {
   const S = state.start, E = state.end, total = days(S, E);
@@ -730,7 +745,7 @@ function listingCard(l) {
   const flags = l.flags ? `<div class="flag-strip">${l.flags.map(f => `<span><i></i>${f}</span>`).join('')}</div>` : '';
   const note = c.exact ? 'Matches your dates exactly' : c.whole ? 'Covers your whole stay' : `Misses ${c.missing} ${c.missing === 1 ? 'day' : 'days'} of your stay`;
   const reviews = l.reviews
-    ? `<button class="meta" data-rep="${l.id}" title="${l.reviews} resident reviews">${ICON.chat}${l.reviews} resident reviews</button>`
+    ? `<button class="meta" data-rep="${l.id}">${ICON.chat}${l.reviews} resident ${l.reviews === 1 ? 'review' : 'reviews'}</button>`
     : `<span class="meta" style="color:var(--muted);cursor:default">No reviews yet</span>`;
   return `<article class="lcard" data-l="${l.id}">
     <div class="photo" style="aspect-ratio:${1 / l.ratio}">
@@ -747,7 +762,8 @@ function listingCard(l) {
         <p class="price">$${l.price.toLocaleString()}<small>/mo</small></p>
         <span class="meta" style="cursor:default">${ICON.walk}${l.walk} min</span>
       </div>
-      ${holdLine(l) ? `<p class="hold-note mt-2">${ICON.mark(14)}Rent held until you move in</p>` : ''}
+      ${holdBook(l) ? `<a class="hold-btn mt-3" href="book.html" data-book>${ICON.houseCheck(16)}${HOLD_BOOK_LABEL}</a>` : ''}
+      ${holdLine(l) ? `<p class="hold-note mt-2.5">${ICON.houseCheck(15)}Rent held until you move in</p>` : ''}
       <p class="avail mt-3">${ICON.cal}Available ${fmt(l.start)} – ${fmt(l.end)}</p>
       <div class="cover-track mt-1.5"><div class="cover-fill" style="left:${c.left * 100}%;width:${c.width * 100}%"></div></div>
       <p class="cover-note mt-1">${note}</p>
@@ -755,7 +771,6 @@ function listingCard(l) {
         ${listerRow(p)}
         ${reviews}
       </div>
-      ${holdBook(l) ? `<a class="hold-btn mt-3.5" href="book.html" data-book>${ICON.houseCheck(16)}${HOLD_BOOK_LABEL}</a>` : ''}
     </div>
   </article>`;
 }
@@ -808,32 +823,59 @@ function personCard(p) {
   </article>`;
 }
 
-let lastCols = 0;
-function renderFeed() {
+/* Masonry by measured height: every card is rendered once into an off-screen column of the real width, measured,
+   then moved (not re-parsed) into the shortest column, in feed order. Photos size by aspect-ratio, so heights are
+   final before images load. The first card always lands top-left, so 734 Comstock keeps its place. */
+let feedSig = '';
+function renderFeed(onlyIfMoved) {
   const feed = $('#feed');
   const w = feed.clientWidth - 40;
   const ncol = w > 700 ? 3 : w > 440 ? 2 : 1;
-  lastCols = ncol;
-  const colW = (w - (ncol - 1) * 16) / ncol;
-  const cols = Array.from({ length: ncol }, () => ({ h: 0, html: [] }));
+  const GAP = 16, ROW_GAP = 18;
+  const colW = (feed.clientWidth - 48 - (ncol - 1) * GAP) / ncol;   // #feed has 24px side padding
+  const keys = [], html = [];
   let nPlaces = 0, nPeople = 0;
   FEED_ORDER.forEach(key => {
     const [t, id] = key.split(':');
-    let html, h;
     if (t === 'L') {
       const l = LISTINGS.find(x => x.id === id);
       if (!visible(l)) return;
-      nPlaces++;
-      html = listingCard(l); h = colW * l.ratio + 200 + (holdLine(l) ? HOLD_LINE_H : 0) + (holdBook(l) ? HOLD_BOOK_H : 0);
+      nPlaces++; html.push(listingCard(l));
     } else {
-      const p = PERSON_CARDS.find(x => x.id === id);
-      nPeople++;
-      html = personCard(p); h = colW * p.ratio + 395;
+      nPeople++; html.push(personCard(PERSON_CARDS.find(x => x.id === id)));
     }
-    const target = cols.reduce((a, b) => (b.h < a.h ? b : a));
-    target.html.push(html); target.h += h + 18;
+    keys.push(key);
   });
-  feed.innerHTML = cols.map(c => `<div class="feed-col">${c.html.join('')}</div>`).join('');
+  const probe = document.createElement('div');
+  probe.className = 'feed-col'; probe.setAttribute('aria-hidden', 'true');
+  probe.style.cssText = `position:absolute;left:-10000px;top:0;visibility:hidden;flex:none;width:${colW}px`;
+  probe.innerHTML = html.join('');
+  document.body.appendChild(probe);
+  const cards = [...probe.children];
+  const hs = cards.map(el => el.offsetHeight + ROW_GAP);
+  // Shortest column first, in feed order. The last few cards (never the top row) are then placed whichever way
+  // leaves the column bottoms most even, so the feed doesn't end with one column hanging far below the others.
+  const n = hs.length, K = ncol > 1 ? Math.max(0, Math.min(8, n - ncol)) : 0;
+  const pick = [], H = new Array(ncol).fill(0);
+  hs.forEach((h, i) => { let t = 0; for (let c = 1; c < ncol; c++) if (H[c] < H[t]) t = c; pick[i] = t; H[t] += h; });
+  if (K) {
+    const base = H.slice(); for (let i = n - K; i < n; i++) base[pick[i]] -= hs[i];
+    let bestSpread = Math.max(...H) - Math.min(...H), best = null;
+    const tail = [], h = base.slice();
+    const search = (i) => {
+      if (i === n) { const s = Math.max(...h) - Math.min(...h); if (s < bestSpread - 1) { bestSpread = s; best = tail.slice(); } return; }
+      for (let c = 0; c < ncol; c++) { h[c] += hs[i]; tail.push(c); search(i + 1); tail.pop(); h[c] -= hs[i]; }
+    };
+    search(n - K);
+    if (best) best.forEach((c, j) => { pick[n - K + j] = c; });
+  }
+  const cols = Array.from({ length: ncol }, () => ({ cards: [], keys: [] }));
+  cards.forEach((el, i) => { cols[pick[i]].cards.push(el); cols[pick[i]].keys.push(keys[i]); });
+  const sig = ncol + '/' + cols.map(c => c.keys.join(',')).join('|');
+  if (onlyIfMoved === true && sig === feedSig) { probe.remove(); return; }
+  feedSig = sig;
+  feed.replaceChildren(...cols.map(c => { const col = document.createElement('div'); col.className = 'feed-col'; col.append(...c.cards); return col; }));
+  probe.remove();
   $('#feedSub').textContent = nPlaces
     ? `${nPlaces} places fit ${fmt(state.start)} to ${fmt(state.end)}, and ${nPeople} verified SU and ESF students nearby are looking too.`
     : `Nothing listed for these dates yet. Try a wider range, or message the ${nPeople} students below.`;
@@ -936,6 +978,17 @@ function syncAxo() {
     el.parentNode.classList.toggle('hl', state.hover === l.id);
   });
 }
+/* On short windows (1280x720 projector) the demo listing's pin, 734 Comstock with its Exact dates flag, lands under
+   the legend in the bottom-left. Nudge the map up just enough to clear it; taller windows are left as they are. */
+function clearLegend() {
+  const leg = $('#mapLegend'), wrap = axoTags.comstock && axoTags.comstock.parentNode;
+  if (!leg || !wrap) return;
+  const p = axo.project(LISTINGS.find(l => l.id === 'comstock').ll);
+  const pw = wrap.offsetWidth || 90, ph = wrap.offsetHeight || 60, pad = 12;
+  const overlapX = p.x - pw / 2 < leg.offsetLeft + leg.offsetWidth + pad && p.x + pw / 2 > leg.offsetLeft - pad;
+  const overlapY = p.y > leg.offsetTop - pad && p.y - ph < leg.offsetTop + leg.offsetHeight;
+  if (overlapX && overlapY) axo.panBy([0, p.y - (leg.offsetTop - pad)], { duration: 0 });
+}
 function axoFallback() {
   $('#axo').style.display = 'none'; $('#map').style.display = '';
 }
@@ -993,6 +1046,7 @@ function initAxo() {
         new maplibregl.Marker({ element: wrap, anchor: 'bottom' }).setLngLat(l.ll).addTo(axo);
       });
       axo.jumpTo({ center: [-76.1290, 43.0372], zoom: 14.35 });
+      clearLegend();
       axoReady = true; syncAxo();
       $('#axo').style.opacity = 1; $('#map').style.display = 'none';
     });
@@ -1333,6 +1387,8 @@ $('#askForm').addEventListener('submit', e => {
    ===================================================================== */
 renderBasemap();
 renderFeed();
+// Inter / Inter Tight arrive after first paint and can rewrap a name or two; re-place cards only if a column changes.
+if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(() => renderFeed(true));
 initAxo();
 let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(renderFeed, 120); });
 if (location.hash.startsWith('#agent')) { openAgent(); runReputation('euclid'); }

@@ -27,8 +27,11 @@
 ::view-transition-old(mv-0), ::view-transition-new(mv-0), ::view-transition-old(mv-1), ::view-transition-new(mv-1) {
   animation-duration: var(--dur-move); animation-timing-function: var(--ease-move);
 }
+/* hold.css gives .chip, .ticks etc. an explicit display, which beats the browser's [hidden] rule. */
+[hidden] { display: none !important; }
 body { background: var(--wash); }
 button { cursor: pointer; }
+.nw { white-space: nowrap; }
 .amt-swap { animation: amt-swap .28s linear; }
 @keyframes amt-swap { from { opacity: .12; } to { opacity: 1; } }
 
@@ -65,6 +68,8 @@ button { cursor: pointer; }
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .cell-note { font-size: var(--bar-note); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 1.4em; }
+/* On the tinted Held cell the grey note would fall under AA contrast, so it darkens there. */
+.cell.has-money .cell-note, .cell.is-frozen .cell-note { color: var(--ink-2); }
 .lane { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 
 /* The travelling amount (the one signature motion) */
@@ -91,7 +96,7 @@ button { cursor: pointer; }
 
 .head { grid-area: head; display: grid; justify-items: start; gap: 12px; padding-bottom: 16px; min-width: 0; }
 .date-chip { margin: 0; }
-.head-title { font-size: var(--head-title); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; margin: 0; }
+.head-title { font-size: var(--head-title); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; margin: 0; text-wrap: balance; }
 .head-title:focus { outline: none; }
 
 .hold { grid-area: hold; display: grid; align-content: start; gap: 10px; min-height: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 6px; }
@@ -100,9 +105,16 @@ button { cursor: pointer; }
 .hi-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .hi-label { font-size: 15px; font-weight: 600; }
 .hi-amt { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: var(--hold-amt); letter-spacing: -.025em; line-height: 1.1; }
-.hi-text { margin: 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.42; }
+.hi-text { margin: 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.42; text-wrap: pretty; }
 .hold .slot-empty { font-size: var(--hold-text); color: var(--muted); }
-.hold-note { margin: 2px 2px 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.45; }
+.hold-note { margin: 2px 2px 0; font-size: var(--hold-text); color: var(--ink-2); line-height: 1.45; text-wrap: pretty; }
+/* If the window is short (browser not fullscreen), the column scrolls: the decision button stays pinned, other content fades at the cut. */
+.hold .decide { position: sticky; bottom: 0; box-shadow: 0 -10px 0 0 var(--wash); }
+.hold.is-over .decide::before {
+  content: ""; position: absolute; left: -1px; right: -1px; bottom: calc(100% + 10px); height: 26px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(247, 247, 247, 0), var(--wash));
+}
+.hold.is-over:not(:has(.decide)) { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); }
 .owner { display: flex; gap: 12px; align-items: flex-start; padding: 12px 2px 0; border-top: 1px solid var(--line); margin-top: 4px; }
 .owner-ic { width: 32px; height: 32px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line-2); display: grid; place-items: center; flex: none; }
 .owner-ic svg { width: 17px; height: 17px; }
@@ -112,26 +124,48 @@ button { cursor: pointer; }
 .decide-who { margin: 0; font-size: 15px; font-weight: 600; }
 .decide-note { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.45; }
 
-/* Ledger panel */
-.led { grid-area: led; align-self: start; max-height: 100%; overflow-y: auto; scrollbar-width: none; padding: 14px 8px 16px; box-sizing: border-box; min-width: 0; }
-.led::-webkit-scrollbar { display: none; }
-.led-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 10px 8px; }
+/* Ledger panel: fees on top (scroll if they ever outgrow the panel), costs and "Kept so far" pinned to the bottom. */
+.led {
+  grid-area: led; align-self: start; max-height: 100%; display: flex; flex-direction: column; overflow: hidden;
+  padding: 14px 8px 16px; box-sizing: border-box; min-width: 0;
+}
+.led-head { flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 10px 8px; }
 .led-head h2 { font-size: 18px; font-weight: 600; }
-.led .ledger-row { font-size: var(--led-size); padding: 9px 10px; }
+.led-head .receipt-ref { white-space: nowrap; }
+.led-fees { flex: 0 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.led-fees::-webkit-scrollbar { display: none; }
+.led-foot { flex: none; }
+.led .ledger-row { grid-template-columns: minmax(0, 1fr) auto; font-size: var(--led-size); padding: 9px 10px; }
+.led .ledger-what small { font-size: 13px; }
+.led .ledger-what time { font-variant-numeric: tabular-nums; }
 .led .ledger-row.is-new { animation-delay: .45s; }
 .led-none { display: block !important; color: var(--muted); }
-.led-sub { margin: 12px 10px 2px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
-.led-costs .ledger-row { grid-template-columns: 1fr auto; padding: 6px 10px; font-size: 14px; }
+.led-sub { margin: 10px 10px 2px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.led-costs .ledger-row { padding: 6px 10px; font-size: calc(var(--led-size) - 1px); }
 .led-costs .ledger-what { color: var(--ink-2); }
-.led .ledger-total { margin: 8px 10px 0; padding: 10px 0 0; }
+.led .ledger-total { margin: 8px 10px 0; padding: 10px 0 0; font-size: var(--led-size); }
 .led .ledger-total .amt { font-size: 22px; }
 
 /* Beat 10: model card over the lower half */
 .mcard {
-  position: absolute; left: var(--pad-x); right: var(--pad-x); bottom: 0; height: 57%; z-index: 15;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); box-sizing: border-box; padding: 24px 0 20px;
+  position: absolute; left: var(--pad-x); right: var(--pad-x); bottom: 0; min-height: 46%; z-index: 15;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); align-content: center; box-sizing: border-box; padding: 28px 0 26px;
 }
-.mcard[hidden] { display: none; }
+/* The stage behind the card steps back, and its cut edge fades out instead of stopping mid-line. */
+.mcard::before {
+  content: ""; position: absolute; left: calc(-1 * var(--pad-x)); right: calc(-1 * var(--pad-x)); bottom: calc(100% + 1px); height: 72px;
+  background: linear-gradient(to bottom, rgba(247, 247, 247, 0), var(--wash)); pointer-events: none;
+}
+@media (min-width: 900px) {
+  .stage.has-card .pwrap, .stage.has-card .hold, .stage.has-card .led { opacity: .38; transition: opacity .25s linear; }
+  /* The white card is painted by ::after, above a fade (::before) that turns solid wash 30px before the card and runs on
+     under its rounded top corners, so the corners show plain wash and the fade has no hard line. Hairline edge only. */
+  .mcard { background: none; box-shadow: none; }
+  .mcard::before { z-index: -1; bottom: calc(100% - var(--r-sheet)); height: calc(110px + var(--r-sheet));
+    background: linear-gradient(to bottom, rgba(247, 247, 247, 0) 0, var(--wash) calc(100% - 30px - var(--r-sheet))); }
+  .mcard::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--paper);
+    border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: 0 0 0 1px var(--line); pointer-events: none; }
+}
 .stage[data-arrive="fwd"] .mcard { animation: card-up .42s var(--ease-move) both; }
 @keyframes card-up { from { transform: translateY(28px); opacity: 0; } }
 .mc-deal, .mc-year { padding: 0 32px; min-width: 0; display: grid; align-content: start; gap: 12px; }
@@ -170,7 +204,10 @@ button { cursor: pointer; }
 .tick span { display: block; width: 24px; height: 4px; border-radius: 2px; background: var(--line-2); }
 .tick.is-done span { background: var(--ink); }
 .tick.is-now span { background: var(--brand); height: 6px; }
-.caption { margin: 0; font-size: 16px; color: var(--ink); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.caption {
+  margin: 0; font-size: 16px; line-height: 1.25; color: var(--ink); text-align: center; text-wrap: balance;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
 .ctl-keys { display: flex; align-items: center; gap: 2px; }
 .ctl-keys .btn { color: var(--ink-2); text-decoration: none; padding: 0 9px; }
 .ctl-keys .btn[aria-pressed="true"] { color: var(--brand-deep); background: var(--brand-tint); }
@@ -178,24 +215,26 @@ button { cursor: pointer; }
 /* ------------------------------------------------------------------ phone screens (designed at 360 x 680) */
 .phone-body { background: var(--paper); }
 .scr { position: relative; min-height: 100%; display: flex; flex-direction: column; padding: 4px 20px 0; box-sizing: border-box; }
-.scr-main { flex: 1; display: grid; align-content: start; gap: 14px; padding-bottom: 14px; }
+.scr-main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 14px; padding-bottom: 14px; }
 .scr-foot { position: sticky; bottom: 0; display: grid; gap: 8px; padding: 10px 0 30px; background: var(--paper); }
 .scr p { margin: 0; }
 .app-bar { display: flex; align-items: center; gap: 6px; height: 34px; font-size: 15px; font-weight: 600; margin-left: -4px; }
 .app-bar svg { width: 20px; height: 20px; }
 .scr-title { font-size: 24px; font-weight: 600; letter-spacing: -.025em; line-height: 1.15; margin: 0; }
-.scr-sub { font-size: 14px; color: var(--muted); line-height: 1.4; }
-.scr-text { font-size: 15px; color: var(--ink-2); line-height: 1.42; }
-.scr-photo { display: block; width: calc(100% + 40px); height: 168px; margin: -4px -20px 0; object-fit: cover; }
+.scr-sub { font-size: 14px; color: var(--muted); line-height: 1.4; text-wrap: pretty; }
+.scr-text { font-size: 15px; color: var(--ink-2); line-height: 1.42; text-wrap: pretty; }
+/* max-width: none, or hold.css's img { max-width: 100% } stops the photo short and leaves a strip on its right. */
+.scr-photo { display: block; width: calc(100% + 40px); max-width: none; height: 148px; margin: -4px -20px 0; object-fit: cover; }
 .scr .chip { justify-self: start; }
 .scr .amt-hero { --amt-size: 46px; }
 .foot-note { font-size: 13px; color: var(--muted); text-align: center; }
 .price-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .price { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.03em; }
 .price small { font-family: var(--font-ui); font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-.badges { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
-.badges .badge { font-size: 14.5px; }
-.badges small { color: var(--muted); font-size: 13px; font-weight: 400; margin-left: 2px; }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.badges .badge { font-size: 14.5px; white-space: normal; align-items: flex-start; line-height: 1.3; }
+.badges .badge svg { margin-top: 1px; }
+.badges small { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
 .badges-2 { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
 .badges-2 .badge { font-size: 13.5px; }
 .hr { height: 1px; background: var(--line); }
@@ -263,8 +302,11 @@ button { cursor: pointer; }
 .record { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--verified-tint); }
 .record-ic { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); color: var(--verified-ink); display: grid; place-items: center; }
 .record-ic svg { width: 22px; height: 22px; }
-.record strong { display: block; font-size: 16px; color: var(--verified-ink); }
+.record strong { display: block; font-size: 16px; color: var(--verified-ink); text-wrap: pretty; }
 .record span { font-size: 13px; color: var(--ink-2); }
+/* A tapped phone button shows its result; longer results wrap inside the phone instead of running off its edge. */
+.btn.is-acked { color: var(--verified-ink); border-color: var(--verified-tint); background: var(--verified-tint); cursor: default;
+  white-space: normal; text-align: center; line-height: 1.3; padding: 8px 14px; text-wrap: balance; }
 .claim-line { display: grid; gap: 6px; }
 .claim-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 16px; font-weight: 600; }
 .ev { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -273,6 +315,20 @@ button { cursor: pointer; }
 .lock { position: absolute; inset: 0; background: var(--wash); display: grid; align-content: start; justify-items: center; padding-top: 64px; text-align: center; }
 .lock-date { font-size: 17px; font-weight: 500; color: var(--ink-2); margin: 0; }
 .lock-time { font-family: var(--font-display); font-weight: 600; font-size: 84px; letter-spacing: -.045em; line-height: 1; margin: 4px 0 0; color: var(--ink); }
+/* a push notification on the lock screen (Lena, beat 8); tapping it opens the app */
+.notif {
+  width: calc(100% - 24px); margin-top: 30px; box-sizing: border-box; display: grid; gap: 5px; padding: 12px 15px 14px;
+  border: 0; border-radius: 20px; background: var(--paper); color: var(--ink); font: inherit; text-align: left;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, .06), 0 12px 28px -14px rgba(17, 17, 17, .28);
+}
+.notif-top { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.notif-top .vm-mark { width: 22px; height: 22px; }
+.notif-top .vm-mark svg { width: 12px; height: 12px; }
+.notif-top span:nth-child(2) { color: var(--ink-2); font-weight: 600; }
+.notif-top time { margin-left: auto; }
+.notif strong { font-size: 16px; line-height: 1.3; }
+.notif .notif-day { font-size: 15px; font-weight: 600; color: var(--brand-deep); }
+.notif .notif-body { font-size: 14.5px; color: var(--ink-2); line-height: 1.42; text-wrap: pretty; }
 
 /* in-phone sheets (pay sheet, Lena's receipt) */
 .p-under { position: absolute; inset: 0; }
@@ -281,6 +337,7 @@ button { cursor: pointer; }
   position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 12px; padding: 8px 20px 30px;
   background: var(--paper); border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--sh-sheet);
 }
+.p-sheet p { margin: 0; }
 .grab { width: 38px; height: 5px; border-radius: 3px; background: var(--line-2); justify-self: center; margin-bottom: 4px; }
 .p-sheet .receipt { font-size: 15px; }
 .p-sheet .rc-row { padding: 5px 0; }
@@ -300,16 +357,45 @@ button { cursor: pointer; }
   .stage { overflow: hidden; }
   .phone-label { display: none; }
 }
+/* 1024-1150 wide: the bar cells are too narrow to park a travelling amount beside the balance, so it sits under it. */
+@media (min-width: 900px) and (max-width: 1150px) {
+  .cell-row { flex-direction: column; align-items: flex-start; }
+  .lane { position: static; transform: none; flex-direction: row; min-height: var(--mv-h); margin-top: 2px; }
+  /* the beat ticks shrink to fit between Next and the key buttons; the date chip may wrap its time under the date */
+  .ticks { width: 100%; max-width: 330px; }
+  .ticks li { flex: 1 1 0; min-width: 0; }
+  .tick { width: 100%; }
+  .tick span { width: calc(100% - 4px); }
+  .date-chip { max-width: 100%; box-sizing: border-box; flex-wrap: wrap; row-gap: 0; white-space: normal; border-radius: 14px; }
+}
+/* Cramped center column (narrow or short window): the what-if decision keeps its button and drops the explainer line. */
+@media (min-width: 900px) and (max-width: 1150px), (min-width: 900px) and (max-height: 700px) {
+  .decide-note { display: none; }
+}
+/* Projector (1280x720) and other short screens: tighter chrome, same readable text (body >= 15px, key amounts >= 28px). */
 @media (min-width: 900px) and (max-height: 820px) {
-  :root { --pad-x: 24px; --gap: 24px; --bar-py: 10px; --bar-amt: 30px; --bar-label: 13px; --bar-note: 12.5px; --head-title: 22px;
-    --hold-amt: 24px; --hold-text: 14.5px; --led-size: 14.5px; --stage-pt: 14px; --stage-pb: 12px; --ctl-h: 50px; --mv-h: 26px; --mv-size: 13.5px; }
-  #hold-nav .hn { --hn-h: 50px; }
-  .head { gap: 9px; padding-bottom: 12px; }
-  .held-item { padding: 11px 13px 12px; }
-  .led { padding: 10px 6px 12px; }
-  .led .ledger-row { padding: 7px 10px; }
-  .led-costs .ledger-row { padding: 5px 10px; }
-  .mcard { height: 60%; padding: 18px 0 14px; }
+  :root { --pad-x: 24px; --gap: 24px; --bar-py: 8px; --bar-amt: 30px; --bar-label: 13.5px; --bar-note: 14px; --head-title: 23px;
+    --hold-amt: 28px; --hold-text: 15px; --led-size: 15px; --stage-pt: 12px; --stage-pb: 10px; --ctl-h: 50px; --mv-h: 26px; --mv-size: 14px; }
+  #hold-nav .hn { --hn-h: 48px; }
+  .cell { gap: 2px; }
+  .head { gap: 8px; padding-bottom: 10px; }
+  .held-item { padding: 10px 13px 11px; gap: 2px; }
+  .hold { gap: 8px; }
+  .led { padding: 10px 6px 10px; }
+  .led-head h2 { font-size: 17px; }
+  .led .ledger-row { padding: 6px 10px; }
+  .led-costs .ledger-row { padding: 4px 10px; }
+  .led-sub { margin-top: 6px; }
+  .mcard { min-height: 50%; padding: 18px 0 16px; }
+  /* A shorter phone (360 x 640) zooms larger here, so its text reads better on a projector. Screens tighten to fit it. */
+  .phone { --phone-h: 640px; }
+  .scr-main { gap: 11px; padding-bottom: 10px; }
+  .scr-photo { height: 124px; }
+  .scr .steps .step { padding-bottom: 10px; }
+  .scr-foot { gap: 6px; padding-bottom: 24px; }
+  .dl > div { padding: 7px 0; }
+  .p-sheet { gap: 10px; padding-bottom: 24px; }
+  .p-sheet .receipt { font-size: 16px; }
   .mc-total { --amt-size: 56px; }
   .mc-deal, .mc-year { gap: 9px; padding: 0 26px; }
   .mc-deal .receipt, .mc-lines { font-size: 15px; }
@@ -340,7 +426,8 @@ button { cursor: pointer; }
   .cell:nth-child(n+3)::after { top: -9px; }
   .cell:nth-child(3)::before { content: none; }
   .cell:nth-child(n+3) { box-shadow: 0 -9px 0 -8px var(--line); }
-  .cell-label { height: 22px; gap: 6px; }
+  .cell-label { height: auto; min-height: 22px; gap: 4px 6px; flex-wrap: wrap; }
+  .cell-label .chip { margin-left: 0; height: 20px; padding: 0 8px; font-size: 11.5px; }
   .cell-label .avatar, .vm-mark { width: 20px; height: 20px; }
   .cell-label .role { display: none; }
   .cell-row { flex-direction: column; align-items: flex-start; min-height: 0; }
@@ -350,6 +437,7 @@ button { cursor: pointer; }
   .head { padding-bottom: 0; }
   .pwrap { display: grid; justify-items: center; }
   .phone-label { justify-self: start; margin-bottom: 10px; }
+  .mcard::before { content: none; }
   .mcard { position: static; grid-area: card; height: auto; grid-template-columns: 1fr; padding: 18px 0; border-radius: var(--r-panel); box-shadow: var(--sh-panel); }
   .mc-deal, .mc-year { padding: 0 18px; }
   .mc-year { border-left: 0; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
@@ -369,7 +457,7 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .amt-swap, .stage[data-arrive="fwd"] .mcard, .stage[data-arrive="fwd"] .slide-up, .stage[data-arrive="fwd"] .p-scrim,
   .stage[data-arrive="fwd"] .tick-in { animation: none !important; }
-  .cell::after, .pwrap .phone, .mc-prem { transition: none; }
+  .cell::after, .pwrap .phone, .mc-prem, .stage.has-card .pwrap, .stage.has-card .hold, .stage.has-card .led { transition: none; }
 }
 </style>
 </head>
@@ -440,13 +528,26 @@ button { cursor: pointer; }
   const FROZEN = WI.states[0], REFUND = WI.states[1], CLAIM = DM.states[0];
   const b = (n) => H.beat(n);
   const $ = (s, r) => (r || document).querySelector(s);
-  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // Product terms, counts, dates and times never split across lines ("All good", "Day 0 of 14", "on time 1/1",
+  // "Mon, May 24", "11:05 AM", "24 h", "1 day").
+  const NB = ' ';
+  const KEEP = /\b(All good|Broken blind|Report a problem|Claim deductions|Day \d+ of 14|on time)\b/g;
+  const tidy = (s) => String(s)
+    .replace(KEEP, (x) => x.replace(/ /g, NB))
+    .replace(/ (AM|PM)\b/g, NB + '$1')
+    .replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun), (?=[A-Z])/g, '$1,' + NB)
+    .replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d)/g, '$1' + NB + '$2')
+    .replace(/\b(\d+) (days?|h|business)\b/g, '$1' + NB + '$2')
+    .replace(/ (\d+\/\d+)$/, NB + '$1');
+  const keep = tidy;
+  const esc = (s) => tidy(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const desk = matchMedia('(min-width: 900px)');
   const clock = (at) => d(at, 'time').replace(/\s?[AP]M$/, '');
   const dayAt = (at) => d(at, 'day') + ' at ' + d(at, 'time');
   const UP = D.upfront.total, FEE = D.listerFee, RATE = Math.round(H.fees.listerRate * 100) + '%';
   const hero = (c) => H.moneyHTML(c, { hero: true });
+  const FF_MS = 280;   // beat 7: one month per step, date chip and Lena's rent rows in sync
 
   /* ------------------------------------------------------------------ icons (24 viewBox, stroke) */
   const svg = (p, extra) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>';
@@ -468,7 +569,9 @@ button { cursor: pointer; }
     'Owner approved sublet': ['badge-owner', I.house],
     'Deposits returned on time': ['badge-owner', I.ret]
   };
-  const badge = (label, small) => { const k = BADGE[label] || ['', I.face]; return '<li class="badge ' + k[0] + '">' + k[1] + esc(label) + (small ? ' <small>' + esc(small) + '</small>' : '') + '</li>'; };
+  const badge = (label, small) => { const k = BADGE[label] || ['', I.face]; return '<li class="badge ' + k[0] + '">' + k[1] + '<span>' + esc(label) + (small ? '<small>' + esc(small) + '</small>' : '') + '</span></li>'; };
+  // A phone button with no next step gives a visible result instead of doing nothing.
+  const ackBtn = (label, done, cls) => '<button class="btn ' + cls + '" type="button" data-act="ack" data-done="' + esc(done) + '">' + label + '</button>';
 
   /* ------------------------------------------------------------------ small builders */
   const rc = (label, cents, cls, note, opts) => '<div class="rc-row ' + (cls || '') + '"><span>' + esc(label) + (note ? '<small class="rc-note">' + esc(note) + '</small>' : '') + '</span><span class="amt">' + m(cents, opts) + '</span></div>';
@@ -484,7 +587,11 @@ button { cursor: pointer; }
    * Each step is one presenter state. Beats 1-10 follow final-model.md section H; beat 3 has a pay-sheet step first
    * so the money only moves when Pay is tapped. `from` + `moves` = money that travels when arriving from that step. */
   const payState = Object.assign({}, b(2), { at: b(3).at, dateLabel: b(3).dateLabel, timeLabel: b(3).timeLabel });
-  const MAIN = ['beat-1', 'beat-2', 'beat-3-pay', 'beat-3', 'beat-4', 'beat-5', 'beat-6', 'beat-7', 'beat-8', 'beat-9', 'beat-10'];
+  // Beat 9 opens on May 21 with the deposit still held and Lena's Return button showing; her tap moves the money.
+  const returnState = Object.assign({}, b(8), { at: b(9).at, dateLabel: b(9).dateLabel, timeLabel: b(9).timeLabel });
+  // Day N of 14 after move-out, by calendar day (Day 0 = the day Jamie taps I've moved out).
+  const dayN = (at) => H.date.diffDays(DL.movedOut, at);
+  const MAIN = ['beat-1', 'beat-2', 'beat-3-pay', 'beat-3', 'beat-4', 'beat-5', 'beat-6', 'beat-7', 'beat-8', 'beat-9-return', 'beat-9', 'beat-10'];
   const STEPS = {
     'beat-1': { beat: 1, st: b(1), j: 'lock', l: 'list', idle: 'j' },
     'beat-2': { beat: 2, st: b(2), j: 'listing', l: 'live', idle: 'l' },
@@ -494,12 +601,14 @@ button { cursor: pointer; }
     'beat-5': { beat: 5, st: b(5), j: 'movein', l: 'waiting', idle: 'l' },
     'beat-6': { beat: 6, st: b(6), j: 'released', l: 'receipt', from: 'beat-5', moves: [['held', 'lena', 'rel'], ['held', 'verimate', 'fee']] },
     'beat-7': { beat: 7, st: b(7), j: 'rent', l: 'rent', from: 'beat-6', moves: [['jamie', 'lena', 'direct']] },
-    'beat-8': { beat: 8, st: b(8), j: 'movedout', l: 'moveout' },
-    'beat-9': { beat: 9, st: b(9), j: 'returned', l: 'returned', from: 'beat-8', moves: [['held', 'jamie', 'ret']] },
+    // On screen the role is Lister; the founder may still say "landlord" out loud.
+    'beat-8': { beat: 8, st: b(8), j: 'movedout', l: 'notify', say: "New York gives Lena 14 days to return a deposit. On Verimate it's one tap." },
+    'beat-9-return': { beat: 9, st: returnState, j: 'movedout', l: 'moveout', idle: 'j', title: 'Lena checks the move-out', say: b(9).say },
+    'beat-9': { beat: 9, st: b(9), j: 'returned', l: 'returned', from: 'beat-9-return', moves: [['held', 'jamie', 'ret']] },
     'beat-10': { beat: 10, st: b(10), j: 'returned', l: 'returned', card: true },
     'what-if': { branch: 'whatif', st: FROZEN, j: 'frozen', l: 'frozen', say: WI.say },
     'what-if-refund': { branch: 'whatif', st: REFUND, j: 'refunded', l: 'refunded', title: m(UP) + ' refunded to Jamie', from: 'what-if', moves: [['held', 'jamie', 'ret']], say: WI.say },
-    'damage': { branch: 'damage', st: CLAIM, j: 'claim', l: 'claim', from: 'beat-8', moves: [['held', 'jamie', 'ret']], say: DM.say }
+    'damage': { branch: 'damage', st: CLAIM, j: 'claim', l: 'claim', from: 'beat-9-return', moves: [['held', 'jamie', 'ret']], say: DM.say }
   };
   const SLOTS = ['jamie', 'held', 'lena', 'verimate'];
   const slotVal = (st, k) => k === 'jamie' ? st.renterBack - st.renterPaid : k === 'held' ? st.held : k === 'lena' ? st.listerReceived : st.verimateEarned;
@@ -533,7 +642,7 @@ button { cursor: pointer; }
       if (S.id === 'what-if') return 'Frozen until Verimate decides';
       if (S.id === 'damage') return 'Broken blind, under review';
       if (st.held === UP) return 'First month and deposit';
-      if (st.held === D.deposit) return S.id === 'beat-8' ? 'Deposit, Day 0 of 14' : 'Deposit';
+      if (st.held === D.deposit) return S.id === 'beat-8' || S.id === 'beat-9-return' ? 'Deposit, Day ' + dayN(st.at) + ' of 14' : 'Deposit';
       return st.renterPaid ? 'Nothing held' : 'Nothing held yet';
     },
     lena: (S) => {
@@ -542,7 +651,7 @@ button { cursor: pointer; }
       if (S.id === 'beat-2' || S.id === 'beat-3-pay') return 'No booking yet';
       if (S.id === 'beat-3' || S.id === 'beat-4') return "Can't withdraw held money";
       if (S.id === 'beat-5') return 'Paid after move-in';
-      if (S.id === 'what-if') return 'Paused, nothing paid';
+      if (S.id === 'what-if') return 'Frozen, nothing paid';
       if (S.id === 'what-if-refund') return 'No move-in, no fee';
       if (st.listerReceived === D.listerFirstPayout) return 'First month, minus the ' + m(FEE) + ' fee';
       return 'All rent, fee paid once';
@@ -613,9 +722,11 @@ button { cursor: pointer; }
     'beat-7': () => item('Deposit', D.deposit, afterMoveOut, 'held') +
       note('February to May rent, ' + m(D.directRent) + ', goes straight to Lena. Verimate never holds it and charges ' + m(0) + '.'),
     'beat-8': () => item('Deposit', D.deposit, 'Day 0 of 14. Lena can return it until ' + d(DL.returnBy, 'day') + '. If she does nothing, it comes back on ' + d(DL.autoReturn, 'day') + '. New York deadline ' + d(DL.nyDeadline, 'day') + '.', 'held'),
+    'beat-9-return': (S) => item('Deposit', D.deposit, 'Day ' + dayN(S.st.at) + ' of 14. One tap from Lena returns all of it to Jamie. To keep any, she must claim deductions with photos by ' + d(DL.returnBy, 'day') + '.', 'held') +
+      note('It never went to Lena, so there is nothing to chase.'),
     'beat-9': () => item('Deposit', D.deposit, 'Returned to Jamie ' + d(DL.returned, 'dayStamp') + ', 1 day after move-out.', 'returned') + empty('The hold is empty.'),
     'beat-10': () => HOLDC['beat-9'](),
-    'what-if': () => item('First month and deposit', UP, 'Lena answers by ' + d(FROZEN.deadlines.listerAnswer, 'dayStamp') + '. Verimate decides by ' + d(FROZEN.deadlines.decision, 'day') + '.', 'frozen') +
+    'what-if': () => item('First month and deposit', UP, FROZEN.jamie[1] + ', by ' + d(FROZEN.deadlines.listerAnswer, 'dayStamp') + '. ' + FROZEN.jamie[2] + ', by ' + d(FROZEN.deadlines.decision, 'day') + '.', 'frozen') +
       '<div class="decide"><p class="decide-who">Verimate decides</p><p class="decide-note">Full refund, partial refund, or release. ' + esc(WI.reason) + ' is one of the 4 reasons, and nothing was paid out yet.</p>' +
       btn(REFUND.button, 'next', 'btn-primary btn-block') + '</div>',
     'what-if-refund': () => item('First month and deposit', UP, 'Refunded to Jamie ' + d(REFUND.at, 'dayStamp') + '. No move-in, no fee.', 'returned') + empty('The hold is empty.'),
@@ -641,7 +752,7 @@ button { cursor: pointer; }
       rc('Verimate fee', D.upfront.verimateFee, 'rc-zero') + rc('Total', D.upfront.total, 'rc-total') + '</div>' +
       '<p class="opt-label">Pay with</p><div class="opts" role="radiogroup" aria-label="Pay with">' +
       '<div class="opt on" role="radio" aria-checked="true"><span class="radio"></span><span>Bank account<small>Free</small></span><span class="amt">' + m(0) + '</span></div>' +
-      '<div class="opt" role="radio" aria-checked="false"><span class="radio"></span><span>Card<small>Card cost, shown before you pay</small></span><span class="amt">' + m(D.cardCost, { sign: true }) + '</span></div></div>' +
+      '<div class="opt" role="radio" aria-checked="false"><span class="radio"></span><span>Card<small>Card cost, shown first</small></span><span class="amt">' + m(D.cardCost, { sign: true }) + '</span></div></div>' +
       btn(V.buttons.pay, 'next', 'btn-primary btn-lg btn-block') + '</div>',
     paid: () => scr(appBar('Your booking') +
       '<span class="chip chip-held chip-lg">' + esc(V.states.held) + '</span>' +
@@ -656,7 +767,7 @@ button { cursor: pointer; }
       '<div class="hr"></div>' +
       '<ol class="steps">' + stepLi(1, S.st.tracker[0], d(DL.booked, 'stamp'), 'is-done') + stepLi(2, S.st.tracker[1], 'Until you move in, ' + d(DL.moveIn, 'day'), 'is-now') +
       stepLi(3, S.st.tracker[2], 'Rent goes to Lena after you tap All good') + '</ol>',
-      btn('Share with a parent', 'none', 'btn-secondary btn-block')),
+      ackBtn('Share with a parent', 'Link copied. Anyone with it sees this page.', 'btn-secondary btn-block')),
     movein: (S) => scr(
       '<div><h2 class="scr-title">Move-in check</h2><p class="scr-sub">' + esc(D.address) + ', ' + esc(d(DL.moveIn, 'day')) + '</p></div>' +
       '<div class="photos">' + ['img/u-room-sofa.jpg', 'img/u-living.jpg', 'img/u-kitchen.jpg'].map((src, i) =>
@@ -678,7 +789,7 @@ button { cursor: pointer; }
       btn(V.buttons.movedOut, 'next', 'btn-primary btn-lg btn-block') + '<p class="foot-note">Lease ends ' + esc(d(D.end, 'day')) + '</p>'),
     movedout: (S) => scr(appBar('Your deposit') +
       '<span class="chip chip-held chip-lg">' + esc(V.states.held) + '</span>' +
-      '<div><p class="day-big">Day 0 of 14</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
+      '<div><p class="day-big">' + esc('Day ' + dayN(S.st.at) + ' of 14') + '</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
       '<p class="scr-sub">You moved out ' + esc(d(DL.movedOut, 'dayStamp')) + '. Photos attached.</p>' +
       '<div class="upcoming"><div class="upcoming-top"><span>Deposit</span><span class="amt">' + m(D.deposit) + '</span></div></div>' +
       dl([['Lena can return it until', d(DL.returnBy, 'day')], ['Comes back on its own', d(DL.autoReturn, 'day')], ['New York deadline', d(DL.nyDeadline, 'day')]])),
@@ -686,13 +797,14 @@ button { cursor: pointer; }
       '<span class="chip chip-returned chip-lg">' + esc(V.results.returnDeposit) + '</span>' +
       '<div>' + hero(D.deposit) + '<p class="scr-text" style="margin-top:6px"><strong>' + esc(S.st.jamie ? S.st.jamie[2] : b(9).jamie[2]) + '</strong></p>' +
       '<p class="scr-sub">Arrives in your bank ' + esc(d(DL.jamieBankArrives[0], 'day')) + ' to ' + esc(d(DL.jamieBankArrives[1], 'day')) + '</p></div>' +
-      '<div class="receipt">' + rc('Rent you paid', T.renterNet) + rc('Verimate fees', T.renterFees, 'rc-zero') + rc('Deposit back', T.renterGotBack, 'rc-total') + '</div>',
-      '<button class="btn btn-secondary btn-block" type="button" data-act="none">' + I.share.replace('<svg', '<svg width="18" height="18"') + 'Share receipt</button>'),
+      '<div class="receipt">' + rc('You paid in', T.renterPaidIn) + rc('Deposit back', -T.renterGotBack, 'rc-sub') +
+      rc('Your cost', T.renterNet, 'rc-total', 'Rent only. Verimate fees ' + m(T.renterFees)) + '</div>',
+      ackBtn(I.share.replace('<svg', '<svg width="18" height="18"') + 'Share receipt', 'Receipt link copied', 'btn-secondary btn-block')),
     frozen: (S) => scr(appBar('Move-in check') +
       '<span class="chip chip-frozen chip-lg">' + esc(V.states.frozen) + '</span>' +
       '<h2 class="scr-title">Problem reported</h2>' +
       '<ul class="reasons">' + WI.reasons.map((r) => '<li class="' + (r === WI.reason ? 'on' : '') + '"><span class="radio"></span>' + esc(r) + '</li>').join('') + '</ul>' +
-      '<div class="upcoming"><div class="upcoming-top"><span>' + esc(S.st.jamie[0].replace(/^\S+\s/, '')) + '</span><span class="amt">' + m(S.st.held) + '</span></div></div>' +
+      '<div class="upcoming"><div class="upcoming-top"><span>First month and deposit</span><span class="amt">' + m(S.st.held) + '</span></div><p class="scr-sub">Frozen. ' + esc(S.st.jamie[1]) + '. ' + esc(S.st.jamie[2]) + '. Nothing goes to Lena until then.</p></div>' +
       dl([['Lena answers by', d(S.st.deadlines.listerAnswer, 'stamp')], ['Decision by', d(S.st.deadlines.decision, 'day')]])),
     refunded: (S) => scr(appBar('Your booking') +
       '<span class="chip chip-returned chip-lg">Refunded</span>' +
@@ -703,9 +815,9 @@ button { cursor: pointer; }
       '<span class="chip chip-returned chip-lg">Returned now</span>' +
       '<div>' + hero(S.st.renterBack) + '<p class="scr-text" style="margin-top:6px">Back to you the moment Lena filed her claim.</p></div>' +
       '<div class="held-item"><div class="hi-top"><span class="hi-label">' + esc(DM.claim.label) + '</span><span class="amt" style="font-weight:600">' + m(-DM.claim.cents) + '</span></div>' +
-      '<p class="scr-sub">' + esc(DM.claim.evidence.join(' and ')) + ' attached. Held by Verimate until decided, by ' + esc(d(S.st.deadlines.decidedBy, 'day')) + '.</p></div>' +
+      '<p class="scr-sub">' + esc(DM.claim.evidence.map((x, i) => i ? x.charAt(0).toLowerCase() + x.slice(1) : x).join(' and ')) + ' attached. Held by Verimate until decided, by ' + esc(d(S.st.deadlines.decidedBy, 'day')) + '.</p></div>' +
       '<p class="scr-sub">Accept or dispute by ' + esc(d(S.st.deadlines.renterReply, 'dayStamp')) + '. Saying nothing means you accept.</p>',
-      btn('Dispute ' + m(DM.claim.cents), 'none', 'btn-secondary btn-block'))
+      ackBtn('Dispute ' + m(DM.claim.cents), 'Disputed. Verimate decides by ' + d(CLAIM.deadlines.decidedBy, 'day'), 'btn-secondary btn-block'))
   };
 
   /* ------------------------------------------------------------------ Lena's phone */
@@ -748,26 +860,32 @@ button { cursor: pointer; }
       '<p class="receipt-ref">Ref ' + esc(D.ref) + ', ' + esc(d(DL.moveInConfirmed, 'stamp')) + '</p></div>',
     rent: () => scr(
       '<div><h2 class="scr-title">Rent received</h2>' + hero(T.listerReceived).replace('amt-hero', 'amt-hero" style="--amt-size:40px') + '</div>' +
-      '<ol class="rows">' + D.schedule.map((x, i) => '<li class="' + (i ? 'tick-in' : '') + '" style="animation-delay:' + (i * 0.11).toFixed(2) + 's"><time>' + esc(d(x.due, 'short')) + '</time><span>' + esc(shortLabel(x.label)) +
+      '<ol class="rows">' + D.schedule.map((x, i) => '<li class="' + (i ? 'tick-in' : '') + '" style="animation-delay:' + (i ? (i - 1) * FF_MS / 1000 : 0).toFixed(2) + 's"><time>' + esc(d(x.due, 'short')) + '</time><span>' + esc(shortLabel(x.label)) +
         '<small>Verimate fee ' + m(-x.fee) + '</small></span><span class="amt">' + m(x.cents - x.fee) + '</span></li>').join('') + '</ol>' +
       '<p class="scr-sub">One fee, on the first month. Months 2 to 5 come straight from Jamie.</p>'),
-    moveout: () => scr(appBar('Your listing') +
+    // Beat 8: Jamie's tap reaches Lena as a notification. Tapping it opens the move-out screen (beat 9).
+    notify: (S) => '<div class="lock"><p class="lock-date">' + esc(d(S.st.at, 'long').replace(/, \d{4}$/, '')) + '</p><p class="lock-time">' + esc(clock(S.st.at)) + '</p>' +
+      '<button class="notif" type="button" data-act="next"><span class="notif-top"><span class="vm-mark">' + MARK + '</span><span>Verimate</span><time>now</time></span>' +
+      '<strong>Jamie moved out of ' + esc(D.address.replace(/ Ave$/, '')) + '</strong>' +
+      '<span class="notif-day">' + esc(S.st.lena[0]) + '</span>' +
+      '<span class="notif-body">' + esc('Deposit ' + m(D.deposit) + ', held by Verimate. ' + S.st.lena.slice(1).join('. ') + '.') + '</span></button></div>',
+    moveout: (S) => scr(appBar('Your listing') +
       '<span class="chip chip-needs chip-lg">' + esc(V.states.needs) + '</span>' +
       '<div><h2 class="scr-title">Jamie moved out</h2><p class="scr-sub" style="margin-top:4px">' + esc(d(DL.movedOut, 'dayStamp')) + '</p></div>' +
-      '<div><p class="day-big">Day 0 of 14</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
+      '<div><p class="day-big">' + esc('Day ' + dayN(S.st.at) + ' of 14') + '</p><p class="scr-text" style="margin-top:2px">New York law</p></div>' +
       dl([['Return by', d(DL.returnBy, 'day')], ['Auto-returns', d(DL.autoReturn, 'day')], ['NY deadline', d(DL.nyDeadline, 'day')]]) +
       '<div class="slot-empty"><strong>Deposit ' + m(D.deposit) + '</strong>Held by Verimate, not you.</div>',
       btn(V.buttons.returnDeposit, 'next', 'btn-primary btn-lg btn-block') + btn(V.buttons.claim, 'damage', 'btn-quiet')),
     returned: () => scr(appBar('Your listing') +
       '<span class="chip chip-returned chip-lg">' + esc(V.results.returnDeposit) + '</span>' +
       '<div><h2 class="scr-title">Deposit returned</h2><p class="scr-sub" style="margin-top:4px">' + m(D.deposit) + ' to Jamie, ' + esc(d(DL.returned, 'dayStamp')) + '</p></div>' +
-      '<div class="record"><span class="record-ic">' + I.ret + '</span><div><strong>' + esc(L.record.after.label) + '</strong><span>' + esc(L.record.after.detail) + '. Shown on your profile.</span></div></div>' +
+      '<div class="record"><span class="record-ic">' + I.ret + '</span><div><strong>' + esc(keep(L.record.after.label)) + '</strong><span>' + esc(L.record.after.detail) + '. Shown on your profile.</span></div></div>' +
       '<div class="receipt">' + rc('Rent received', T.listerReceived) + rc('Lister fee, paid once', T.listerPaid, '', T.listerPaidPctOfLease + ' of your lease') + '</div>'),
     frozen: (S) => scr(appBar('Your listing') +
       '<span class="chip chip-frozen chip-lg">' + esc(V.states.frozen) + '</span>' +
-      '<div><h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2><p class="scr-sub" style="margin-top:4px">Jamie reported it ' + esc(d(S.st.at, 'dayStamp')) + ', with photos.</p></div>' +
+      '<div><h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2><p class="scr-sub" style="margin-top:4px">Jamie reported it ' + esc(d(S.st.at, 'dayStamp')) + ', with photos. You have 24 h to answer.</p></div>' +
       dl([['Answer by', d(S.st.deadlines.listerAnswer, 'stamp')], ['Verimate decides by', d(S.st.deadlines.decision, 'day')]]) +
-      '<div class="upcoming"><div class="upcoming-top"><span>First payout</span><span class="amt amt-strike">' + m(D.listerFirstPayout) + '</span></div><p class="scr-sub">Paused until Verimate decides</p></div>'),
+      '<div class="upcoming"><div class="upcoming-top"><span>First payout</span><span class="amt amt-strike">' + m(D.listerFirstPayout) + '</span></div><p class="scr-sub">Frozen until Verimate decides</p></div>'),
     refunded: (S) => scr(appBar('Your listing') +
       '<span class="chip chip-quiet chip-lg">Cancelled</span>' +
       '<div><h2 class="scr-title">' + esc(S.st.lena[0]) + '</h2><p class="scr-sub" style="margin-top:4px">' + esc(d(S.st.at, 'dayStamp')) + '</p></div>' +
@@ -796,21 +914,35 @@ button { cursor: pointer; }
     g[1].note = g[1].note.charAt(0).toUpperCase() + g[1].note.slice(1);
     return g.filter((x) => x.cents !== 0);
   }
+  // The four no-fee rent payments (Feb to May) read as one ledger line, so the panel stays short enough to show its total.
+  const DIRECT_IDS = ['fee-feb', 'fee-mar', 'fee-apr', 'fee-may'];
+  function feeRows(rows) {
+    const out = [];
+    rows.filter((r) => r.kind !== 'cost').forEach((r) => {
+      if (DIRECT_IDS.indexOf(r.id) < 0) { out.push(r); return; }
+      if (out.some((x) => x.id === 'direct')) return;
+      const all = rows.filter((x) => DIRECT_IDS.indexOf(x.id) >= 0);
+      out.push({ id: 'direct', at: all[0].at, label: 'Feb–May rent to Lena', note: all.length + ' payments, ' + m(D.directRent), cents: all.reduce((s, x) => s + x.cents, 0), kind: 'nofee' });
+    });
+    return out;
+  }
+  const lcFirst = (s) => /^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
   function ledgerHTML(S, prevSt, fresh) {
     const st = S.st, rows = st.ledgerRows;
-    const old = new Set(prevSt ? prevSt.ledgerRows.map((r) => r.id) : []);
+    const fees = feeRows(rows);
+    const old = new Set(prevSt ? feeRows(prevSt.ledgerRows).map((r) => r.id) : []);
     const isNew = (r) => fresh && prevSt && !old.has(r.id);
-    const fees = rows.filter((r) => r.kind !== 'cost');
     const groups = costGroups(rows), oldGroups = prevSt ? costGroups(prevSt.ledgerRows) : [];
     const gNew = (g) => fresh && prevSt && !oldGroups.some((x) => x.label === g.label && x.cents === g.cents);
     return '<div class="led-head"><h2>Verimate ledger</h2><span class="receipt-ref">' + esc(D.ref) + '</span></div>' +
-      '<ol class="ledger">' + (fees.length ? fees.map((r) =>
-        '<li class="ledger-row ' + (r.kind === 'fee' ? 'is-fee' : 'is-zero') + (isNew(r) ? ' is-new' : '') + '"><time class="ledger-when" datetime="' + r.at + '">' + esc(d(r.at, 'short')) + '</time>' +
-        '<span class="ledger-what">' + esc(r.label) + (r.note ? '<small>' + esc(r.note) + '</small>' : '') + '</span><span class="ledger-amt amt">' + m(r.cents) + '</span></li>').join('')
-        : '<li class="ledger-row led-none">No fees yet. Lena pays only after move-in.</li>') + '</ol>' +
-      '<p class="led-sub">Costs</p><ol class="ledger led-costs">' + groups.map((g) =>
+      '<div class="led-fees"><ol class="ledger">' + (fees.length ? fees.map((r) =>
+        '<li class="ledger-row ' + (r.kind === 'fee' ? 'is-fee' : 'is-zero') + (isNew(r) ? ' is-new' : '') + '">' +
+        '<span class="ledger-what">' + esc(r.label) + '<small>' + (r.id === 'direct' ? esc(r.note) : '<time datetime="' + r.at + '">' + esc(d(r.at, 'short')) + '</time>' +
+        (r.note ? ', ' + esc(lcFirst(r.note)) : '')) + '</small></span><span class="ledger-amt amt">' + m(r.cents) + '</span></li>').join('')
+        : '<li class="ledger-row led-none">No fees yet. Lena pays only after <span class="nw">move-in.</span></li>') + '</ol></div>' +
+      '<div class="led-foot"><p class="led-sub">Costs</p><ol class="ledger led-costs">' + groups.map((g) =>
         '<li class="ledger-row is-cost' + (gNew(g) ? ' is-new' : '') + '"><span class="ledger-what">' + esc(g.label) + '<small>' + esc(g.note || 'ACH returns, disputes') + '</small></span><span class="ledger-amt amt">' + m(g.cents) + '</span></li>').join('') + '</ol>' +
-      '<div class="ledger-total"><span>' + (S.id === 'beat-10' ? 'Kept on this deal' : 'Kept so far') + '</span><span class="amt">' + m(st.verimateNet) + '</span></div>';
+      '<div class="ledger-total"><span>' + (S.id === 'beat-10' ? 'Kept on this deal' : 'Kept so far') + '</span><span class="amt">' + m(st.verimateNet) + '</span></div></div>';
   }
 
   /* ------------------------------------------------------------------ beat 10: model card */
@@ -823,7 +955,11 @@ button { cursor: pointer; }
   const mcard = $('#mcard');
   mcard.innerHTML =
     '<div class="mc-deal"><h2 class="mc-h">This deal, ' + esc(D.address) + '</h2><div class="receipt">' +
-    B10.card.map((x) => rc(x.label, x.cents, x.total ? 'rc-total' : x.cents === 0 ? 'rc-zero' : '', x.note || CARD_NOTE[x.label])).join('') + '</div></div>' +
+    // Costs are shown as a minus, so the column adds up: $0.00 + $87.50 − $21.66 = $65.84 kept.
+    B10.card.map((x) => {
+      const cost = /costs$/.test(x.label), c = cost ? -x.cents : x.cents;
+      return rc(x.label, c, x.total ? 'rc-total' : cost ? 'rc-sub' : c === 0 ? 'rc-zero' : '', x.note || CARD_NOTE[x.label]);
+    }).join('') + '</div></div>' +
     '<div class="mc-year"><div class="mc-yhead"><h2 class="mc-h">' + esc(RUN.label) + '</h2><span>' + esc(Y1.period) + '</span></div>' +
     '<div class="mc-grid"><div><p class="mc-deals"><b id="mcDeals">' + RUN.toDeals + '</b> deals</p><span class="amt amt-hero mc-total" id="mcTotal"></span><p class="mc-total-label">Revenue, year 1</p></div>' +
     '<div class="receipt mc-lines"><div class="rc-row"><span id="mcFeeLabel"></span><span class="amt" id="mcFees"></span></div>' +
@@ -857,8 +993,10 @@ button { cursor: pointer; }
     countRAF = requestAnimationFrame(tick);
   }
   setCount(RUN.toDeals, RUN.premium, true);
-  // The counter must land exactly on the data's year-1 revenue.
+  // The counter must land exactly on the data's year-1 revenue, and the deal column must add up to what Verimate kept.
   if (RUN.toDeals * RUN.perDeal + RUN.premium !== RUN.total || RUN.total !== Y1.revenue) console.error('hold.html: beat 10 counter does not match HOLD.year1.revenue');
+  const cardSum = B10.card.filter((x) => !x.total).reduce((s, x) => s + (/costs$/.test(x.label) ? -x.cents : x.cents), 0);
+  if (cardSum !== B10.card.filter((x) => x.total)[0].cents || cardSum !== B10.verimateNet) console.error('hold.html: beat 10 card does not add up to Verimate kept');
 
   /* ------------------------------------------------------------------ controls */
   const stage = $('#stage'), title = $('#title'), live = $('#live');
@@ -869,7 +1007,9 @@ button { cursor: pointer; }
   const pj = $('#pj'), pl = $('#pl'), scrJ = $('#scrJ'), scrL = $('#scrL');
 
   let cur = null, nav = 0, active = null, captionOn = false, cardHidden = false;
-  const origin = { whatif: 'beat-5', damage: 'beat-8' };
+  const origin = { whatif: 'beat-5', damage: 'beat-9-return' };
+
+  function showCard(on) { mcard.hidden = !on; stage.classList.toggle('has-card', on); }
 
   function renderControls(S) {
     const n = S.beat;
@@ -884,12 +1024,35 @@ button { cursor: pointer; }
     const atEnd = S.id === 'beat-10';
     $('#nextLabel').textContent = atEnd ? (cardHidden ? 'Show card' : 'Run again') : 'Next';
     $('#nextBtn').disabled = !atEnd && !S.next;
-    document.querySelector('[data-act="whatif"]').setAttribute('aria-pressed', String(S.branch === 'whatif'));
-    document.querySelector('[data-act="damage"]').setAttribute('aria-pressed', String(S.branch === 'damage'));
-    document.querySelector('[data-act="caption"]').setAttribute('aria-pressed', String(captionOn));
+    // Only the presenter-bar buttons are toggles; the phones carry buttons with the same data-act.
+    $('.ctl-keys [data-act="whatif"]').setAttribute('aria-pressed', String(S.branch === 'whatif'));
+    $('.ctl-keys [data-act="damage"]').setAttribute('aria-pressed', String(S.branch === 'damage'));
+    $('.ctl-keys [data-act="caption"]').setAttribute('aria-pressed', String(captionOn));
     caption.textContent = S.say || '';
     caption.hidden = !captionOn;
     ticks.hidden = captionOn;
+  }
+
+  /* ------------------------------------------------------------------ date chip (beat 7 fast-forwards Feb to May) */
+  const dateChip = $('#dateChip');
+  let ffTimer = 0;
+  const chipHTML = (label, time) => esc(label) + (time ? '<span class="date-chip-time">' + esc(time) + '</span>' : '');
+  function renderDate(st, fastForward) {
+    clearInterval(ffTimer);
+    dateChip.classList.remove('is-ff');
+    if (!fastForward) { dateChip.innerHTML = chipHTML(st.dateLabel, st.timeLabel); return; }
+    // One step per rent payment, in time with the rows ticking in on Lena's phone, then the whole range.
+    const seq = st.ticks.map((t) => d(t, 'year'));
+    let k = 0;
+    dateChip.classList.add('is-ff');
+    dateChip.innerHTML = chipHTML(seq[0]);
+    ffTimer = setInterval(() => {
+      k++;
+      if (k < seq.length) { dateChip.innerHTML = chipHTML(seq[k]); return; }
+      clearInterval(ffTimer);
+      dateChip.classList.remove('is-ff');
+      dateChip.innerHTML = chipHTML(st.dateLabel, st.timeLabel);
+    }, FF_MS);
   }
 
   /* ------------------------------------------------------------------ render one step */
@@ -900,8 +1063,8 @@ button { cursor: pointer; }
     document.documentElement.dataset.step = id;
     stage.dataset.arrive = o.arrive === 'fwd' && !reduce.matches ? 'fwd' : 'none';
     renderBar(S, o);
-    $('#dateChip').innerHTML = esc(st.dateLabel) + (st.timeLabel ? '<span class="date-chip-time">' + esc(st.timeLabel) + '</span>' : '');
-    title.textContent = S.title;
+    renderDate(st, stage.dataset.arrive === 'fwd' && st.ticks && st.ticks.length);
+    title.textContent = keep(S.title);
     $('#hold').innerHTML = HOLDC[id](S);
     scrJ.innerHTML = J_SCR[S.j](S);
     scrL.innerHTML = L_SCR[S.l](S);
@@ -911,13 +1074,15 @@ button { cursor: pointer; }
     pj.classList.toggle('is-idle', S.idle === 'j');
     pl.classList.toggle('is-idle', S.idle === 'l');
     $('#led').innerHTML = ledgerHTML(S, o.prevSt, o.arrive === 'fwd');
-    mcard.hidden = !(S.card && !cardHidden);
+    showCard(!!S.card && !cardHidden);
     renderControls(S);
+    holdEl.scrollTop = 0; checkOver();
     live.textContent = count.textContent + '. ' + S.title + '. ' + V.states.held + ' ' + m(st.held) + '. Verimate earned ' + m(st.verimateEarned) + '.';
     if (focusWasIn && (!document.activeElement || document.activeElement === document.body)) title.focus({ preventScroll: true });
   }
 
   /* ------------------------------------------------------------------ navigation with the travelling amounts */
+  const sameMoney = (a, c) => SLOTS.every((k) => slotVal(a, k) === slotVal(c, k));
   function finishActive() {
     if (!active) return;
     const a = active; active = null;
@@ -933,8 +1098,9 @@ button { cursor: pointer; }
     const prevId = cur, A = prevId ? STEPS[prevId] : null, S = STEPS[id];
     const token = ++nav;
     let moves = [], dir = 'none';
-    if (how !== 'jump' && A && S.from === prevId && S.moves) { moves = S.moves; dir = 'fwd'; }
-    else if (how !== 'jump' && A && A.from === id && A.moves) { moves = A.moves.map((x) => ({ i: x.i, from: x.to, to: x.from, kind: x.kind, cents: x.cents })); dir = 'back'; }
+    // Money travels when arriving from the step a move starts at, or from any step with the same money (beat 8 to the damage claim).
+    if (how !== 'jump' && A && S.moves && (S.from === prevId || sameMoney(A.st, STEPS[S.from].st))) { moves = S.moves; dir = 'fwd'; }
+    else if (how !== 'jump' && A && A.moves && (A.from === id || sameMoney(S.st, STEPS[A.from].st))) { moves = A.moves.map((x) => ({ i: x.i, from: x.to, to: x.from, kind: x.kind, cents: x.cents })); dir = 'back'; }
     cur = id;
     if (id === 'beat-10') cardHidden = false;
     if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
@@ -1018,18 +1184,15 @@ button { cursor: pointer; }
   function damage() {
     const S = STEPS[cur];
     if (S.branch === 'damage') { go(origin.damage, 'jump'); return; }
-    origin.damage = isMain(cur) ? cur : 'beat-8';
-    if (cur === 'beat-8') { go('damage'); return; }
-    // Rewind to move-out first, then let Lena's claim move the money.
-    go('beat-8', 'jump');
-    const t = nav;
-    setTimeout(() => { if (nav === t) go('damage'); }, reduce.matches ? 0 : 420);
+    origin.damage = isMain(cur) ? cur : 'beat-9-return';
+    // From beat 8 or Lena's Return screen the $815.00 travels to Jamie; from anywhere else the bar simply changes.
+    go('damage');
   }
   function reset() { cardHidden = false; go('beat-1', 'jump'); }
   function toggleCaption() { captionOn = !captionOn; renderControls(STEPS[cur]); }
   function escape() {
     const S = STEPS[cur];
-    if (S.card && !cardHidden) { cardHidden = true; mcard.hidden = true; cancelAnimationFrame(countRAF); renderControls(S); return; }
+    if (S.card && !cardHidden) { cardHidden = true; showCard(false); cancelAnimationFrame(countRAF); renderControls(S); return; }
     if (S.branch) go(origin[S.branch], 'jump');
   }
 
@@ -1037,6 +1200,9 @@ button { cursor: pointer; }
     const t = e.target.closest('[data-act]');
     if (!t || t.disabled) return;
     const a = t.dataset.act;
+    // A mouse click must not leave focus on the button, or the next Space/Enter would press it again instead of going forward.
+    if (e.detail) t.blur();
+    if (a === 'ack') { if (!t.classList.contains('is-acked')) { t.classList.add('is-acked'); t.textContent = t.dataset.done; } return; }
     if (a === 'next') next();
     else if (a === 'back') back();
     else if (a === 'whatif') whatIf();
@@ -1057,8 +1223,17 @@ button { cursor: pointer; }
     else if (k === 'd' || k === 'D') damage();
     else if (k === 'r' || k === 'R') reset();
     else if (k === 'c' || k === 'C') toggleCaption();
+    else if (k === 'f' || k === 'F') toggleFull();
     else if (k === 'Escape') escape();
   });
+  // F: fullscreen, so a projector browser that is not in F11 mode still gets the whole screen.
+  function toggleFull() {
+    const de = document.documentElement;
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (de.requestFullscreen) de.requestFullscreen().catch(() => {});
+    } catch (e) { /* not allowed here */ }
+  }
 
   function fromHash() {
     const h = decodeURIComponent(location.hash.replace(/^#/, '')).toLowerCase();
@@ -1067,22 +1242,29 @@ button { cursor: pointer; }
     if (h === 'what-if-frozen') return 'what-if';
     if (h === 'what-if-refunded' || h === 'refund') return 'what-if-refund';
     if (h === 'pay') return 'beat-3-pay';
+    if (h === 'return') return 'beat-9-return';
     return STEPS[h] ? h : null;
   }
   addEventListener('hashchange', () => { const id = fromHash(); if (id && id !== cur) go(id, 'jump'); });
 
   /* ------------------------------------------------------------------ fit the phones to the stage */
-  const PHONE_W = 360, PHONE_H = 680;
+  const PHONE_W = 360;
   const phones = [$('.phone', pj), $('.phone', pl)];
   function fit() {
     if (!desk.matches) { phones.forEach((p) => p.style.removeProperty('--phone-scale')); return; }
+    const PHONE_H = parseFloat(getComputedStyle(phones[0]).getPropertyValue('--phone-h')) || 680;   // 640 on short screens
     const cs = getComputedStyle(stage);
     const h = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     const gap = parseFloat(cs.columnGap) || 0;
     const w = (stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 3 * gap) / 4;
     const s = Math.max(0.45, Math.min(h / PHONE_H, w / PHONE_W, 1.25));
     phones.forEach((p) => p.style.setProperty('--phone-scale', s.toFixed(4)));
+    checkOver();
   }
+  // The center column fades at its cut edge when it has more below (short window), so nothing disappears without a sign.
+  const holdEl = $('#hold');
+  function checkOver() { holdEl.classList.toggle('is-over', holdEl.scrollTop + holdEl.clientHeight < holdEl.scrollHeight - 2); }
+  holdEl.addEventListener('scroll', checkOver, { passive: true });
   if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else addEventListener('resize', fit);
   desk.addEventListener('change', fit);
 

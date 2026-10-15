@@ -51,7 +51,7 @@
   .demo .keyhints { margin-left: 12px; }
 
   /* ---------------------------------------------------------------- pay: Airbnb-style checkout */
-  .pay { padding: 34px 0 96px; }
+  .pay { padding-top: 34px; padding-bottom: 96px; }
   .pay-grid { display: grid; grid-template-columns: minmax(0, 1fr) 416px; gap: 80px; align-items: start; }
   .pay-head { display: flex; align-items: center; gap: 10px; margin: 0 0 30px -10px; }
   .back { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); flex: none; }
@@ -70,6 +70,7 @@
   .badges li { display: grid; gap: 2px; min-width: 0; }
   .badges .badge { font-size: 14px; font-weight: 600; white-space: normal; }
   .badges small { padding-left: 22px; font-size: 13px; color: var(--muted); }
+  .badges .is-quiet .badge { color: var(--muted); font-weight: 500; }
 
   .pm { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; min-width: 0; }
   .pm-opt {
@@ -117,7 +118,7 @@
   .m-only { display: none; }
 
   /* ---------------------------------------------------------------- tracker */
-  .trk { padding: 34px 0 96px; }
+  .trk { padding-top: 34px; padding-bottom: 96px; }
   .trk-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: start; }
   .col { min-width: 0; }
   .trk-head { margin-bottom: 24px; }
@@ -132,9 +133,12 @@
   .st-who { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
   .st-who img { width: 26px; height: 26px; }
   .vm-mark { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; }
-  .st-amt { font-family: var(--font-display); font-weight: 600; font-size: 26px; letter-spacing: -.025em; line-height: 1.1; }
+  .st-amt { font-family: var(--font-display); font-weight: 600; font-size: 30px; letter-spacing: -.025em; line-height: 1.1; }
   .st-hold .amt-hero { --amt-size: 48px; }
-  .st-note { font-size: 13px; color: var(--muted); }
+  .st-note { font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+  .st-hold.is-frozen .vm-mark { background: var(--flagged); }
+  .st-hold.is-frozen .st-label { color: var(--flagged-ink); }
+  .rc-note { font-size: 13.5px; }
   .lane { padding: 16px 0 18px; border-top: 1px solid var(--line-2); }
   .lane-track { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; min-height: 40px; }
   .lane-track::before { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--line-2); }
@@ -154,6 +158,7 @@
   .lane-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
   .countdown { font-size: 14px; color: var(--ink-2); }
   .countdown .amt { font-weight: 700; color: var(--ink); }
+  .lane-when { font-size: 14px; font-weight: 600; color: var(--ink-2); margin-right: 2px; }
   .rail-cap { padding-top: 14px; border-top: 1px solid var(--line-2); font-size: 13.5px; color: var(--muted); }
 
   /* State detail under the rail */
@@ -165,6 +170,8 @@
   .det .receipt-ref { margin-top: 12px; }
   .det-text { display: grid; gap: 12px; font-size: 15px; color: var(--ink-2); }
   .det-text strong { color: var(--ink); font-weight: 600; }
+  .det-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: 4px; }
+  .prog-end { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
   .det-foot { margin-top: 18px; font-size: 14.5px; color: var(--ink-2); max-width: 70ch; }
   .choices { display: grid; grid-template-columns: 150px minmax(0, 1fr); margin: 0; border-top: 1px solid var(--ink); }
   .choices dt, .choices dd { padding: 13px 0; border-bottom: 1px solid var(--line); }
@@ -270,7 +277,23 @@
   .rp-next .step-dot { background: var(--paper); }
   .rp-next .step-title { color: var(--ink); font-size: 14.5px; }
   .rp-next .step-meta { font-size: 13.5px; }
-  .rp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+  /* The submit row stays in view even when the sheet has to scroll */
+  .rp-actions {
+    position: sticky; bottom: 0; z-index: 1; display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+    margin: 0 -24px -22px; padding: 12px 24px 22px; background: var(--paper); border-top: 1px solid var(--line);
+  }
+  /* Projector height (1280x720): tighten so the whole sheet fits without scrolling */
+  @media (max-height: 780px) {
+    .rp { gap: 12px; padding-top: 18px; }
+    .rp-grab { display: none; }
+    .rp-head p { margin-top: 4px; }
+    .rp-reasons { gap: 6px; }
+    .rp-opt { padding: 8px 14px; }
+    .rp-next { padding: 12px 16px; }
+    .rp-next h3 { margin-bottom: 8px; }
+    .rp-next .step { padding-bottom: 8px; }
+    .rp-actions { padding-top: 10px; padding-bottom: 18px; }
+  }
 
   .foot { border-top: 1px solid var(--line); }
   .foot .wrap { padding-top: 22px; padding-bottom: 28px; font-size: 13.5px; color: var(--muted); }
@@ -331,6 +354,7 @@
     .act-state { grid-column: 2; }
     .sched th:nth-child(4), .sched td:nth-child(4) { display: none; }
     .rp { padding: 8px 16px 18px; }
+    .rp-actions { margin: 0 -16px -18px; padding: 12px 16px 18px; }
     .rp-actions .btn-primary { flex: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -376,7 +400,7 @@
 
   const D = H.deal, DL = D.deadlines, U = D.upfront, m = H.money, dt = H.date;
   const J = H.people.renter, L = H.people.lister, O = H.people.owner;
-  const WI = H.branches.whatIf, FZ = WI.states[0];
+  const WI = H.branches.whatIf, FZ = WI.states[0], RF = WI.states[1];
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const amt = (c, o) => '<span class="amt">' + m(c, o) + '</span>';
   const t = (iso) => dt.parse(iso).getTime();
@@ -397,7 +421,7 @@
 
   /* ---------------------------------------------------------------- states
    * Main path (PgDn / PgUp walk it): pay, tracker, move-in-day, moved-in, moved-out, returned.
-   * Branch: #problem opens the Report a problem sheet over move-in-day; submitting it leads to #frozen. */
+   * Branch: #problem opens the Report a problem sheet over move-in-day; submitting it leads to #frozen, then #refunded. */
   const ORDER = ['pay', 'tracker', 'move-in-day', 'moved-in', 'moved-out', 'returned'];
   const ST = {
     'pay':         { at: '2026-12-01', noTime: true, name: 'Confirm and pay', title: 'Confirm and pay' },
@@ -406,9 +430,12 @@
     'moved-in':    { at: DL.moveInConfirmed, name: 'Rent released', bar: H.beat(6), pos: { rent: 'lena', dep: 'hold' }, hold: 'beat-6', lister: 'paid' },
     'moved-out':   { at: DL.movedOut, name: 'Moved out', bar: H.beat(8), pos: { rent: 'lena', dep: 'hold' }, hold: 'beat-8', lister: 'move-out' },
     'returned':    { at: DL.returned, name: 'Deposit returned', bar: H.beat(9), pos: { rent: 'lena', dep: 'you' }, hold: 'beat-9', lister: 'returned' },
-    'frozen':      { at: FZ.at, name: 'What if: problem reported', bar: FZ, pos: { rent: 'hold', dep: 'hold' }, frozen: true, hold: 'what-if', lister: 'booked' }
+    'frozen':      { at: FZ.at, name: 'What if: problem reported', bar: FZ, pos: { rent: 'hold', dep: 'hold' }, frozen: true, hold: 'what-if', lister: 'booked' },
+    'refunded':    { at: RF.at, name: 'What if: refunded', bar: RF, pos: { rent: 'you', dep: 'you' }, refunded: true, hold: 'what-if-refund', lister: null }
   };
-  const rank = (k) => (k === 'frozen' ? 2.5 : ORDER.indexOf(k));
+  // What-if branch, reached from move-in day: Report a problem leads to frozen, then Verimate's refund.
+  const BRANCH = ['frozen', 'refunded'];
+  const rank = (k) => (BRANCH.indexOf(k) >= 0 ? 2.5 + BRANCH.indexOf(k) / 10 : ORDER.indexOf(k));
 
   let cur = null;               // current state key
   let method = 'bank';          // payment method picked on #pay
@@ -421,6 +448,7 @@
   const cancelBy = H.date.addDays(D.start, -14);
   const firstMonthEnd = H.date.addDays(D.schedule[1].due, -1);
   const directRows = D.schedule.filter((r) => r.via === 'direct');
+  const cardNote = () => '<strong>Paying by card:</strong> the ' + m(D.cardCost) + ' card cost goes to the card network when you pay, so it isn’t part of the amounts above.';
   const stepLi = (n, title, meta, cls, cur) => '<li class="step ' + (cls || '') + '"' + (cur ? ' aria-current="step"' : '') + '><span class="step-dot">' + n + '</span><div class="step-body"><p class="step-title">' + title + '</p>' + (meta ? '<p class="step-meta">' + meta + '</p>' : '') + '</div></li>';
 
   function listingRow(cls) {
@@ -438,14 +466,14 @@
         '<li><span class="badge badge-student">' + SEAL(STUDENT) + esc(b[0]) + '</span></li>' +
         '<li><span class="badge badge-verified">' + SEAL(VERIFIED) + esc(b[1]) + '</span></li>' +
         '<li><span class="badge badge-owner">' + I.house() + esc(b[2]) + '</span><small>' + esc(O.name) + ', in writing</small></li>' +
-        '<li><span class="badge badge-owner">' + I.ret() + esc(rec.label) + '</span><small>' + esc(rec.detail) + '</small></li>' +
+        '<li class="is-quiet"><span class="badge">' + I.ret() + esc(rec.label) + ' ' + rec.onTime + '/' + rec.total + '</span><small>New lister. ' + esc(rec.detail) + '</small></li>' +
       '</ul></div>';
   }
 
   /* ---------------------------------------------------------------- #pay */
   function receiptRows() {
     return rc('First month', U.firstMonth, '', dt(D.start, 'short') + ' – ' + dt(firstMonthEnd, 'short') + '. Goes to Lena after you tap All good.') +
-      rc('Deposit', U.deposit, '', "Comes back after move-out. One month, New York's limit.") +
+      rc('Deposit', U.deposit, '', 'Comes back after move-out. One month, New York’s limit.') +
       rc('Verimate fee', U.verimateFee, 'rc-zero', 'Lena pays 10% of one month, after you move in.') +
       (method === 'card' ? rc('Card cost', D.cardCost, 'rc-sub', cardRate + ', to the card network') : '') +
       rc('Total', total(), 'rc-total');
@@ -475,7 +503,7 @@
               '<span class="pm-cost amt">' + m(D.cardCost, { sign: true }) + '</span></label>' +
           '</fieldset></section>' +
         '<section class="sec" aria-labelledby="h-what"><h2 id="h-what">What happens to your ' + m(U.total) + '</h2><ol class="steps seq">' +
-          stepLi(1, 'Today: it goes to the hold, not to Lena', 'Verimate holds it at Stripe. Lena can see it but can’t withdraw it.') +
+          stepLi(1, 'Today: it goes to the hold, not to Lena', 'Stripe holds it for Verimate. Lena can see it but can’t withdraw it.') +
           stepLi(2, 'Move-in, ' + moveIn + ': 48 hours to check the room',
             'Tap All good and ' + m(D.rent) + ' rent goes to Lena. Say nothing and it goes on its own ' + dt(DL.autoRelease, 'dayStamp') + '. Report a problem and it stays frozen until Verimate decides.') +
           stepLi(3, 'Move-out, ' + moveOut + ': your deposit back in one tap',
@@ -488,6 +516,7 @@
           '<li><strong>Lena cancels:</strong> all ' + m(U.total) + ' comes back to you.</li>' +
           '<li><strong>You cancel by ' + dt(cancelBy, 'day') + ':</strong> all ' + m(U.total) + ' comes back.</li>' +
           '<li><strong>You cancel after that:</strong> your deposit comes back in full. The first month goes to Lena, minus her 10% fee, unless she re-rents the room from ' + dt(D.start, 'short') + '.</li>' +
+          '<li id="cardNote"' + (method === 'card' ? '' : ' hidden') + '>' + cardNote() + '</li>' +
         '</ul></section>' +
       '</div>' +
       '<aside class="sum panel-raised" aria-labelledby="h-due">' +
@@ -495,7 +524,7 @@
         '<h2 class="sum-h" id="h-due">Due today</h2>' +
         '<div class="receipt" id="payRc">' + receiptRows() + '</div>' +
         '<button class="btn btn-primary btn-lg btn-block pay-btn" type="button" id="payBtn" data-act="pay">Pay ' + m(total()) + '</button>' +
-        '<p class="sum-fine">Held by Verimate at Stripe until you move in.</p>' +
+        '<p class="sum-fine">Stripe holds it for Verimate until you move in.</p>' +
       '</aside>' +
     '</div></div>';
   }
@@ -507,6 +536,7 @@
       method = e.target.value;
       document.getElementById('payRc').innerHTML = receiptRows();
       document.getElementById('payBtn').textContent = 'Pay ' + m(total());
+      document.getElementById('cardNote').hidden = method !== 'card';
     });
   }
 
@@ -536,6 +566,7 @@
       case 'moved-out': return 'You moved out. Your ' + amt(D.deposit) + ' deposit stays held until Lena returns it, and New York’s 14-day clock has started.';
       case 'returned': return 'Your ' + amt(D.deposit) + ' deposit is on its way back. Nothing is held anymore.';
       case 'frozen': return 'Problem reported. All ' + amt(U.total) + ' is frozen while Verimate looks into it. Nothing goes to Lena.';
+      case 'refunded': return 'Verimate refunded all ' + amt(U.total) + '. No move-in, so Lena pays no fee and Verimate earns ' + amt(RF.verimateEarned) + '.';
     }
     return '';
   }
@@ -546,16 +577,16 @@
     switch (k) {
       case 'tracker': return rent
         ? { chip: CHIP.held, text: 'Goes to Lena after you move in on ' + dt(DL.moveIn, 'day') + ' and tap All good, or on its own 48 hours later.' }
-        : { chip: CHIP.held, text: 'Comes back to you after move-out on ' + dt(D.moveOut, 'day') + ', when Lena taps Return. If she does nothing, it comes back on its own on Day 8.' };
+        : { chip: CHIP.held, text: 'Comes back to you after move-out on ' + dt(D.moveOut, 'day') + ', when Lena taps Return. If she does nothing, it comes back on its own ' + dt(DL.autoReturn, 'day') + '.' };
       case 'move-in-day': return rent
-        ? { chip: CHIP.needs, extra: '<span class="countdown"><span class="amt">' + esc(H.beat(5).timer.display) + '</span> left</span>',
+        ? { chip: CHIP.needs, extra: '<span class="countdown"><span class="amt" id="timer">' + esc(H.beat(5).timer.display) + '</span> left</span>',
             text: 'Goes to Lena when you tap All good, or on its own ' + dt(DL.autoRelease, 'dayStamp') + '.',
             actions: '<button class="btn btn-primary" type="button" data-act="all-good">All good</button><button class="btn btn-secondary" type="button" data-act="report">Report a problem</button>' }
         : { chip: CHIP.held, text: 'Stays held through your lease. Comes back after move-out, when Lena taps Return.' };
       case 'moved-in': return rent
         ? { chip: CHIP.released, html: released }
         : { chip: CHIP.held, text: 'Comes back after you move out on ' + dt(D.moveOut, 'day') + ' and Lena taps Return. If she does nothing, it comes back on its own ' + dt(DL.autoReturn, 'day') + '.',
-            actions: '<button class="btn btn-primary" type="button" data-act="moved-out">I’ve moved out</button>' };
+            actions: '<span class="lane-when">On ' + dt(D.moveOut, 'day') + ':</span><button class="btn btn-secondary" type="button" data-act="moved-out">I’ve moved out</button>' };
       case 'moved-out': return rent
         ? { chip: CHIP.released, html: released }
         : { chip: CHIP.held, extra: '<span class="countdown"><span class="amt">Day 0</span> of 14</span>',
@@ -568,6 +599,9 @@
       case 'frozen': return rent
         ? { chip: CHIP.frozen, text: 'Frozen: ' + esc(reason) + '. Lena answers by ' + dt(FZ.deadlines.listerAnswer, 'dayStamp') + '. Verimate decides by ' + dt(FZ.deadlines.decision, 'day') + '.' }
         : { chip: CHIP.frozen, text: 'Frozen with the first month. If you get a full refund, it comes back too.' };
+      case 'refunded': return rent
+        ? { chip: CHIP.returned, text: 'Refunded ' + dt(RF.at, 'dayStamp') + '. It never reached Lena, so it comes straight back.' }
+        : { chip: CHIP.returned, text: 'Refunded with the first month. The booking is cancelled.' };
     }
     return {};
   }
@@ -599,15 +633,18 @@
   function rail(k, pre) {
     const s = ST[k], b = s.bar;
     const released = s.pos.rent === 'lena' ? D.rent : 0;
+    const holdLabel = s.frozen ? 'Frozen' : 'Held by Verimate';
+    const holdNote = s.frozen ? 'Nothing goes to Lena.' : b.held === 0 ? 'Nothing held anymore.' : 'At Stripe. Lena can’t withdraw it.';
+    const lenaNote = released ? 'She gets ' + m(D.listerFirstPayout) + ' after the fee' : s.refunded ? 'Lena’s fee ' + m(0) : 'Released to Lena';
     return '<section class="rail" aria-labelledby="h-rail">' +
       '<h2 id="h-rail" class="sr-only">Where your ' + m(U.total) + ' is now</h2>' +
       '<div class="stations">' +
         '<div class="station"><div class="st-who"><img class="avatar" src="' + esc(J.img) + '" alt="' + esc(J.alt) + '" />You</div>' +
-          '<div class="st-amt amt">' + m(b.renterBack) + '</div><div class="st-note">Back to you</div></div>' +
-        '<div class="station st-hold"><div class="st-who"><span class="vm-mark">' + I.mark + '</span>Held by Verimate</div>' +
-          '<div>' + H.moneyHTML(b.held, { hero: true }) + '</div><div class="st-note">At Stripe. Lena can’t withdraw it.</div></div>' +
+          '<div class="st-amt amt">' + m(b.renterBack) + '</div><div class="st-note">' + (s.refunded ? 'Refunded to you' : 'Back to you') + '</div></div>' +
+        '<div class="station st-hold' + (s.frozen ? ' is-frozen' : '') + '"><div class="st-who"><span class="vm-mark">' + I.mark + '</span><span class="st-label">' + holdLabel + '</span></div>' +
+          '<div>' + H.moneyHTML(b.held, { hero: true }) + '</div><div class="st-note">' + holdNote + '</div></div>' +
         '<div class="station st-lena"><div class="st-who">Lena<img class="avatar" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" /></div>' +
-          '<div class="st-amt amt">' + m(released) + '</div><div class="st-note">' + (released ? 'Released. She gets ' + m(D.listerFirstPayout) : 'Released to Lena') + '</div></div>' +
+          '<div class="st-amt amt">' + m(released) + '</div><div class="st-note">' + lenaNote + '</div></div>' +
       '</div>' +
       lane(k, 'rent', s.pos, pre) + lane(k, 'dep', s.pos, pre) +
       '<p class="rail-cap">Only your first month and deposit go through Hold. February to May rent, ' + amt(D.directRent) + ', goes straight to Lena.</p>' +
@@ -623,6 +660,14 @@
       'returned':    { done: 6 },
       'frozen':      { done: 2, frozen: true }
     }[k];
+    if (k === 'refunded') {
+      // The booking ended at the problem report: show what happened instead of steps that will never come.
+      const items = H.tracker.slice(0, 2).map((x, i) => stepLi(i + 1, esc(x.label), dt(x.at, 'stamp'), 'is-done')).join('') +
+        stepLi(3, 'Problem reported: ' + esc(reason), dt(FZ.at, 'stamp'), 'is-done') +
+        stepLi(4, 'Refunded ' + m(U.total), dt(RF.at, 'stamp'), 'is-done');
+      return '<section class="side-prog" aria-labelledby="h-prog"><h2 id="h-prog">Progress</h2><ol class="steps">' + items + '</ol>' +
+        '<p class="prog-end">Booking cancelled. Nothing else happens.</p></section>';
+    }
     const items = H.tracker.map((x, i) => {
       if (i < P.done) return stepLi(i + 1, esc(x.label), dt(x.at, 'stamp'), 'is-done');
       if (i === P.done && P.frozen) return stepLi(i + 1, 'Frozen: ' + esc(reason), 'Lena answers by ' + dt(FZ.deadlines.listerAnswer, 'dayStamp'), 'is-frozen', true);
@@ -656,7 +701,8 @@
           '<div class="det-text">' +
             (method === 'bank' ? '<p><strong>Your bank payment settles ' + dt(DL.achSettles, 'day') + '.</strong> Nothing is released before that.</p>' : '') +
             '<p><strong>You move in ' + dt(DL.moveIn, 'day') + '.</strong> From 10:00 AM you have 48 hours to tap All good or Report a problem.</p>' +
-            '<p><strong>Plans change?</strong> Cancel by ' + dt(cancelBy, 'day') + ' and all ' + m(U.total) + ' comes back.</p>' +
+            '<p><strong>Plans change?</strong> Cancel by ' + dt(cancelBy, 'day') + ' and all ' + m(U.total) + ' comes back.' +
+              (method === 'card' ? ' The ' + m(D.cardCost) + ' card cost went to the card network when you paid, so it isn’t part of that.' : '') + '</p>' +
           '</div></div></section>';
       case 'move-in-day':
         return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">What each choice does</h2><dl class="choices">' +
@@ -709,7 +755,19 @@
             stepLi(3, 'Verimate decides', 'By ' + dt(FZ.deadlines.decision, 'day'), '') +
           '</ol>' +
           '<div class="det-text"><p>Verimate decides one of three: a full refund (Lena’s fee is ' + amt(0) + '), a partial refund (her fee shrinks with it), or release to Lena.</p>' +
-            '<p><strong>A full refund sends all ' + amt(U.total) + ' back to you.</strong> Nothing was paid out, so there is nothing to chase.</p></div>' +
+            '<p><strong>A full refund sends all ' + amt(U.total) + ' back to you.</strong> Nothing was paid out, so there is nothing to chase.</p>' +
+            '<div class="det-links"><button class="btn btn-secondary btn-sm" type="button" data-act="refund">See a full refund</button><a class="link" href="#move-in-day">Back to move-in day</a></div></div>' +
+          '</div></section>';
+      case 'refunded':
+        return '<section class="det" aria-labelledby="h-det"><h2 id="h-det">Refunded: no move-in, no fee</h2><div class="det-cols">' +
+          '<div class="panel"><div class="receipt">' +
+            rc('First month', U.firstMonth) + rc('Deposit', U.deposit) + rc('Back to you', RF.renterBack, 'rc-total') + '</div>' +
+            '<p class="receipt-ref">Ref ' + esc(D.ref) + ', refunded ' + dt(RF.at, 'stamp') + '. Reason: ' + esc(reason) + '.</p></div>' +
+          '<div class="det-text">' +
+            '<p><strong>Lena receives ' + amt(RF.listerReceived) + ' and pays ' + amt(0) + ' in fees.</strong> Her fee only exists after a move-in.</p>' +
+            '<p><strong>Verimate earns ' + amt(RF.verimateEarned) + '.</strong> A scammer can’t get paid here: the money never left the hold.</p>' +
+            (method === 'card' ? '<p>The ' + m(D.cardCost) + ' card cost went to the card network when you paid, so it isn’t part of this refund.</p>' : '') +
+            '<div class="det-links"><a class="link" href="#move-in-day">Back to move-in day</a><a class="link" href="hold.html#what-if-refund">See both sides in the live demo</a></div></div>' +
           '</div></section>';
     }
     return '';
@@ -717,13 +775,18 @@
 
   function activityRows(k) {
     const lim = t(ST[k].at);
-    let rows = H.activity.filter((a) => a.cents !== null && t(a.at) <= (k === 'frozen' ? t(DL.moveIn) : lim)).map((a) => Object.assign({}, a));
-    if (k === 'frozen') rows.push({ at: FZ.at, who: 'renter', text: 'You reported a problem: ' + reason, cents: U.total, state: 'frozen' });
+    const branch = BRANCH.indexOf(k) >= 0;
+    let rows = H.activity.filter((a) => a.cents !== null && t(a.at) <= (branch ? t(DL.moveIn) : lim)).map((a) => Object.assign({}, a));
+    if (k === 'frozen' || k === 'refunded') rows.push({ at: FZ.at, who: 'renter', text: 'You reported a problem: ' + reason, cents: U.total, state: 'frozen', note: 'Lena answers by ' + dt(FZ.deadlines.listerAnswer, 'dayStamp') });
+    if (k === 'refunded') rows.push({ at: RF.at, who: 'system', text: 'Verimate refunded all ' + m(U.total) + ' to you', cents: RF.renterBack, state: 'returned', note: 'No move-in, so Lena’s fee is ' + m(0) });
     if (method === 'card') {
       rows = rows.filter((a) => !/^Bank payment settled/.test(a.text));
       rows.forEach((a) => { if (a.at === DL.booked && a.who === 'renter') { a.text = a.text.replace('by bank', 'by card'); a.note = 'Plus ' + m(D.cardCost) + ' card cost'; } });
     }
-    rows.forEach((a) => { if (/rent paid to Lena/.test(a.text)) { a.note = 'Straight to Lena. Verimate fee ' + m(0); a.state = null; } });
+    rows.forEach((a) => {
+      if (/rent paid to Lena/.test(a.text)) { a.note = 'Straight to Lena. Verimate fee ' + m(0); a.state = null; }
+      if (/^Move-in window opened/.test(a.text)) a.note = 'That amount is your first month. Your ' + m(D.deposit) + ' deposit stays held too.';
+    });
     return rows.reverse();
   }
 
@@ -732,7 +795,7 @@
     return '<section class="act" aria-labelledby="h-act"><h2 id="h-act">Activity</h2><ol class="act-list">' +
       rows.map((a) => '<li class="act-row' + (since !== null && t(a.at) > since ? ' is-new' : '') + '">' +
         '<time class="act-when" datetime="' + esc(a.at) + '">' + dt(a.at, 'stamp') + '</time>' +
-        '<span class="act-what">' + esc(a.text) + (a.note ? '<small>' + esc(a.note) + '</small>' : '') + '</span>' +
+        '<span class="act-what">' + esc(a.text.replace(/'/g, '’')) + (a.note ? '<small>' + esc(a.note) + '</small>' : '') + '</span>' +
         '<span class="act-amt">' + amt(a.cents) + '</span>' +
         '<span class="act-state">' + (a.state ? CHIP[a.state] : '') + '</span></li>').join('') +
       '</ol></section>';
@@ -744,7 +807,7 @@
       '<div class="bk-lst"><img src="' + esc(D.img) + '" alt="' + esc(D.imgAlt) + '" width="60" height="60" /><div><p class="bk-t">' + esc(D.address) + '</p><p class="bk-s">' + esc(D.unitShort) + ', ' + esc(D.datesLabel) + '</p></div></div>' +
       '<div class="person"><img class="avatar" src="' + esc(L.img) + '" alt="' + esc(L.alt) + '" /><div><p class="person-name">' + esc(L.name) + '</p><p class="person-meta">Lister, ' + esc(L.year) + '</p></div></div>' +
       '<dl class="bk-dl"><dt>Reference</dt><dd>' + esc(D.ref) + '</dd><dt>Rent</dt><dd>' + esc(D.rentLabel) + '</dd><dt>Paid by</dt><dd>' + (method === 'card' ? 'Card' : 'Bank') + '</dd><dt>Your fees</dt><dd>' + m(H.totals.renterFees) + '</dd></dl>' +
-      '<ul class="bk-links"><li><a class="link" href="lister.html#' + s.lister + '">See Lena’s side</a></li><li><a class="link" href="hold.html#' + s.hold + '">See this step in the live demo</a></li></ul>' +
+      '<ul class="bk-links">' + (s.lister ? '<li><a class="link" href="lister.html#' + s.lister + '">See Lena’s side</a></li>' : '') + '<li><a class="link" href="hold.html#' + s.hold + '">See this step in the live demo</a></li></ul>' +
     '</section>';
   }
 
@@ -837,14 +900,35 @@
     const chip = document.getElementById('demoDate');
     chip.innerHTML = esc(dt(s.at, 'full')) + (s.noTime ? '' : '<span class="date-chip-time">' + esc(dt(s.at, 'time')) + '</span>');
     document.getElementById('demoName').textContent = s.name;
-    document.getElementById('demoCount').textContent = i >= 0 ? (i + 1) + ' of ' + ORDER.length : '';
+    const bi = BRANCH.indexOf(k);
+    document.getElementById('demoCount').textContent = i >= 0 ? (i + 1) + ' of ' + ORDER.length : 'What if, ' + (bi + 1) + ' of ' + BRANCH.length;
     document.getElementById('prevBtn').disabled = i === 0;
-    document.getElementById('nextBtn').disabled = k === 'frozen' || i === ORDER.length - 1;
+    document.getElementById('nextBtn').disabled = i === ORDER.length - 1 || bi === BRANCH.length - 1;
     document.title = (k === 'pay' ? 'Confirm and pay' : 'Where is my money?') + ' | Verimate';
+  }
+
+  /* The 48 h move-in timer counts down live on move-in day; it is static with reduced motion. */
+  let tick = null;
+  function stopTimer() { if (tick) { clearInterval(tick); tick = null; } }
+  function startTimer() {
+    stopTimer();
+    if (reduce.matches) return;
+    const T = H.beat(5).timer;
+    let left = Math.round((t(T.end) - t(T.start)) / 1000) - 1;     // 47:59:59
+    const pad = (n) => String(n).padStart(2, '0');
+    tick = setInterval(() => {
+      const el = document.getElementById('timer');
+      if (cur !== 'move-in-day') { stopTimer(); return; }
+      if (!el) return;
+      left = Math.max(0, left - 1);
+      el.textContent = pad(Math.floor(left / 3600)) + ':' + pad(Math.floor(left / 60) % 60) + ':' + pad(left % 60);
+    }, 1000);
   }
 
   function show(prev, k, initial) {
     updateBar(k);
+    stopTimer();
+    if (k === 'move-in-day') startTimer();
     if (k === 'pay') {
       app.innerHTML = payView();
       bindPay();
@@ -881,7 +965,14 @@
   }
 
   function step(dir) {
-    if (cur === 'frozen') { if (dir < 0) go('move-in-day'); return; }
+    const bi = BRANCH.indexOf(cur);
+    if (bi >= 0) {
+      // Back from the branch's first state returns to move-in day, where the problem was reported.
+      const j = bi + dir;
+      if (j < 0) go('move-in-day');
+      else if (j < BRANCH.length) go(BRANCH[j]);
+      return;
+    }
     const j = ORDER.indexOf(cur) + dir;
     if (j >= 0 && j < ORDER.length) go(ORDER[j]);
   }
@@ -894,6 +985,7 @@
       case 'all-good': go('moved-in'); break;
       case 'report': openReport(); break;
       case 'moved-out': go('moved-out'); break;
+      case 'refund': go('refunded'); break;
       case 'copy': {
         const done = (txt) => { b.textContent = txt; setTimeout(() => { if (b.isConnected) b.textContent = 'Copy receipt link'; }, 2200); };
         const url = location.href.split('#')[0] + '#returned';

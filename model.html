@@ -5,7 +5,7 @@
 <meta name="google" content="notranslate" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Business model | Verimate Hold</title>
-<meta name="description" content="How Verimate Hold makes money: the lister pays 10% of the first month's rent, once, after move-in. Pricing, one deal end to end, unit economics, year 1 in Syracuse and three years." />
+<meta name="description" content="How Verimate Hold makes money: the lister pays 10% of the first month’s rent, once, after move-in. Pricing, one deal end to end, unit economics, year 1 in Syracuse and three years." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%23D81E28%22/%3E%3Cg transform=%22translate(5 5) scale(.58)%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z%22/%3E%3Cpath d=%22m8.5 14 2.5 2.5 4.5-5%22/%3E%3C/g%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -115,7 +115,7 @@
   .cmp-bar { position: absolute; left: 0; top: 0; height: 10px; width: calc(var(--w) * 100%); background: var(--cost); border-radius: 0 3px 3px 0; }
   .cmp-range { position: absolute; top: 0; height: 10px; left: calc(var(--a) * 100%); width: calc(var(--w) * 100%); background: #E3E3E3; border-radius: 0 3px 3px 0; }
   .cmp-bar.has-range { border-radius: 0; }
-  .cmp-val { position: absolute; top: -6px; left: calc(var(--x) * 100% + 10px); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .cmp-val { position: absolute; top: -6px; left: calc(var(--x) * 100% + 10px); white-space: nowrap; color: var(--ink); }
   .cmp-sub { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
   .t-cmp tr.is-us th, .t-cmp tr.is-us td { border-top: 1px solid var(--ink); font-weight: 600; }
   .t-cmp tr.is-us .cmp-bar { background: var(--fee); }
@@ -136,16 +136,17 @@
     .party-note { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; line-height: 1.45; }
 
   .wf-wrap { margin-top: 56px; }
-  .wf-axis { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr) 104px; column-gap: 24px; font-size: 12.5px; color: var(--muted); padding-bottom: 6px; font-variant-numeric: tabular-nums; }
+  .wf-axis { display: grid; grid-template-columns: minmax(0, 296px) minmax(0, 1fr) 104px; column-gap: 24px; font-size: 13px; color: var(--muted); padding-bottom: 6px; font-variant-numeric: tabular-nums; }
   .wf-axis .ax { display: flex; justify-content: space-between; }
   .wf { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
-  .wf-row { display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr) 104px; column-gap: 24px; align-items: center; border-bottom: 1px solid var(--line); }
+  .wf-row { display: grid; grid-template-columns: minmax(0, 296px) minmax(0, 1fr) 104px; column-gap: 24px; align-items: center; border-bottom: 1px solid var(--line); }
   .wf-label { font-size: 15px; padding: 11px 0; line-height: 1.35; }
-  .wf-track { position: relative; height: 46px; border-left: 1px solid var(--line-2); }
-  .wf-bar { position: absolute; top: 16px; height: 14px; left: calc(var(--a) * 100%); width: calc(var(--w) * 100%); background: var(--cost); border-radius: 2px; }
+  /* The track fills the row, so the $0 axis and the connectors stay unbroken even if a label wraps. */
+  .wf-track { position: relative; align-self: stretch; min-height: 46px; border-left: 1px solid var(--line-2); }
+  .wf-bar { position: absolute; top: calc(50% - 7px); height: 14px; left: calc(var(--a) * 100%); width: calc(var(--w) * 100%); background: var(--cost); border-radius: 2px; }
   .wf-row.is-rev .wf-bar { background: var(--fee); border-radius: 0 4px 4px 0; }
   .wf-row.is-net .wf-bar { background: var(--ink); border-radius: 0 4px 4px 0; }
-  .wf-link { position: absolute; top: -16px; height: 32px; width: 0; border-left: 1px solid var(--faint); left: calc(var(--x) * 100%); }
+  .wf-link { position: absolute; top: calc(7px - 50%); height: calc(100% - 14px); width: 0; border-left: 1px solid var(--faint); left: calc(var(--x) * 100%); }
   .wf-amt { text-align: right; font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 500; white-space: nowrap; }
   .wf-row.is-cost .wf-amt { color: var(--ink-2); }
   .wf-row.is-net { border-top: 1px solid var(--ink); border-bottom: 0; }
@@ -166,11 +167,13 @@
 
   .t-flow { font-size: 14px; }
   .t-flow th, .t-flow td { padding: 12px 14px 12px 0; }
+  .t-flow thead th, .t-flow thead th.num { white-space: normal; vertical-align: bottom; line-height: 1.3; }
   .t-flow .n { width: 22px; color: var(--muted); font-weight: 500; }
-  .t-flow .d { width: 108px; color: var(--ink-2); white-space: nowrap; }
+  .t-flow .ev { min-width: 300px; }
+  .t-flow .ev-d { display: block; color: var(--muted); font-size: 13px; margin-bottom: 2px; font-variant-numeric: tabular-nums; }
   .t-flow .ev b { display: block; font-weight: 600; color: var(--ink); }
-  .t-flow .ev span { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .t-flow .num { width: 92px; }
+  .t-flow .ev-x { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; line-height: 1.45; }
+  .t-flow .num { width: 84px; }
   .t-flow .dash { color: var(--faint); }
 
   /* ---------------------------------------------------------------- per deal */
@@ -233,14 +236,16 @@
   .sw-text small { display: block; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
   @media (prefers-reduced-motion: reduce) { .sw-track, .sw-thumb { transition: none; } }
 
-  .sim-body { display: grid; grid-template-columns: minmax(0, 1fr) 248px; gap: 36px; margin-top: 26px; align-items: start; }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; color: var(--ink-2); margin: 0 0 6px; padding: 0; list-style: none; }
+  .sim { scroll-margin-top: 10px; }
+  .sim-body { display: grid; grid-template-columns: minmax(0, 1fr) 284px; gap: 36px; margin-top: 22px; align-items: start; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--ink-2); margin: 0 0 6px; padding: 0; list-style: none; }
   .legend li { display: inline-flex; align-items: center; gap: 8px; }
   .lk { display: inline-block; width: 18px; height: 2px; border-radius: 1px; background: var(--ink); flex: none; }
   .lk-cost { background: var(--muted); }
   .chart { position: relative; touch-action: pan-y; }
   .chart svg { display: block; width: 100%; overflow: visible; }
-  .chart text { font-family: var(--font-ui); font-size: 12.5px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+  .chart text { font-family: var(--font-ui); font-size: 14px; fill: var(--ink-2); }
+  .chart text.n { font-variant-numeric: tabular-nums; }
   .chart .t-ink { fill: var(--ink); font-weight: 600; }
   .chart .halo { paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
   .tip { position: absolute; z-index: 3; pointer-events: none; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: var(--sh-panel); padding: 10px 12px; font-size: 13px; min-width: 176px; }
@@ -250,7 +255,7 @@
   .tip-r .l { color: var(--muted); }
   .tip-r.res { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 6px; }
 
-  .slider-row { position: relative; margin-top: 4px; }
+  .slider-row { position: relative; margin-top: 4px; margin-bottom: 4px; }
   .slider-row input[type="range"] {
     --track: 6px; --thumb: 22px; --p: 50%;
     appearance: none; -webkit-appearance: none; display: block; box-sizing: border-box; height: 40px; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer;
@@ -260,25 +265,28 @@
   .slider-row input[type="range"]::-moz-range-track { height: var(--track); border-radius: 999px; background: var(--line-2); }
   .slider-row input[type="range"]::-moz-range-progress { height: var(--track); border-radius: 999px; background: var(--ink); }
   .slider-row input[type="range"]::-moz-range-thumb { width: var(--thumb); height: var(--thumb); border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-sizing: border-box; }
-  .slider-row input[type="range"]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 8px; }
-  .ticks { position: relative; height: 20px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .slider-row input[type="range"]:focus-visible { outline: 2px solid var(--brand); outline-offset: 0; border-radius: 8px; }
+  .ticks { position: relative; height: 20px; font-size: 14px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
   .ticks .ticks-title { left: auto; right: 0; transform: none; }
   .sim-foot { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; margin-top: 10px; font-size: 13.5px; color: var(--muted); }
 
-  .pl-live .rc-row { padding: 6px 0; font-size: 14.5px; }
+  .pl-live .rc-row { padding: 6px 0; font-size: 15px; }
+  .pl-live .rc-row:not(.rc-total) > :last-child { font-weight: 500; }
   .pl-live .rc-total { padding-top: 9px; margin-top: 3px; }
   .pl-live .rc-total + .rc-row { margin-top: 6px; }
-  .pl-live .rc-total > :last-child { font-size: 17px; }
+  .pl-live .rc-total > :last-child { font-size: 18px; }
+  .pl-live .rc-final { border-top-width: 2px; margin-top: 8px; padding-top: 12px; }
   .pl-live .rc-final > :last-child { font-size: 30px; line-height: 1; }
-  .pl-live .rc-final { border-top-width: 2px; }
   .pl-live .is-off { color: var(--muted); }
-  .pl-live small { display: block; font-size: 12.5px; color: var(--muted); font-weight: 400; }
-  .sim-facts { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; }
-  .sim-facts dt { font-size: 13px; color: var(--muted); }
+  .pl-live small { display: block; font-size: 13.5px; color: var(--muted); font-weight: 400; }
+  .sim-facts { margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 12px 44px; }
+  .sim-facts > div { display: flex; flex-direction: column; justify-content: space-between; }
+  .sim-facts dt { font-size: 13.5px; color: var(--muted); line-height: 1.35; }
   .sim-facts dd { margin: 2px 0 0; font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
 
   /* ---------------------------------------------------------------- three years */
+  .t-3y th, .t-3y td { vertical-align: baseline; }
   .t-3y .yr { font-weight: 600; white-space: nowrap; }
   .t-3y .camp { color: var(--ink-2); }
   .t-3y .rev { font-weight: 700; font-family: var(--font-display); font-size: 18px; letter-spacing: -.015em; }
@@ -396,7 +404,7 @@
     .wf-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label amt" "track track"; column-gap: 16px; padding: 10px 0 12px; }
     .wf-label { grid-area: label; padding: 0 0 6px; font-size: 14.5px; }
     .wf-amt { grid-area: amt; align-self: start; }
-    .wf-track { grid-area: track; height: 14px; border-left: 0; }
+    .wf-track { grid-area: track; align-self: auto; min-height: 0; height: 14px; border-left: 0; }
     .wf-bar { top: 0; }
     .wf-link { display: none; }
 
@@ -412,8 +420,7 @@
 
     .t-flow tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; row-gap: 3px; padding: 14px 0; }
     .t-flow .n { display: none; }
-    .t-flow .d { grid-column: 1 / -1; width: auto; font-size: 13px; color: var(--muted); }
-    .t-flow .ev { grid-column: 1 / -1; margin-bottom: 6px; }
+    .t-flow .ev { grid-column: 1 / -1; min-width: 0; margin-bottom: 6px; }
     .t-flow td.num { display: contents; }
     .t-flow td.num .cell-label { grid-column: 1; font-size: 13.5px; }
     .t-flow td.num .cell-val { grid-column: 2; text-align: right; font-size: 13.5px; }
@@ -422,6 +429,7 @@
     .sim { padding: 20px 16px 22px; }
     .sim-num output { font-size: 44px; }
     .sim-ctrl, .switch { width: 100%; }
+    .sim-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 16px; }
     .sim-facts dd { font-size: 17px; }
     .rules-short div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
     .pocket div { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
@@ -438,7 +446,7 @@
 <div id="hold-nav"></div>
 
 <header class="wrap hero" id="top">
-  <h1>Verimate is paid once per lease, by the lister, after move-in.</h1>
+  <h1>Verimate’s fee is paid once per lease, by the lister, after move-in.</h1>
   <p class="lede" id="hero-lede"></p>
   <figure class="ribbon" id="ribbon"></figure>
   <hr class="hero-rule" />
@@ -502,7 +510,7 @@
           <div class="more-body">
             <table class="t t-flow stack" id="flow-table">
               <caption class="sr-only">The 734 Comstock deal, step by step</caption>
-              <thead><tr><th scope="col" class="n">#</th><th scope="col" class="d">Date</th><th scope="col">What happens</th><th scope="col" class="num">Jamie</th><th scope="col" class="num">Held by Verimate</th><th scope="col" class="num">Lena</th><th scope="col" class="num">Verimate revenue</th><th scope="col" class="num">Verimate cost</th></tr></thead>
+              <thead><tr><th scope="col" class="n">#</th><th scope="col">What happens</th><th scope="col" class="num">Jamie</th><th scope="col" class="num">Held by Verimate</th><th scope="col" class="num">Lena</th><th scope="col" class="num">Verimate revenue</th><th scope="col" class="num">Verimate cost</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -544,11 +552,11 @@
       <dl class="facts facts-2" id="y1-facts" style="margin-top:40px"></dl>
     </section>
 
-    <section class="sec" id="deals" aria-labelledby="sim-h">
+    <section class="sec" id="deal-count" aria-labelledby="sim-h">
       <h2 id="sim-h">Change the deal count</h2>
       <p class="sec-lede" id="sim-lede"></p>
       <div class="sec-body">
-        <div class="sim panel-raised">
+        <div class="sim panel-raised" id="deals">
           <div class="sim-top">
             <div>
               <label class="sim-label" for="deals-input">Deals in year 1</label>
@@ -565,7 +573,7 @@
           <div class="sim-body">
             <div>
               <ul class="legend" aria-hidden="true">
-                <li><span class="lk"></span>Contribution (revenue minus deal costs)</li>
+                <li><span class="lk"></span>Contribution</li>
                 <li><span class="lk lk-cost"></span>Marketing and fixed costs</li>
               </ul>
               <div class="chart" id="be-chart">
@@ -595,7 +603,7 @@
       <p class="sec-lede" id="y3-lede"></p>
       <div class="sec-body">
         <table class="t t-3y stack" id="y3-table">
-          <caption class="sr-only">Revenue by year for three years, with the deck's old figures for comparison</caption>
+          <caption class="sr-only">Revenue by year for three years, with the deck’s old figures for comparison</caption>
           <thead><tr><th scope="col">Year</th><th scope="col">Campuses</th><th scope="col" class="num">Share</th><th scope="col" class="num">Deals</th><th scope="col" class="num">Lister fees</th><th scope="col" class="num">Premium</th><th scope="col" class="num">Revenue</th><th scope="col" class="num deck">Deck had</th></tr></thead>
           <tbody></tbody>
         </table>
@@ -656,8 +664,12 @@
 
   var D = H.deal, T = H.totals, U = H.unit, Y = H.year1, F = H.fees, P = H.people;
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  // Display copy uses typographic apostrophes; hold-data.js keeps straight ones ("SU '27", "Deck's"), so convert on the way out.
+  var curly = function (s) { return String(s).replace(/'(?=\d)/g, '’').replace(/(\w)'/g, '$1’').replace(/'/g, '‘'); };
+  var esc = function (s) { return curly(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var M = function (c, o) { return H.money(c, o); };
+  // Compact amounts for big totals: $896K, and $1.92M once a total passes a million dollars.
+  var big = function (c) { return c >= 100000000 ? '$' + (c / 100000000).toFixed(2) + 'M' : M(c, { k: 0 }); };
   var A = function (c, o, cls) { return '<span class="amt' + (cls ? ' ' + cls : '') + '">' + M(c, o) + '</span>'; };
   var W0 = { cents: false };
   var RATE = Math.round(F.listerRate * 100) + '%';
@@ -700,7 +712,7 @@
   })();
 
   /* ------------------------------------------------------------ pricing */
-  $('#pricing-lede').textContent = 'One fee, paid by the lister after move-in. Hold is free for renters. Card costs pass through at cost and are not revenue.';
+  $('#pricing-lede').textContent = 'One fee, paid by the lister after move-in. Hold is free for renters; Premium is optional. Card costs pass through at cost and are not revenue.';
   (function pricing() {
     var split = function (w) {
       var i = w.indexOf(': ');
@@ -761,7 +773,7 @@
     var html = '';
     html += '<div class="party">' + person(P.renter) +
       row('Paid in', T.renterPaidIn, 'First month and deposit, then rent for February to May') +
-      row('Got back', -T.renterGotBack, 'Deposit, the day after move-out') +
+      row('Got back', T.renterGotBack, 'Deposit, the day after move-out') +
       row('Net cost', T.renterNet, null, 'is-total') +
       '<p class="party-note">Rent only. Verimate fees ' + A(T.renterFees) + '.</p></div>';
     html += '<div class="party">' + person(P.lister) +
@@ -808,8 +820,8 @@
     $('#flow-table tbody').innerHTML = H.flow.map(function (s) {
       var when = s.atEnd ? H.date(s.at, 'short') + ' – ' + H.date(s.atEnd, 'short') : H.date(s.at, 'day');
       var cost = H.sum(s.costs, function (c) { return c.cents; });
-      return '<tr><td class="n">' + s.n + '</td><td class="d">' + esc(when) + '</td>' +
-        '<td class="ev"><b>' + esc(s.title) + '</b><span>' + esc(s.detail) + '</span></td>' +
+      return '<tr><td class="n">' + s.n + '</td>' +
+        '<td class="ev"><span class="ev-d">' + esc(when) + '</span><b>' + esc(s.title) + '</b><span class="ev-x">' + esc(s.detail) + '</span></td>' +
         cell('Jamie', s.renter, true) + cell('Held by Verimate', s.held, false, true) + cell('Lena', s.lister, true) +
         cell('Verimate revenue', s.revenue, true) + cell('Verimate cost', cost ? -cost : 0, false) + '</tr>';
     }).join('');
@@ -838,7 +850,7 @@
     }).join('');
 
     var f = [
-      ['Take rate', esc(a.takeRate.split(' (')[0]), esc(upperFirst(a.takeRate.split(' (')[1].replace(/\)$/, '')))],
+      ['Take rate', esc(a.takeRate.split(' (')[0]), esc(upperFirst(a.takeRate.split(' (')[1].replace(/\)$/, '')) + ', paid by the lister')],
       ['Marketing per completed deal', A(Y.cac, W0), 'An assumption the first cycle measures. The ceiling is what one deal keeps, ' + A(Y.cacCeiling) + '.']
     ];
     $('#avg-facts').innerHTML = f.map(function (x) { return '<div><dt>' + x[0] + '</dt><dd class="f-val">' + x[1] + '</dd><dd class="f-note">' + x[2] + '</dd></div>'; }).join('');
@@ -862,7 +874,7 @@
     var peakN = Math.round(Y.peakDepositsHeld / U.average.deposit);
     var bShare = Math.round(Y.breakEvenWithPremium / MARKET * 100) + '%';
     var f = [
-      ['Rent through Verimate', A(Y.facilitated, { k: 0 }), H.threeYear[0].deals + ' deals × ' + A(perDealRent, W0) + ' of rent.'],
+      ['Rent on Verimate leases', '<span class="amt">' + big(Y.facilitated) + '</span>', H.threeYear[0].deals + ' deals × ' + A(perDealRent, W0) + ' of rent. Verimate holds only the first month and the deposit.'],
       ['Held at booking', A(Y.heldAtBooking, { k: 0 }), 'First month and deposit, ' + H.threeYear[0].deals + ' × ' + A(perDealHeld, W0) + '.'],
       ['Peak deposits held at once', A(Y.peakDepositsHeld, { k: 0 }), 'About ' + peakN + ' × ' + A(U.average.deposit, W0) + ', in spring.'],
       ['Every ' + Y.ruleOfThumb.deals + ' deals', A(Y.ruleOfThumb.revenue, W0), 'Of lister fee revenue. The rule of thumb for any campus.'],
@@ -879,7 +891,7 @@
   var sim = { deals: PLAN, premium: true, hover: null };
   var model = function (d, p) { return H.yearModel({ deals: d, premium: p }); };
 
-  $('#sim-lede').textContent = 'Year 1 at any count from ' + MIN + ' to ' + MAX + ' deals. Price, costs and marketing stay as above; switch Premium off to see the case without it.';
+  $('#sim-lede').textContent = 'Year 1 at any count from ' + MIN + ' to ' + MAX + ' deals, with price and costs as above. Contribution (revenue minus deal costs) has to cover marketing and fixed costs; where the two lines cross is break-even.';
   $('#prem-sub').innerHTML = members + ' members × ' + months + ' months × ' + M(F.premiumMonthly);
 
   var input = $('#deals-input'), out = $('#deals-out'), svg = $('#be-svg'), tip = $('#be-tip'), chart = $('#be-chart');
@@ -893,18 +905,18 @@
     var html = '';
     html += r('Lister fees', m.listerFees, d + ' × ' + M(U.average.revenue, W0));
     html += r('Premium', m.premium, sim.premium ? members + ' × ' + months + ' × ' + M(F.premiumMonthly) : 'Off', sim.premium ? '' : 'is-off');
-    html += r('Revenue', m.revenue, null, 'is-total');
+    html += r('Revenue', m.revenue, null, 'rc-total');
     html += r('Deal costs', -m.dealCosts, d + ' × ' + M(U.average.costs));
     html += r('Premium card fees', -m.premiumCardFees, sim.premium ? m.subscriptions + ' × ' + M(F.premiumCardFee()) : 'Off', sim.premium ? '' : 'is-off');
-    html += r('Contribution', m.contribution, null, 'is-total');
+    html += r('Contribution', m.contribution, null, 'rc-total');
     html += r('Marketing', -m.marketing, M(base0.marketing, W0) + ' + ' + M(perDealMkt, W0) + ' a deal');
     html += r('Fixed', -m.fixed, 'Legal opinion, hosting and tools');
-    html += r('Result before team pay', m.result, null, 'rc-total rc-final', { cents: false, sign: true });
+    html += r('Result', m.result, 'before team pay', 'rc-total rc-final', { cents: false, sign: true });
     $('#pl-live').innerHTML = html;
     $('#pl-sub').innerHTML =
       '<div><dt>Break-even</dt><dd>' + m.breakEvenDeals + ' deals</dd></div>' +
       '<div><dt>Marketing per deal</dt><dd>' + M(m.cac, W0) + '</dd></div>' +
-      '<div><dt>Rent through Verimate</dt><dd>' + M(m.facilitated, { k: 0 }) + '</dd></div>';
+      '<div><dt>Rent on Verimate leases</dt><dd>' + big(m.facilitated) + '</dd></div>';
     return m;
   }
 
@@ -926,11 +938,76 @@
     return n;
   }
 
+  // Text labels inside the chart are placed at the first candidate spot that clears the lines, the guides and the labels
+  // already placed, so nothing is drawn across a line at any deal count.
+  function labeler(bounds) {
+    var segs = [], boxes = [];
+    // Number of things a label box would touch (0 = clear). Leaving the plot counts as many.
+    function hits(bb, pad, hardOnly) {
+      var x0 = bb.x - pad, x1 = bb.x + bb.width + pad, y0 = bb.y - pad, y1 = bb.y + bb.height + pad, n = 0;
+      if (bb.x < bounds.x0 || bb.x + bb.width > bounds.x1 || bb.y < bounds.y0 || bb.y + bb.height > bounds.y1) n += 10;
+      for (var i = 0; i < segs.length; i++) {
+        if (hardOnly && segs[i].soft) continue;
+        var s = segs[i], lo = Math.min(s.x1, s.x2), hi = Math.max(s.x1, s.x2);
+        var a = Math.max(x0, lo), b = Math.min(x1, hi);
+        if (a > b) continue;
+        var ya, yb;
+        if (s.x1 === s.x2) { ya = s.y1; yb = s.y2; }
+        else { ya = s.y1 + (s.y2 - s.y1) * (a - s.x1) / (s.x2 - s.x1); yb = s.y1 + (s.y2 - s.y1) * (b - s.x1) / (s.x2 - s.x1); }
+        if (Math.max(ya, yb) >= y0 && Math.min(ya, yb) <= y1) n++;
+      }
+      for (var j = 0; j < boxes.length; j++) {
+        var o = boxes[j];
+        if (x0 < o.x + o.width && x1 > o.x && y0 < o.y + o.height && y1 > o.y) n++;
+      }
+      return n;
+    }
+    function pos(node, c) {
+      node.setAttribute('x', c.x); node.setAttribute('y', c.y); node.setAttribute('text-anchor', c.anchor || 'start');
+      Array.prototype.forEach.call(node.querySelectorAll('tspan'), function (t) { t.setAttribute('x', c.x); });
+    }
+    return {
+      boxes: boxes,
+      // A soft segment is a thin guide: labels avoid it when they can, and the guide is cut around them when they cannot.
+      seg: function (x1, y1, x2, y2, soft) { segs.push({ x1: x1, y1: y1, x2: x2, y2: y2, soft: !!soft }); },
+      box: function (x, y, bw, bh) { boxes.push({ x: x, y: y, width: bw, height: bh }); },
+      // Returns the box used, or null when an optional label found no clear spot (it is then left out).
+      place: function (node, cands, optional) {
+        svg.appendChild(node);
+        var best = 0, bestN = Infinity;
+        for (var pass = 0; pass < 2; pass++) {
+          for (var i = 0; i < cands.length; i++) {
+            pos(node, cands[i]);
+            var n = hits(node.getBBox(), 3, pass === 1);
+            if (!n) { best = i; bestN = 0; break; }
+            if (pass === 1 && n < bestN) { best = i; bestN = n; }
+          }
+          if (!bestN) break;
+        }
+        if (bestN && optional) { svg.removeChild(node); return null; }
+        pos(node, cands[best]);
+        var bb = node.getBBox(); bb = { x: bb.x, y: bb.y, width: bb.width, height: bb.height, label: true };
+        boxes.push(bb); return bb;
+      }
+    };
+  }
+  // A vertical guide at x from y1 to y2, with gaps where it would cross a label.
+  function guide(parent, x, y1, y2, boxes, attrs) {
+    var cuts = boxes.filter(function (b) { return b.label && x >= b.x - 3 && x <= b.x + b.width + 3 && b.y + b.height > y1 && b.y < y2; })
+      .map(function (b) { return [b.y - 3, b.y + b.height + 3]; }).sort(function (p, q) { return p[0] - q[0]; });
+    var y = y1;
+    cuts.concat([[y2, y2]]).forEach(function (c) {
+      if (c[0] > y + 1) parent.appendChild(el('line', Object.assign({ x1: x, x2: x, y1: y, y2: Math.min(c[0], y2) }, attrs)));
+      y = Math.max(y, c[1]);
+    });
+  }
+
   function drawChart() {
     var w = Math.round(chart.clientWidth);
     if (!w) return;
     var narrow = w < 440;
-    var h = narrow ? 230 : 300, pl = narrow ? 46 : 56, pr = 14, pt = 30, pb = 6;
+    // On a 720px-tall projector the whole panel has to fit on screen, so the plot gets shorter there.
+    var h = narrow ? 240 : (innerHeight < 820 ? 248 : 300), pl = narrow ? 48 : 58, pr = 14, pt = 32, pb = 6;
     var pw = w - pl - pr, ph = h - pt - pb;
     var YMAX = 4500000;
     var X = function (d) { return pl + (d - MIN) / (MAX - MIN) * pw; };
@@ -948,40 +1025,78 @@
     for (var t = 0; t <= 4000000; t += 1000000) {
       var y = Yc(t);
       g.appendChild(el('line', { x1: pl, x2: w - pr, y1: y, y2: y, stroke: t === 0 ? '#BDBDBD' : '#EFEFEF', 'stroke-width': 1, 'shape-rendering': 'crispEdges' }));
-      g.appendChild(el('text', { x: pl - 10, y: y + 4, 'text-anchor': 'end' }, t === 0 ? '$0' : M(t, { k: 0 })));
+      g.appendChild(el('text', { x: pl - 10, y: y + 5, 'text-anchor': 'end', class: 'n' }, t === 0 ? '$0' : M(t, { k: 0 })));
     }
     svg.appendChild(g);
 
     var a = model(MIN, sim.premium), b = model(MAX, sim.premium), m = model(sim.deals, sim.premium);
-    // Lines: marketing + fixed (muted), contribution (ink).
-    svg.appendChild(el('line', { x1: X(MIN), y1: Yc(costs(a)), x2: X(MAX), y2: Yc(costs(b)), stroke: '#767676', 'stroke-width': 2, 'stroke-linecap': 'round' }));
-    svg.appendChild(el('line', { x1: X(MIN), y1: Yc(a.contribution), x2: X(MAX), y2: Yc(b.contribution), stroke: '#111111', 'stroke-width': 2, 'stroke-linecap': 'round' }));
-    // Direct labels near the right end.
-    svg.appendChild(el('text', { x: w - pr, y: Yc(b.contribution) - 10, 'text-anchor': 'end', class: 'halo t-ink' }, 'Contribution'));
-    svg.appendChild(el('text', { x: w - pr, y: Yc(costs(b)) + 20, 'text-anchor': 'end', class: 'halo' }, 'Marketing and fixed'));
-
-    // Break-even point.
+    var bottom = pt + ph;
     var be = m.breakEvenDeals, bm = model(be, sim.premium), bx = X(be), by = Yc(costs(bm));
-    svg.appendChild(el('line', { x1: bx, x2: bx, y1: by + 6, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .35, 'shape-rendering': 'crispEdges' }));
-    svg.appendChild(el('circle', { cx: bx, cy: by, r: 5.5, fill: '#fff', stroke: '#111', 'stroke-width': 2 }));
-    var beLeft = bx > pl + pw * 0.8;
-    var beText = el('text', { x: beLeft ? bx - 8 : bx + 8, y: pt + ph - 26, 'text-anchor': beLeft ? 'end' : 'start', class: 'halo' });
-    beText.appendChild(el('tspan', { x: beLeft ? bx - 8 : bx + 8, class: 't-ink' }, 'Break-even'));
-    beText.appendChild(el('tspan', { x: beLeft ? bx - 8 : bx + 8, dy: 16 }, 'about ' + be + ' deals'));
-    svg.appendChild(beText);
-
-    // Current deal count.
     var cx = X(sim.deals), cy1 = Yc(m.contribution), cy2 = Yc(costs(m));
-    svg.appendChild(el('line', { x1: cx, x2: cx, y1: pt - 6, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .35, 'shape-rendering': 'crispEdges' }));
-    svg.appendChild(el('line', { x1: cx, x2: cx, y1: cy1, y2: cy2, stroke: '#111', 'stroke-width': 2 }));
-    svg.appendChild(el('circle', { cx: cx, cy: cy2, r: 4.5, fill: '#767676', stroke: '#fff', 'stroke-width': 2 }));
-    svg.appendChild(el('circle', { cx: cx, cy: cy1, r: 4.5, fill: '#111', stroke: '#fff', 'stroke-width': 2 }));
-    var lblRight = cx < pl + pw * 0.72;
-    var midY = (cy1 + cy2) / 2 + 4;
+    var hiY = Math.min(cy1, cy2), loY = Math.max(cy1, cy2);
     var resTxt = M(m.result, { cents: false, sign: true });
-    svg.appendChild(el('text', { x: lblRight ? cx + 10 : cx - 10, y: midY, 'text-anchor': lblRight ? 'start' : 'end', class: 'halo t-ink' }, resTxt));
+
+    // Lines first: marketing + fixed (muted), contribution (ink). Guides and points go in `marks`, under the labels.
+    var costLine = [X(MIN), Yc(costs(a)), X(MAX), Yc(costs(b))], contLine = [X(MIN), Yc(a.contribution), X(MAX), Yc(b.contribution)];
+    svg.appendChild(el('line', { x1: costLine[0], y1: costLine[1], x2: costLine[2], y2: costLine[3], stroke: '#767676', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+    svg.appendChild(el('line', { x1: contLine[0], y1: contLine[1], x2: contLine[2], y2: contLine[3], stroke: '#111111', 'stroke-width': 2, 'stroke-linecap': 'round' }));
+    var marks = el('g');
+    svg.appendChild(marks);
+
+    var L = labeler({ x0: pl - 4, x1: w, y0: 0, y1: bottom + 1 });
+    L.seg.apply(null, costLine);
+    L.seg.apply(null, contLine);
+    L.seg(bx, by, bx, bottom);                 // break-even drop line
+    L.seg(cx, pt - 6, cx, loY);                // current count, down to its lower point
+    L.seg(cx, loY, cx, bottom, true);          // and the thin guide below it
+    L.box(bx - 7, by - 7, 14, 14);
+    var txt = function (cls, s) { return el('text', { class: 'halo ' + cls }, s); };
+
+    // 1. The deal count above the plot.
     var topAnchor = cx < pl + 40 ? 'start' : (cx > w - pr - 40 ? 'end' : 'middle');
-    svg.appendChild(el('text', { x: cx, y: pt - 12, 'text-anchor': topAnchor, class: 'halo t-ink' }, sim.deals + ' deals'));
+    L.place(txt('t-ink n', sim.deals + ' deals'), [{ x: cx, y: pt - 12, anchor: topAnchor }]);
+
+    // 2. The result, beside the gap between the two lines; outside the gap when the gap is too small or too close to an edge.
+    var mid = (cy1 + cy2) / 2 + 5;
+    var R = function (y) { return { x: cx + 10, y: y, anchor: 'start' }; }, Lf = function (y) { return { x: cx - 10, y: y, anchor: 'end' }; };
+    var above = [Lf(hiY - 10), R(hiY - 12), Lf(hiY - 26), R(hiY - 28)], below = [R(loY + 19), Lf(loY + 19), R(loY + 35), Lf(loY + 35)];
+    // Inside the gap: centred, then hugging whichever line runs away from the label.
+    var inside = [R(mid), Lf(mid), R(hiY + 18), R(loY - 7), Lf(loY - 7), Lf(hiY + 18)];
+    L.place(txt('t-ink n', resTxt), inside.concat(m.result >= 0 ? above.concat(below) : below.concat(above)));
+
+    // 3. Break-even, next to its drop line.
+    var beText = el('text', { class: 'halo' });
+    beText.appendChild(el('tspan', { class: 't-ink' }, 'Break-even'));
+    beText.appendChild(el('tspan', { dy: 17, class: 'n' }, be + ' deals'));
+    var beBottom = bottom - 25;
+    L.place(beText, [
+      { x: bx + 9, y: beBottom, anchor: 'start' },
+      { x: bx - 9, y: beBottom, anchor: 'end' },
+      { x: bx - 11, y: by - 31, anchor: 'end' }
+    ]);
+
+    // 4. Direct line labels, at whichever end is clear. The legend names both lines, so a label with no room is left out.
+    L.place(txt('t-ink', 'Contribution'), [
+      { x: X(MAX), y: Yc(b.contribution) - 11, anchor: 'end' },
+      { x: X(MIN) + 6, y: Yc(a.contribution) + 21, anchor: 'start' }
+    ], true);
+    if (!narrow) {
+      var rise = Math.ceil((costLine[1] - costLine[3]) / (costLine[2] - costLine[0]) * 140); // how far the cost line climbs under the label
+      L.place(txt('', 'Marketing and fixed'), [
+        { x: X(MAX), y: Yc(costs(b)) + 18 + rise, anchor: 'end' },
+        { x: X(MIN) + 6, y: Yc(costs(a)) - 8 - rise, anchor: 'start' },
+        { x: X(MAX), y: Yc(costs(b)) - 11, anchor: 'end' }
+      ], true);
+    }
+
+    // Guides and points.
+    var thin = { stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .35, 'shape-rendering': 'crispEdges' };
+    guide(marks, bx, by + 6, bottom, L.boxes, thin);
+    marks.appendChild(el('circle', { cx: bx, cy: by, r: 5.5, fill: '#fff', stroke: '#111', 'stroke-width': 2 }));
+    guide(marks, cx, pt - 6, bottom, L.boxes, thin);
+    marks.appendChild(el('line', { x1: cx, x2: cx, y1: cy1, y2: cy2, stroke: '#111', 'stroke-width': 2 }));
+    marks.appendChild(el('circle', { cx: cx, cy: cy2, r: 4.5, fill: '#767676', stroke: '#fff', 'stroke-width': 2 }));
+    marks.appendChild(el('circle', { cx: cx, cy: cy1, r: 4.5, fill: '#111', stroke: '#fff', 'stroke-width': 2 }));
 
     // Hover layer: ghost crosshair (drawn on demand).
     var ghost = el('line', { id: 'be-ghost', x1: 0, x2: 0, y1: pt, y2: pt + ph, stroke: '#111', 'stroke-width': 1, 'stroke-opacity': .18, visibility: 'hidden', 'shape-rendering': 'crispEdges' });
@@ -1049,7 +1164,8 @@
   $('#prem').addEventListener('click', function () { set({ premium: !sim.premium }, true); });
   $('#reset').addEventListener('click', function () { set({ deals: PLAN, premium: true }, true); });
   if ('ResizeObserver' in window) new ResizeObserver(function () { drawChart(); }).observe(chart);
-  else addEventListener('resize', drawChart);
+  // The plot height also follows the window height (shorter on a 720px projector), which the observer does not see.
+  addEventListener('resize', drawChart);
 
   /* ------------------------------------------------------------ three years */
   (function threeYears() {
@@ -1072,7 +1188,7 @@
 
   /* ------------------------------------------------------------ legal */
   (function legal() {
-    $('#money-line').textContent = H.promise.money;
+    $('#money-line').textContent = curly(H.promise.money);
     var s = H.legal.split(/(?<=[.])\s+(?=[A-Z])/);
     var groups = [s.slice(0, 4), s.slice(4, 7), s.slice(7)];
     $('#legal-text').innerHTML = groups.filter(function (g) { return g.length; }).map(function (g) { return '<p>' + esc(g.join(' ')) + '</p>'; }).join('') +
@@ -1095,7 +1211,7 @@
       return '<div><dt>' + esc(r.label) + '</dt><dd>' + esc(r.text.replace(/\byou tap\b/g, P.renter.first + ' taps')) + '</dd></div>';
     }).join('');
     var silence = H.rules.filter(function (r) { return r.key === 'silence'; })[0];
-    $('#silence').textContent = silence ? silence.title + ': ' + lowerFirst(silence.items[0]) : '';
+    $('#silence').textContent = silence ? curly(silence.title + ': ' + lowerFirst(silence.items[0])) : '';
     var full = H.rules.filter(function (r) { return r.key !== 'silence'; });
     var n = H.sum(full, function (r) { return r.items.length; });
     $('#rules-count').textContent = n + ' rules, before move-in to Day 14';
@@ -1112,7 +1228,7 @@
     $('#qa-list').innerHTML = H.qa.map(function (q) {
       var see = SEE[q.n];
       return '<details id="qa-' + q.n + '" name="qa"><summary><span class="q">' + esc(q.q) + '</span><span class="pm" aria-hidden="true"></span></summary>' +
-        '<div class="ans"><p>' + esc(q.a) + '</p>' + (see ? '<a href="#' + see[0] + '">See ' + esc(see[1]) + '</a>' : '') + '</div></details>';
+        '<div class="ans"><p>' + esc(q.a) + '</p>' + (see ? '<a href="#' + see[0] + '">See ' + esc(lowerFirst(see[1])) + '</a>' : '') + '</div></details>';
     }).join('');
     $('#pocket').innerHTML = H.pocket.map(function (p) { return '<div><dt>' + esc(p.q) + '</dt><dd>' + esc(p.a) + '</dd></div>'; }).join('');
     $('#qa-list').addEventListener('toggle', function (e) {
@@ -1149,9 +1265,11 @@
 
   /* ------------------------------------------------------------ hash routes */
   // #year1, #per-deal, #qa and every section id; #qa-1 … #qa-8 open one answer; #deals-141, #deals-600-no-premium set the model.
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function route(jump, behavior) {
     var h = decodeURIComponent(location.hash.slice(1));
-    var opt = { block: 'start', behavior: behavior || 'instant' };
+    var opt = { block: 'start', behavior: reduce ? 'instant' : (behavior || 'instant') };
+    // #deals is the panel itself (not the section heading), so #deals and #deals-N show the slider and the result together at 1280x720.
     var m = /^deals-(\d+)(-no-premium)?$/.exec(h);
     if (m) {
       set({ deals: +m[1], premium: !m[2] });

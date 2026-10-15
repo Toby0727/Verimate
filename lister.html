@@ -28,36 +28,42 @@
   .moments-wrap { border-bottom: 1px solid var(--line); background: var(--paper); }
   .moments {
     max-width: var(--page-max); margin: 0 auto; padding: 12px var(--gutter); box-sizing: border-box;
-    display: flex; align-items: center; gap: 22px; min-width: 0;
+    display: flex; align-items: center; gap: 16px; min-width: 0;
   }
   .moments .date-chip { flex: none; font-size: 15px; padding: 6px 13px; }
   .moments > nav { min-width: 0; flex: 0 1 auto; }
+  /* The strip fits in one line from 1240px up (checked in every state). Narrower, it scrolls and fades at the cut edge. */
   .mo-list { list-style: none; margin: 0; padding: 2px 0; display: flex; align-items: center; min-width: 0; overflow-x: auto; scrollbar-width: none; }
   .mo-list::-webkit-scrollbar { display: none; }
+  .mo-list.is-more { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+  .mo-list.is-more.is-less { -webkit-mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+  .mo-list.is-less:not(.is-more) { -webkit-mask-image: linear-gradient(90deg, transparent, #000 40px); mask-image: linear-gradient(90deg, transparent, #000 40px); }
   .mo-item { display: flex; align-items: center; flex: none; }
-  .mo-item + .mo-item::before { content: ""; width: 22px; height: 1px; margin: 0 8px; background: var(--line-2); }
+  .mo-item + .mo-item::before { content: ""; width: 14px; height: 1.5px; margin: 0 6px; background: var(--line-2); }
   .mo-item.is-done + .mo-item::before { background: var(--ink); }
   .mo-item.mo-alt::before { content: none; }
-  .mo-alt { margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--line); }
-  .mo-link { display: inline-flex; align-items: center; gap: 9px; padding: 5px 6px 5px 4px; border-radius: 9px; text-decoration: none; color: var(--muted); }
+  .mo-alt { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--line); }
+  .mo-link { display: inline-flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 9px; text-decoration: none; color: var(--muted); }
   .mo-link:hover .mo-label { color: var(--ink); }
   .mo-dot {
     width: 22px; height: 22px; flex: none; border-radius: 50%; box-sizing: border-box; display: grid; place-items: center;
     border: 1.5px solid var(--line-2); background: var(--paper); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted);
   }
   .mo-dot svg { width: 11px; height: 11px; }
-  .mo-text { display: grid; line-height: 1.2; }
-  .mo-label { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
-  .mo-date { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .mo-text { display: grid; line-height: 1.22; }
+  .mo-label { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .mo-date { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .is-done .mo-dot { background: var(--ink); border-color: var(--ink); color: #fff; }
   .is-done .mo-label, .is-now .mo-label { color: var(--ink); }
   .is-now .mo-dot { border: 2px solid var(--brand); color: var(--brand); box-shadow: 0 0 0 3px var(--brand-tint); }
+  /* The claim is a branch, not step 6: an empty dashed ring, filled with a red dot while you are on it. */
   .mo-alt .mo-dot { border-style: dashed; }
   .mo-alt.is-now .mo-dot { border-style: solid; }
+  .mo-alt.is-now .mo-dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
 
   /* ---------------------------------------------------------------- page grid */
   .dash {
-    max-width: var(--page-max); margin: 0 auto; padding: 34px var(--gutter) 96px; box-sizing: border-box;
+    max-width: var(--page-max); margin: 0 auto; padding: 22px var(--gutter) 96px; box-sizing: border-box;
     display: grid; grid-template-columns: minmax(0, 1fr) 316px; grid-template-rows: auto auto 1fr; column-gap: 64px;
     grid-template-areas: "work side" "earn side" "act side";
   }
@@ -75,7 +81,7 @@
   .who .avatar { width: 44px; height: 44px; }
   .who-name { font-weight: 600; line-height: 1.25; }
   .who-meta { font-size: 13.5px; color: var(--muted); }
-  .status-title { margin-top: 22px; font-size: 34px; font-weight: 600; letter-spacing: -.03em; }
+  .status-title { margin-top: 12px; font-size: 34px; font-weight: 600; letter-spacing: -.03em; }
   .status-title:focus { outline: none; }
   .status-sub { margin: 8px 0 0; font-size: 17px; color: var(--ink-2); max-width: 62ch; }
 
@@ -95,7 +101,19 @@
   .wc-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; }
   .wc-actions .btn-primary { min-width: 240px; }
   .wc-actions-note { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); }
+  /* On long cards (publish, claim) the action row is the card's footer and stays on screen at 720px tall,
+     so the button whose label changes is always in view. It sits flush with the card's bottom edge. */
+  .wc-actions.is-sticky {
+    position: sticky; bottom: 0; z-index: 2; margin: 24px -28px -28px; padding: 16px 28px 18px;
+    background: var(--paper); border-top: 1px solid var(--line); border-radius: 0 0 var(--r-panel) var(--r-panel);
+    transition: box-shadow .2s linear;
+  }
+  .wc-actions.is-sticky.is-stuck { border-radius: 0; box-shadow: 0 -10px 18px -14px rgba(17, 17, 17, .35); }
   .amt-hero.is-mid { --amt-size: 46px; }
+  .decide { display: grid; justify-items: start; gap: 2px; padding-top: 16px; }
+  .decide .btn-primary { width: 100%; }
+  .decide .btn-quiet { margin-left: -6px; }
+  .decide .wc-actions-note { margin: 0; }
 
   .checks { list-style: none; margin: 0; padding: 0; display: grid; }
   .checks li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
@@ -119,11 +137,11 @@
   .record-big span { font-size: 13.5px; color: var(--ink-2); }
 
   /* ---------------------------------------------------------------- NY 14-day ruler (the memorable element) */
-  .ruler { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .ruler { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
   .ruler-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .ruler-head strong { font-size: 15px; font-weight: 600; }
   .ruler-head span { font-size: 13px; color: var(--muted); }
-  .ruler-track { position: relative; height: 26px; margin: 30px 9px 0; }
+  .ruler-track { position: relative; height: 26px; margin: 28px 9px 0; }
   .ruler-base { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; background: var(--line-2); }
   .ruler-win { position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 6px; background: var(--ink);
     left: calc(var(--a) / 14 * 100%); width: calc((var(--b) - var(--a)) / 14 * 100%); }
@@ -141,8 +159,9 @@
   .ruler-today { position: absolute; bottom: calc(100% + 6px); left: calc(var(--d) / 14 * 100%); transform: translateX(-50%);
     padding: 2px 7px; border-radius: var(--r-chip); background: var(--ink); color: #fff; font-size: 11.5px; font-weight: 600; line-height: 1.35; white-space: nowrap; }
   .ruler-today[data-align="start"] { transform: translateX(-9px); }
-  .ruler-labels { list-style: none; position: relative; height: 42px; margin: 10px 9px 0; padding: 0; }
-  .ruler-label { position: absolute; top: 0; left: calc(var(--d) / 14 * 100%); white-space: nowrap; font-size: 13px; line-height: 1.4; }
+  .ruler-labels { list-style: none; position: relative; height: 44px; margin: 10px 9px 0; padding: 0; }
+  .ruler-label { position: absolute; top: 0; left: calc(var(--d) / 14 * 100%); white-space: nowrap; font-size: 14px; line-height: 1.4; }
+  .ruler-label.is-quiet b { color: var(--muted); font-weight: 500; }
   .ruler-label[data-align="start"] { transform: translateX(-9px); }
   .ruler-label[data-align="end"] { transform: translateX(calc(-100% + 9px)); text-align: right; }
   .ruler-label b { display: block; font-weight: 600; color: var(--ink); }
@@ -178,6 +197,10 @@
   .dep-slot p { margin: 2px 0 0; font-size: 13.5px; grid-column: 1; }
   .dep-slot .amt { font-size: 18px; font-weight: 600; color: var(--muted); grid-row: 1; grid-column: 2; }
   .dep-slot.is-back { border-style: solid; border-color: var(--line); }
+  .dep-later { grid-row: 1 / span 2; grid-column: 2; text-align: right; align-self: center; }
+  .dep-slot .dep-later .amt { font-size: 16px; font-weight: 500; }
+  .dep-later small { display: block; font-size: 12.5px; color: var(--muted); }
+  .act-empty { margin: 0; padding: 14px 0 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
 
   /* ---------------------------------------------------------------- activity */
   .act .ledger { margin-top: 12px; }
@@ -262,6 +285,7 @@
   .cl-rules { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13.5px; color: var(--ink-2); }
   .form-err { margin: 10px 0 0; font-size: 13.5px; color: var(--flagged-ink); font-weight: 500; }
   .form-err:empty { display: none; }
+  .wc-actions .form-err { flex: 1 0 100%; margin: 0; }
 
   .filed-lines { margin-top: 18px; }
 
@@ -296,6 +320,7 @@
     .wc-actions .btn-primary { width: 100%; min-width: 0; }
     .wc-actions { gap: 6px; }
     .wc-actions .btn-quiet { margin: 0 auto; }
+    .wc-actions.is-sticky { margin: 20px -18px -22px; padding: 12px 18px 14px; }
     .side { display: block; }
     .side > .side-sec:nth-child(2) { margin-top: 30px; }
     .act .ledger-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
@@ -304,6 +329,7 @@
     .file-kind { display: none; }
     .dep-slot { grid-template-columns: 1fr; }
     .dep-slot .amt { grid-row: auto; grid-column: 1; }
+    .dep-later { grid-row: auto; grid-column: 1; text-align: left; }
   }
   @media (max-width: 600px) {
     .ruler-track { margin-top: 28px; }
@@ -351,6 +377,7 @@
   <section class="act" aria-labelledby="actTitle">
     <div class="sec-head"><h2 id="actTitle">Activity</h2><span class="receipt-ref" id="actRef"></span></div>
     <ol class="ledger" id="activity"></ol>
+    <p class="act-empty" id="actEmpty" hidden>Publish to start taking bookings. Each booking, rent payment and the deposit shows up here with its time.</p>
   </section>
 
   <footer class="site-foot">
@@ -418,11 +445,14 @@
   var state = 'new';
 
   /* ------------------------------------------------------------------ claim draft (Lena's itemized deductions) */
-  function freshDraft() {
+  /* Line 1 opens at $0.00 with the reason, label, photo and estimate already attached, so on stage the presenter
+     types one number and the button changes from "Return $875.00" to "Return $815.00 and claim $60.00". */
+  function demoLine(cents) {
     var c = DAMAGE.claim;
-    return { seq: 1, lines: [{ id: 1, reason: c.reason, what: c.label, amount: (c.cents / 100).toFixed(2),
-      photo: { name: 'IMG_2041.jpg', note: c.evidence[0] }, estimate: { name: 'Blind repair estimate.pdf', note: c.evidence[1] } }] };
+    return { id: 1, reason: c.reason, what: c.label, amount: (cents / 100).toFixed(2),
+      photo: { name: 'IMG_2041.jpg', note: c.evidence[0] }, estimate: { name: 'Blind repair estimate.pdf', note: c.evidence[1] } };
   }
+  function freshDraft() { return { seq: 1, lines: [demoLine(0)] }; }
   var draft = freshDraft();
   var filed = null;   // snapshot when the claim is filed
 
@@ -437,13 +467,16 @@
     return H.sum(lines, function (l) { var c = parseCents(l.amount); return isNaN(c) ? 0 : c; });
   }
   function filedLines() {
-    var src = filed || freshDraft().lines;
+    // Opened straight from #claim-filed (no claim typed this session): show the worked example, Broken blind $60.00.
+    var src = filed || [demoLine(DAMAGE.claim.cents)];
     return src.filter(function (l) { return parseCents(l.amount) > 0; });
   }
   function returnLabel(claim) {
     if (claim <= 0) return VB.returnDeposit;   // "Return $875.00"
-    return 'Return ' + m(Math.max(0, DEP - claim)) + ' and claim ' + m(Math.min(claim, DEP));
+    if (claim > DEP) return 'Claim can’t exceed ' + m(DEP);
+    return 'Return ' + m(DEP - claim) + ' and claim ' + m(claim);
   }
+  var AMOUNT_HINT = 'Enter dollars and cents, like 60.00.';
 
   /* ------------------------------------------------------------------ icons (hand-drawn, same family as the site) */
   var IC = {
@@ -478,7 +511,7 @@
     }).join('');
     var today = '<span class="ruler-today"' + (cfg.today === 0 ? ' data-align="start"' : '') + ' style="--d:' + cfg.today + '">Today</span>';
     var labels = cfg.marks.filter(function (k) { return k.label; }).map(function (k) {
-      return '<li class="ruler-label" data-align="' + (k.align || 'start') + '" style="--d:' + k.day + '"><i class="rl-key is-' + k.kind + '" aria-hidden="true"></i><b>' + esc(k.label) + '</b><span>' + esc(k.date) + '</span></li>';
+      return '<li class="ruler-label' + (k.quiet ? ' is-quiet' : '') + '" data-align="' + (k.align || 'start') + '" style="--d:' + k.day + '"><i class="rl-key is-' + k.kind + '" aria-hidden="true"></i><b>' + esc(k.label) + '</b><span>' + esc(k.date) + '</span></li>';
     }).join('');
     return '<div class="ruler"><div class="ruler-head"><strong>' + esc(cfg.head) + '</strong><span>' + esc(cfg.note || '') + '</span></div>' +
       '<div class="ruler-track" aria-hidden="true"><span class="ruler-base"></span>' + win + ticks + marks + today + '</div>' +
@@ -517,7 +550,7 @@
             '<div><p class="wc-label">What you pay</p><div class="receipt">' + receipt + '</div></div>' +
             '<div><p class="wc-label">Ready to publish</p><ul class="checks">' + checks + '</ul></div>' +
           '</div>' +
-          '<div class="wc-actions"><button type="button" class="btn btn-primary btn-lg" data-act="publish">Publish listing</button>' +
+          '<div class="wc-actions is-sticky"><button type="button" class="btn btn-primary btn-lg" data-act="publish">Publish listing</button>' +
           '<a class="btn btn-quiet" href="book.html">See what renters see</a></div>',
         waiting: []
       };
@@ -576,14 +609,14 @@
         sub: 'Return ' + J.first + '’s deposit by ' + fmt(DL.returnBy, 'day') + '.',
         card:
           '<div class="wc-head"><div><h2>' + esc(J.first) + ' moved out</h2><p>' + esc(dayStamp(DL.movedOut)) + ', with move-out photos</p></div>' + chip('needs', VS.needs) + '</div>' +
+          /* The decision sits beside the amount, so the amount, both buttons and the 14-day clock all fit on a 1280x720 projector. */
           '<div class="wc-split">' +
-            '<div><p class="wc-label">Deposit, held by Verimate</p>' + hero(DEP) + '<p class="wc-note">You never held it. One tap sends it back.</p></div>' +
-            '<div class="receipt">' + rc('Deposit', DEP) + rc('Deductions', 0, 'rc-zero', 'None unless you claim them') + rc('Back to ' + esc(J.first), DEP, 'rc-total') + '</div>' +
+            '<div><p class="wc-label">Deposit, held by Verimate</p>' + hero(DEP) + '<p class="wc-note">You never held it. One tap sends it back to ' + esc(J.first) + '.</p></div>' +
+            '<div class="decide"><button type="button" class="btn btn-primary btn-lg" data-act="return">' + esc(VB.returnDeposit) + '</button>' +
+              '<button type="button" class="btn btn-quiet" data-act="claim">' + esc(VB.claim) + '</button>' +
+              '<p class="wc-actions-note">If you do nothing, it auto-returns ' + esc(fmt(DL.autoReturn, 'day')) + '.</p></div>' +
           '</div>' +
-          ruler({ head: 'Day 0 of 14, New York law', note: 'GOL 7-108', today: 0, win: [0, dayOf(DL.returnBy), 'ink'], marks: MOVE_MARKS }) +
-          '<div class="wc-actions"><button type="button" class="btn btn-primary btn-lg" data-act="return">' + esc(VB.returnDeposit) + '</button>' +
-          '<button type="button" class="btn btn-quiet" data-act="claim">' + esc(VB.claim) + '</button></div>' +
-          '<p class="wc-actions-note">If you do nothing, Verimate returns the full ' + m(DEP) + ' to ' + esc(J.first) + ' on ' + esc(fmt(DL.autoReturn, 'day')) + '.</p>',
+          ruler({ head: 'Day 0 of 14, New York law', note: 'GOL 7-108', today: 0, win: [0, dayOf(DL.returnBy), 'ink'], marks: MOVE_MARKS }),
         waiting: []
       };
     },
@@ -603,7 +636,7 @@
             marks: [
               { day: 0, kind: 'start' },
               { day: days, kind: 'done', label: 'Returned', date: fmt(DL.returned, 'day'), align: 'start' },
-              { day: dayOf(DL.returnBy), kind: 'muted' },
+              { day: dayOf(DL.returnBy), kind: 'muted', label: 'Return by', date: fmt(DL.returnBy, 'day'), align: 'end', quiet: true },
               { day: dayOf(DL.nyDeadline), kind: 'law', label: 'NY deadline', date: fmt(DL.nyDeadline, 'day'), align: 'end' }
             ] }) +
           '<div class="wc-split is-even" style="margin-top:26px"><div><p class="wc-label">Your lease, ' + esc(D.datesLabel) + '</p>' +
@@ -631,8 +664,7 @@
               '<li>Verimate rules on disputed lines by ' + esc(fmt(DL.nyDeadline, 'day')) + ', comparing the signed move-in and move-out photos. You carry the burden of proof.</li>' +
             '</ul>' +
           '</div>' +
-          '<p class="form-err" id="formErr" role="alert"></p>' +
-          '<div class="wc-actions"><button type="submit" class="btn btn-primary btn-lg" id="claimBtn">' + esc(returnLabel(total)) + '</button>' +
+          '<div class="wc-actions is-sticky"><p class="form-err" id="formErr" role="alert"></p><button type="submit" class="btn btn-primary btn-lg" id="claimBtn"' + (total > DEP ? ' aria-disabled="true"' : '') + '>' + esc(returnLabel(total)) + '</button>' +
           '<button type="button" class="btn btn-quiet" data-act="cancel-claim">Cancel claim</button></div>' +
           '</form>',
         waiting: []
@@ -693,7 +725,7 @@
       '<div class="field"><label for="what-' + id + '">What it’s for</label><input class="input" type="text" id="what-' + id + '" data-id="' + id + '" data-k="what" maxlength="60" autocomplete="off" value="' + esc(l.what) + '"' + (need ? ' required' : '') + ' aria-describedby="what-' + id + '-err" />' +
         '<p class="f-err" id="what-' + id + '-err">Say what the deduction is for.</p></div>' +
       '<div class="field"><label for="amount-' + id + '">Amount</label><div class="money-in"><span aria-hidden="true">$</span><input class="input" type="text" inputmode="decimal" id="amount-' + id + '" data-id="' + id + '" data-k="amount" autocomplete="off" value="' + esc(l.amount) + '" pattern="\\$?\\d{1,6}(\\.\\d{0,2})?" aria-describedby="amount-' + id + '-err" /></div>' +
-        '<p class="f-err" id="amount-' + id + '-err">Enter dollars and cents, like 60.00.</p></div>' +
+        '<p class="f-err" id="amount-' + id + '-err">' + esc(AMOUNT_HINT) + '</p></div>' +
       '<div class="cl-files">' + fileSlot(l, 'photo') + fileSlot(l, 'estimate') + '</div>' +
       '<p class="line-err" id="line-' + id + '-err"></p>' +
       '</fieldset>';
@@ -705,11 +737,36 @@
   }
   function lineById(id) { return draft.lines.filter(function (l) { return String(l.id) === String(id); })[0]; }
 
-  function refreshClaim() {
-    var total = claimTotal(draft.lines);
+  /* A claim over the deposit: mark the amount that was just typed (or the last one that claims money) and say why there. */
+  function markOver(on, src) {
+    Array.prototype.forEach.call(document.querySelectorAll('.field[data-bad="over"]'), function (f) {
+      f.classList.remove('is-bad'); f.removeAttribute('data-bad');
+      var i = f.querySelector('.input'), p = f.querySelector('.f-err');
+      if (i) i.setAttribute('aria-invalid', 'false');
+      if (p) p.textContent = AMOUNT_HINT;
+    });
+    if (!on) return null;
+    var el = src && src.getAttribute('data-k') === 'amount' ? src : null;
+    if (!el) draft.lines.forEach(function (l) { if (parseCents(l.amount) > 0) el = document.getElementById('amount-' + l.id) || el; });
+    var f = el && el.closest('.field');
+    if (!f) return null;
+    f.classList.add('is-bad'); f.setAttribute('data-bad', 'over'); el.setAttribute('aria-invalid', 'true');
+    var p = f.querySelector('.f-err');
+    if (p) p.textContent = 'This takes your claim over the ' + m(DEP) + ' deposit.';
+    return el;
+  }
+
+  function refreshClaim(src) {
+    var total = claimTotal(draft.lines), over = total > DEP;
     var sum = $('#clSum'), btn = $('#claimBtn');
     if (sum) sum.innerHTML = sumHTML(total);
-    if (btn) btn.textContent = returnLabel(total);
+    if (btn) {
+      btn.textContent = returnLabel(total);
+      if (over) btn.setAttribute('aria-disabled', 'true'); else btn.removeAttribute('aria-disabled');
+    }
+    markOver(over, src);
+    stuckBar();
+    if (!over && $('#formErr') && /deposit/.test($('#formErr').textContent)) $('#formErr').textContent = '';
     // Fields are required only on lines that claim money.
     draft.lines.forEach(function (l) {
       var need = parseCents(l.amount) > 0;
@@ -721,6 +778,7 @@
 
   function validateClaim() {
     var first = null, ok = true;
+    markOver(false);
     var mark = function (el, bad) {
       if (!el) return;
       var field = el.closest('.field');
@@ -744,8 +802,8 @@
     });
     var total = claimTotal(draft.lines);
     var fe = $('#formErr');
-    if (total > DEP) { ok = false; if (fe) fe.textContent = 'A claim can’t be more than the ' + m(DEP) + ' deposit.'; first = first || document.querySelector('[data-k="amount"]'); }
-    else if (fe) fe.textContent = '';
+    if (total > DEP) { ok = false; if (fe) fe.textContent = 'Your lines add up to ' + m(total) + '. Lower an amount: a claim can’t be more than the ' + m(DEP) + ' deposit.'; first = first || markOver(true); }
+    else if (fe) fe.textContent = ok ? '' : 'Fix what’s marked above, then file again.';
     if (first) first.focus();
     return ok;
   }
@@ -769,7 +827,7 @@
         '<span class="mo-dot" aria-hidden="true">' + dot + '</span><span class="mo-text"><span class="mo-label">' + esc(mo.label) + '</span><span class="mo-date">' + esc(fmt(AT[mo.key], 'short')) + '</span></span></a></li>';
     }).join('');
     var alt = '<li class="mo-item mo-alt' + (inClaim ? ' is-now' : '') + '"><a class="mo-link" href="#claim"' + (inClaim ? ' aria-current="step"' : '') + '>' +
-      '<span class="mo-dot" aria-hidden="true">' + MOMENTS.length + '</span><span class="mo-text"><span class="mo-label">' + (state === 'claim-filed' ? esc(VR.claim) : 'Or: ' + esc(VB.claim)) + '</span><span class="mo-date">' + esc(fmt(AT.claim, 'short')) + '</span></span></a></li>';
+      '<span class="mo-dot" aria-hidden="true"></span><span class="mo-text"><span class="mo-label">' + (state === 'claim-filed' ? esc(VR.claim) : 'Or: ' + esc(VB.claim)) + '</span><span class="mo-date">' + esc(fmt(AT.claim, 'short')) + '</span></span></a></li>';
     $('#moments').innerHTML = items + alt;
     var on = $('#moments [aria-current]');
     var list = $('#moments');
@@ -777,7 +835,24 @@
       var li = on.closest('.mo-item');
       list.scrollLeft = Math.max(0, li.offsetLeft - list.offsetLeft - 16);
     }
+    stripEdges();
     $('#clock').innerHTML = esc(fmt(AT[state], 'full')) + '<span class="date-chip-time">' + esc(fmt(AT[state], 'time')) + '</span>';
+  }
+
+  /* The sticky action row gets a soft top shadow only while it floats over the card. */
+  function stuckBar() {
+    var bar = $('.wc-actions.is-sticky');
+    if (!bar) return;
+    var card = bar.closest('.wcard').getBoundingClientRect(), b = bar.getBoundingClientRect();
+    bar.classList.toggle('is-stuck', b.bottom >= innerHeight - 1 && card.bottom > innerHeight + 1);
+  }
+  addEventListener('scroll', function () { cancelAnimationFrame(stuckBar.f); stuckBar.f = requestAnimationFrame(stuckBar); }, { passive: true });
+  addEventListener('resize', function () { stuckBar(); });
+
+  function stripEdges() {
+    var list = $('#moments');
+    list.classList.toggle('is-more', list.scrollLeft + list.clientWidth < list.scrollWidth - 2);
+    list.classList.toggle('is-less', list.scrollLeft > 2);
   }
 
   function renderWho() {
@@ -802,7 +877,8 @@
         '<div><div class="list-head"><h3>Upcoming</h3>' + amt(0, 'list-total amt-held') + '</div><p class="list-empty">Nothing yet. When someone books, their first month waits here, held by Verimate until they move in.</p></div>' +
         '<div><div class="list-head"><h3>Paid to you</h3>' + amt(0, 'list-total') + '</div><p class="list-empty">No payouts yet.</p></div>' +
         '</div>' +
-        '<div class="slot-empty dep-slot" style="view-transition-name:mv-dep"><div><b>Deposit</b><p>Held by Verimate, not you. When someone books, Verimate holds it and returns it after move-out.</p></div>' + amt(DEP) + '</div>';
+        '<div class="slot-empty dep-slot" style="view-transition-name:mv-dep"><div><b>Deposit</b><p>Held by Verimate, not you. When someone books, Verimate holds it and returns it after move-out.</p></div>' +
+        '<span class="dep-later">' + amt(DEP) + '<small>once someone books</small></span></div>';
     }
     var up = [], paid = [];
     ROWS.forEach(function (r) { (ms(r.paidAt) <= now ? paid : up).push(r); });
@@ -811,7 +887,7 @@
       var hold = r.via === 'hold';
       var what = isPaid
         ? (hold ? 'Released, in your bank ' + fmt(DL.lenaBankArrives, 'short') : 'Paid to you directly')
-        : (hold ? 'Held by Verimate until move-in' : (r.detail ? r.detail + ', paid to you directly' : 'Paid to you directly'));
+        : (hold ? 'Held by Verimate until move-in' : (r.detail ? r.detail + ', ' : '') + J.first + ' pays you directly');
       var sub = hold ? 'After ' + m(r.fee) + ' fee' : 'Fee ' + m(r.fee);
       return '<li class="mrow" style="view-transition-name:' + r.id + '"><time class="mrow-when" datetime="' + esc(isPaid ? r.paidAt : r.due) + '">' + esc(fmt(isPaid ? r.paidAt : r.due, 'short')) + '</time>' +
         '<div class="mrow-what"><span class="mrow-title">' + esc(r.title) + '</span><small>' + esc(what) + '</small></div>' +
@@ -841,7 +917,8 @@
 
   function activityRows() {
     var now = ms(AT[state]), rows = [];
-    if (state !== 'new') rows.push({ at: DL.listed, what: 'You published ' + D.address, note: 'Listing is free', cents: null });
+    if (state === 'new') rows.push({ at: DL.listed, what: 'Your listing for ' + D.address + ' is ready to publish', note: 'Student, ID and face checks passed. Lease and owner’s OK uploaded', cents: null });
+    else rows.push({ at: DL.listed, what: 'You published ' + D.address, note: 'Listing is free', cents: null });
     rows.push({ at: DL.booked, what: J.name + ' booked with Hold', note: 'First month and deposit, paid by bank. Held by Verimate', cents: D.upfront.total, cls: 'is-held' });
     rows.push({ at: SETTLED, what: 'Bank payment settled', note: 'Nothing is released before this', cents: D.upfront.total, cls: 'is-held' });
     rows.push({ at: DL.moveIn, what: 'Move-in day. ' + J.first + '’s 48 hours started', note: 'Auto-release ' + dayStamp(DL.autoRelease), cents: null });
@@ -862,7 +939,8 @@
 
   function renderActivity(animate) {
     var rows = activityRows();
-    $('#actRef').textContent = 'Ref ' + D.ref;
+    $('#actRef').textContent = state === 'new' ? '' : 'Ref ' + D.ref;   // the booking ref exists only once someone books
+    $('#actEmpty').hidden = state !== 'new';
     $('#activity').innerHTML = rows.map(function (r, i) {
       return '<li class="ledger-row' + (animate && i === 0 ? ' is-new' : '') + '"><time class="ledger-when" datetime="' + esc(r.at) + '">' + esc(fmt(r.at, 'stamp')) + '</time>' +
         '<span class="ledger-what">' + esc(r.what) + (r.note ? '<small>' + esc(r.note) + '</small>' : '') + '</span>' +
@@ -911,6 +989,7 @@
     $('#earnBody').innerHTML = earningsHTML();
     renderActivity(animate);
     renderSide(animate);
+    stuckBar();
     document.title = (v.title === '1 thing needs you' ? '(1) ' : '') + 'List your place | Verimate';
   }
 
@@ -919,8 +998,16 @@
     if (ALL.indexOf(next) < 0) next = 'new';
     if (next === state && animate) return;
     state = next;
-    var focus = function () { if (animate) $('#statusTitle').focus({ preventScroll: true }); };
-    if (!animate || !document.startViewTransition || reduce.matches) { render(animate); focus(); return; }
+    // After a state change the page goes back to the top, so the new heading, the date and the strip are on screen.
+    var focus = function () {
+      if (!animate) return;
+      $('#statusTitle').focus({ preventScroll: true });
+      if (scrollY > 0) scrollTo({ top: 0, behavior: reduce.matches ? 'auto' : 'smooth' });
+    };
+    // The money rows only travel when Earnings is on screen; otherwise swap at once and scroll up.
+    var earn = $('.earn').getBoundingClientRect();
+    var rowsInView = earn.top < innerHeight && earn.bottom > 0;
+    if (!animate || !document.startViewTransition || reduce.matches || !rowsInView) { render(animate); focus(); return; }
     var t = document.startViewTransition(function () { render(true); });
     t.finished.finally(focus);
   }
@@ -932,6 +1019,8 @@
 
   /* ------------------------------------------------------------------ events */
   addEventListener('hashchange', function () { show(fromHash(), true); });
+  $('#moments').addEventListener('scroll', stripEdges, { passive: true });
+  addEventListener('resize', stripEdges);
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]');
@@ -977,7 +1066,7 @@
     l[k] = el.value;
     var field = el.closest('.field');
     if (field && field.classList.contains('is-bad')) { field.classList.remove('is-bad'); el.setAttribute('aria-invalid', 'false'); }
-    if (k === 'amount') refreshClaim();
+    if (k === 'amount') refreshClaim(el);
   });
 
   document.addEventListener('change', function (e) {
@@ -995,13 +1084,30 @@
     if (x) x.focus();
   });
 
+  // Focusing an amount selects it, so typing "60" replaces "0.00".
+  document.addEventListener('focusin', function (e) {
+    var el = e.target;
+    if (!el.getAttribute || el.getAttribute('data-k') !== 'amount') return;
+    setTimeout(function () { if (document.activeElement === el) el.select(); }, 0);
+  });
+  // A click would collapse that selection on mouseup, so the first click into an amount selects it instead.
+  var selectOnUp = null;
+  document.addEventListener('mousedown', function (e) {
+    var el = e.target;
+    selectOnUp = el.getAttribute && el.getAttribute('data-k') === 'amount' && document.activeElement !== el ? el : null;
+  });
+  document.addEventListener('mouseup', function (e) {
+    if (selectOnUp && e.target === selectOnUp) { e.preventDefault(); selectOnUp.select(); }
+    selectOnUp = null;
+  });
+
   // Tidy the amount to two decimals when the field is left.
   document.addEventListener('focusout', function (e) {
     var el = e.target;
     if (!el.getAttribute || el.getAttribute('data-k') !== 'amount') return;
     var c = parseCents(el.value), l = lineById(el.getAttribute('data-id'));
-    if (!isNaN(c) && l) { el.value = (c / 100).toFixed(2); l.amount = el.value; refreshClaim(); }
     el.setAttribute('aria-invalid', isNaN(c) ? 'true' : 'false');
+    if (!isNaN(c) && l) { el.value = (c / 100).toFixed(2); l.amount = el.value; refreshClaim(el); }
   });
 
   document.addEventListener('submit', function (e) {
@@ -1024,7 +1130,7 @@
       else if (state === 'claim-filed') go('claim');
       else if (i > 0) go(MAIN[i - 1]);
     } else if (k === 'd' || k === 'D') go('claim');
-    else if (k === 'r' || k === 'R' || k === 'Home') go('new');
+    else if (k === 'r' || k === 'R' || k === 'Home') { draft = freshDraft(); filed = null; go('new'); }
     else if (k === 'End') go('returned');
     else handled = false;
     if (handled) e.preventDefault();
@@ -1032,7 +1138,7 @@
 
   /* ------------------------------------------------------------------ boot */
   renderWho();
-  $('#foot').textContent = 'Payments run on Stripe Connect. Verimate never keeps rent or deposits in its own bank account, and only tells Stripe when to release. Ref ' + D.ref + '.';
+  $('#foot').textContent = 'Payments run on Stripe Connect. Verimate never keeps rent or deposits in its own bank account, and only tells Stripe when to release.';
   state = fromHash();
   render(false);
 })();
