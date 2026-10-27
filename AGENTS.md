@@ -30,7 +30,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Tailwind CSS v4 + shadcn/ui（`base-nova` 预设，Base UI）+ lucide-react 图标
 - Supabase（`@supabase/supabase-js` + `@supabase/ssr`，精确锁定版本）
 - Biome（格式化 + lint，替代 ESLint/Prettier）
-- Vercel 部署（Toby 的 Hobby 团队）：项目最初按静态站创建，Framework Preset 为 “Other”，因此用 `vercel.json` 的 `"framework": "nextjs"` 覆盖，不要删除
+- Vercel 部署（Toby 的 Hobby 团队）：Framework Preset 为 Next.js；`vercel.json` 中的 `"framework": "nextjs"` 与之一致，作为兜底保留（会覆盖后台设置，防止后台被误改导致构建去找 `public` 目录而失败）。PR 预览部署已关闭 Vercel Authentication，非团队成员也能打开
 - husky + lint-staged：提交前对暂存文件执行 `biome check --write`（格式化 + 安全修复），再全量 `tsc` 类型检查
 - npm
 
