@@ -1,3 +1,6 @@
 # Local test output and reference screenshots, never deploy
 .playwright-mcp/
 /*.jpg
+
+# Local secrets, never commit
+.env
