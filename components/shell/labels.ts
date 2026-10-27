@@ -12,10 +12,11 @@ import type {
 } from "@/lib/rules/types";
 import type { Choice } from "./choice-chips";
 
+// Asked as pronouns; the stored value still drives the gender filter.
 export const GENDER: Choice<Gender>[] = [
-  { value: "woman", label: "Woman" },
-  { value: "man", label: "Man" },
-  { value: "nonbinary", label: "Non-binary" },
+  { value: "woman", label: "she/her" },
+  { value: "man", label: "he/him" },
+  { value: "nonbinary", label: "they/them" },
 ];
 
 export const HOUSING: Choice<HousingStatus>[] = [
@@ -46,6 +47,51 @@ export const PETS: Choice<Pets>[] = [
   { value: "none", label: "No pets" },
   { value: "ok", label: "Pets OK" },
   { value: "has-pet", label: "Has a pet" },
+];
+
+// Year in school, or the term an admitted student starts.
+export const STANDINGS = {
+  current: ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"],
+  admitted: [
+    "Admitted · Spring 2027",
+    "Admitted · Summer 2027",
+    "Admitted · Fall 2027",
+    "Admitted · Spring 2028",
+  ],
+};
+
+// Common lease terms. "Custom" in the profile form lets people pick exact dates.
+export const MOVE_TERMS = [
+  {
+    value: "spring-2027",
+    label: "Spring 2027",
+    from: "2027-01-10",
+    to: "2027-05-15",
+  },
+  {
+    value: "summer-2027",
+    label: "Summer 2027",
+    from: "2027-05-15",
+    to: "2027-08-15",
+  },
+  {
+    value: "fall-2027",
+    label: "Fall 2027",
+    from: "2027-08-15",
+    to: "2027-12-20",
+  },
+  {
+    value: "year-2027",
+    label: "2027–28 school year",
+    from: "2027-08-15",
+    to: "2028-05-15",
+  },
+  {
+    value: "spring-2028",
+    label: "Spring 2028",
+    from: "2028-01-10",
+    to: "2028-05-15",
+  },
 ];
 
 export const ROOM_TYPES: Choice<RoomType>[] = [

@@ -188,9 +188,9 @@ export function RoommateFilters({
                 ))}
               </select>
             </Section>
-            <Section title="Gender">
+            <Section title="Pronouns">
               <ChoiceChips
-                label="Gender"
+                label="Pronouns"
                 options={GENDER}
                 value={value.gender}
                 onChange={(gender) =>

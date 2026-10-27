@@ -6,11 +6,14 @@ import { FieldError } from "@/components/onboarding/onboarding-step";
 import { ChoiceChips } from "@/components/shell/choice-chips";
 import {
   CLEANLINESS,
+  formatDay,
   GENDER,
   HOUSING,
+  MOVE_TERMS,
   PETS,
   SLEEP,
   SMOKING,
+  STANDINGS,
 } from "@/components/shell/labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +29,7 @@ const FIELD_LABELS: Record<RequiredField, string> = {
   displayName: "Display name",
   school: "School",
   standing: "Year or admit term",
-  gender: "Gender",
+  gender: "Pronouns",
   budgetMin: "Budget from",
   budgetMax: "Budget to",
   moveInFrom: "Move-in from",
@@ -80,6 +83,15 @@ export function RequiredProfileForm({
   const set = (patch: Partial<Profile>) =>
     setValues((v) => ({ ...v, ...patch }));
   const invalid = (field: RequiredField) => missing.includes(field);
+  const termFor = (from?: string | null, to?: string | null) =>
+    MOVE_TERMS.find((t) => t.from === from && t.to === to);
+  // Exact dates show only for "Custom" or dates that match no term.
+  const [customDates, setCustomDates] = useState(
+    () =>
+      Boolean(initial?.moveInFrom || initial?.moveInTo) &&
+      !termFor(initial?.moveInFrom, initial?.moveInTo),
+  );
+  const term = termFor(values.moveInFrom, values.moveInTo);
   const num = (value: string) => (value === "" ? null : Number(value));
 
   return (
@@ -151,18 +163,37 @@ export function RequiredProfileForm({
       </Field>
 
       <Field label="Year or admit term" htmlFor="standing">
-        <Input
+        <select
           id="standing"
-          placeholder="e.g. Junior, Graduate, Admitted · Fall 2027"
+          className="h-9 rounded-lg border bg-background px-2 text-sm aria-invalid:border-destructive"
           value={values.standing ?? ""}
           aria-invalid={invalid("standing")}
-          onChange={(e) => set({ standing: e.target.value })}
-        />
+          onChange={(e) => set({ standing: e.target.value || null })}
+        >
+          <option value="">Choose one</option>
+          <optgroup label="Current student">
+            {STANDINGS.current.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Admitted">
+            {STANDINGS.admitted.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </optgroup>
+          {/* Keep an older free-text answer selectable. */}
+          {values.standing &&
+          ![...STANDINGS.current, ...STANDINGS.admitted].includes(
+            values.standing,
+          ) ? (
+            <option>{values.standing}</option>
+          ) : null}
+        </select>
       </Field>
 
-      <Field label="Gender">
+      <Field label="Pronouns">
         <ChoiceChips
-          label="Gender"
+          label="Pronouns"
           options={GENDER}
           value={values.gender ?? null}
           invalid={invalid("gender")}
@@ -195,23 +226,40 @@ export function RequiredProfileForm({
       </Field>
 
       <Field label="When do you need a place?">
-        <div className="flex items-center gap-2">
-          <Input
-            aria-label="Move-in from"
-            type="date"
-            value={values.moveInFrom ?? ""}
-            aria-invalid={invalid("moveInFrom")}
-            onChange={(e) => set({ moveInFrom: e.target.value || null })}
-          />
-          <span className="text-muted-foreground">–</span>
-          <Input
-            aria-label="Move-out by"
-            type="date"
-            value={values.moveInTo ?? ""}
-            aria-invalid={invalid("moveInTo")}
-            onChange={(e) => set({ moveInTo: e.target.value || null })}
-          />
-        </div>
+        <ChoiceChips
+          label="Move-in term"
+          options={[...MOVE_TERMS, { value: "custom", label: "Custom" }]}
+          value={customDates ? "custom" : (term?.value ?? null)}
+          invalid={invalid("moveInFrom") || invalid("moveInTo")}
+          onChange={(value) => {
+            const picked = MOVE_TERMS.find((t) => t.value === value);
+            setCustomDates(!picked);
+            if (picked) set({ moveInFrom: picked.from, moveInTo: picked.to });
+          }}
+        />
+        {customDates ? (
+          <div className="flex items-center gap-2">
+            <Input
+              aria-label="Move-in from"
+              type="date"
+              value={values.moveInFrom ?? ""}
+              aria-invalid={invalid("moveInFrom")}
+              onChange={(e) => set({ moveInFrom: e.target.value || null })}
+            />
+            <span className="text-muted-foreground">–</span>
+            <Input
+              aria-label="Move-out by"
+              type="date"
+              value={values.moveInTo ?? ""}
+              aria-invalid={invalid("moveInTo")}
+              onChange={(e) => set({ moveInTo: e.target.value || null })}
+            />
+          </div>
+        ) : term ? (
+          <p className="text-muted-foreground text-xs">
+            {formatDay(term.from)} – {formatDay(term.to)}
+          </p>
+        ) : null}
       </Field>
 
       <Field label="Where are you at?">
