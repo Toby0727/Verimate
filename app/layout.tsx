@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Figtree, Geist_Mono, Newsreader } from "next/font/google";
+import { DemoBanner } from "@/components/demo/demo-banner";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const geistSans = Geist({
+const figtree = Figtree({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+// Serif for profile prompt answers.
+const newsreader = Newsreader({
+  variable: "--font-serif",
   subsets: ["latin"],
 });
 
@@ -14,16 +22,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Verimate",
-  description: "Verified student subleasing",
+  description: "Verified roommate finding for SU & ESF students",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${figtree.variable} ${newsreader.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-neutral-100">
+        <DemoBanner />
+        {children}
+        <Toaster theme="light" position="top-center" />
+      </body>
     </html>
   );
 }
