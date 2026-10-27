@@ -2,93 +2,120 @@
 
 ## Core Principles
 
-### I. 核心用户路径优先
+### I. Core User Path First
 
-- 每项任务 MUST 优先完成当前明确提出的功能，并优先打通端到端的核心用户路径。
-- 任务开始前 MUST 简要区分"本次必须实现"与"可延后"的部分，只实现前者。
-- MUST NOT 为尚未验证的需求提前开发功能、页面、模块或基础设施，
-  包括"未来可能商业化"所设想的支付、订阅、管理员后台等，除非当前需求明确涉及。
+- Every task MUST first deliver the functionality that is explicitly requested now, and MUST
+  prioritize getting the core user path working end to end.
+- Before starting a task, the work MUST be briefly split into "required now" and "can wait";
+  only the former is implemented.
+- Features, pages, modules, or infrastructure for unvalidated needs MUST NOT be built ahead of
+  time. This includes payments, subscriptions, and admin dashboards imagined for future
+  commercialization, unless the current requirement explicitly calls for them.
 
-理由：MVP 的目标是尽快可运行、可演示、可验证产品价值；未验证的功能只会增加维护成本。
+Rationale: the MVP exists to become runnable, demoable, and able to validate product value as
+fast as possible; unvalidated features only add maintenance cost.
 
-### II. 简单、成熟的方案
+### II. Simple, Proven Solutions
 
-- 默认采用最简单且合理的实现；存在多种方案时，选择当前开发成本低、未来迁移成本可控的一种。
-- MUST 优先使用现有框架和托管服务（Next.js、Supabase、Vercel、shadcn/ui 等）
-  提供的能力，而不是自行实现。
-- MUST NOT 引入过度抽象、过早优化、复杂架构模式或针对不可能发生情况的防御性代码。
-- 代码结构保持清晰、模块职责明确，允许逐步扩展，不追求一次性设计完美。
+- Default to the simplest reasonable implementation. When several approaches exist, choose the
+  one with low development cost now and a manageable migration cost later.
+- Capabilities provided by existing frameworks and hosted services (Next.js, Supabase, Vercel,
+  shadcn/ui, etc.) MUST be preferred over building our own.
+- Over-abstraction, premature optimization, complex architectural patterns, and defensive code
+  for situations that cannot happen MUST NOT be introduced.
+- Keep the code structure clear with well-defined module responsibilities. It may grow
+  incrementally; a perfect up-front design is not a goal.
 
-理由：成熟方案降低出错概率和学习成本；复杂度只在被真实需求证明时才值得付出。
+Rationale: proven solutions lower the chance of mistakes and the learning cost; complexity is
+only worth paying for once real requirements justify it.
 
-### III. 为商业化保留演进路径
+### III. Keep a Path to Commercialization
 
-- 基础架构 MUST 能支持未来正式部署（当前即 Vercel + Supabase 的生产级组合）。
-- 用户身份、数据存储、权限控制、订阅状态 MUST 依托平台原生机制
-  （Supabase Auth、Postgres 表、RLS），以便后续扩展，而不是临时的本地状态或硬编码。
-- 核心业务规则 MUST NOT 硬编码在 UI 组件中；关键业务逻辑放在 `lib/` 或服务端函数中，
-  与页面展示适度分离，但不引入额外的分层架构。
-- 配置与密钥 MUST 通过环境变量管理，MUST NOT 提交到代码库；服务端密钥 MUST NOT
-  带 `NEXT_PUBLIC_` 前缀。
-- 数据库结构变更 MUST 通过迁移文件记录，保证可重复、可追溯。
+- The underlying architecture MUST support a future production deployment (currently the
+  production-grade Vercel + Supabase combination).
+- User identity, data storage, access control, and subscription status MUST rely on
+  platform-native mechanisms (Supabase Auth, Postgres tables, RLS) so they can be extended
+  later, not on ad-hoc local state or hardcoded values.
+- Core business rules MUST NOT be hardcoded in UI components. Key business logic lives in
+  `lib/` or server-side functions, reasonably separated from presentation, without introducing
+  extra architectural layers.
+- Configuration and secrets MUST be managed through environment variables and MUST NOT be
+  committed to the repository. Server-side secrets MUST NOT carry the `NEXT_PUBLIC_` prefix.
+- Database schema changes MUST be recorded as migration files so they are repeatable and
+  traceable.
 
-理由：这些是事后补救代价最高的部分；现在用平台默认方式做对，几乎不增加 MVP 成本。
+Rationale: these are the areas that are most expensive to fix after the fact; doing them the
+platform-default way now adds almost no cost to the MVP.
 
-### IV. 模拟与真实明确区分
+### IV. Clearly Separate Mock from Real
 
-- 允许使用 Mock Data、测试账户或支付测试模式完成演示。
-- 模拟功能 MUST 在代码中可识别（命名、位置或注释），并在交付说明中明确标注哪些是模拟、
-  哪些是真实可用。
-- MUST NOT 让模拟数据或测试模式在用户和开发者面前冒充真实功能。
+- Mock data, test accounts, or payment test modes MAY be used for demos.
+- Mocked functionality MUST be identifiable in the code (by naming, location, or comments), and
+  delivery notes MUST state clearly what is mocked and what actually works.
+- Mock data or test modes MUST NOT be presented to users or developers as real functionality.
 
-理由：演示需要速度，但混淆模拟与真实会误导产品判断，并在上线时埋下隐患。
+Rationale: demos need speed, but blurring mock and real misleads product decisions and plants
+problems for launch.
 
-### V. 安全与数据正确性不打折
+### V. No Compromise on Security and Data Correctness
 
-- 始终遵守基础安全实践：服务端鉴权使用 `getClaims()` 而不信任 `getSession()`；
-  新建表 MUST 开启 RLS 并显式授权；输入在服务端校验。
-- 涉及真实账户、用户数据、权限或支付的改动，MUST 增加对应的安全与正确性验证
-  （如 RLS 策略验证、越权访问检查），MUST NOT 为了开发速度省略。
-- 发现可能造成重大返工、安全风险或数据丢失的设计问题时，MUST 主动指出，
-  并采用更可靠的最小方案。
+- Always follow basic security practices: server-side authorization uses `getClaims()` and does
+  not trust `getSession()`; new tables MUST enable RLS and grant access explicitly; input is
+  validated on the server.
+- Changes involving real accounts, user data, permissions, or payments MUST include matching
+  security and correctness verification (e.g., RLS policy checks, unauthorized-access checks),
+  and these MUST NOT be skipped for speed.
+- When a design issue could cause major rework, a security risk, or data loss, it MUST be raised
+  proactively and resolved with a more reliable minimal approach.
 
-理由：速度优先的边界在于不可逆的损失；安全事故和数据丢失无法靠后续迭代弥补。
+Rationale: the limit of speed-first is irreversible loss; security incidents and data loss
+cannot be fixed by later iterations.
 
-## MVP 实现边界
+## MVP Implementation Boundaries
 
-当前默认按 Demo / MVP 模式执行，而非完整 Production 模式：
+Work defaults to Demo / MVP mode, not full Production mode:
 
-- 不要求复杂的多环境管理、微服务、容器编排、负载均衡或大规模性能优化。
-- 不要求完整测试覆盖率，不建设复杂的集成测试体系。
-- MUST 保持基础的安全实践、语义化 HTML 和合理的错误处理（用户可见的失败要有可理解的提示）。
-- 不为了代码的理论可扩展性而牺牲开发速度。
-- 技术栈、目录约定和常用命令以 `AGENTS.md` 为准；新增依赖、目录或约定时 MUST 同步更新该文件。
+- Complex multi-environment management, microservices, container orchestration, load balancing,
+  and large-scale performance optimization are not required.
+- Full test coverage is not required, and no complex integration test suite is built.
+- Basic security practices, semantic HTML, and reasonable error handling (user-visible failures
+  show an understandable message) MUST be maintained.
+- Development speed is not sacrificed for theoretical extensibility of the code.
+- `AGENTS.md` is the source of truth for the tech stack, directory conventions, and common
+  commands; it MUST be updated whenever dependencies, directories, or conventions are added.
 
-## 开发流程与质量门禁
+## Development Workflow and Quality Gates
 
-工作方式：
+Way of working:
 
-- 优先直接实现并验证，不做冗长的技术规划。
-- 业务决策或影响效果的技术决策 MUST 先与用户对齐，并用非技术语言说明各方案的业务影响。
+- Prefer implementing and verifying directly over lengthy technical planning.
+- Business decisions, and technical decisions that affect the outcome, MUST be agreed with the
+  user first, explaining each option's business impact in non-technical language.
 
-每次完成开发任务后，MUST 至少执行：
+After every development task, at least the following MUST be done:
 
-1. 静态检查：`npm run lint`、`npm run typecheck`，以及适用时的 `npm run build`。
-2. 核心业务逻辑的必要单元测试。
-3. 使用可用的内置浏览器，对核心用户路径执行 Smoke Test。
-4. 确认关键页面能够正常加载、交互和展示数据。
-5. 修复影响主要功能的错误。
+1. Static checks: `npm run lint`, `npm run typecheck`, and `npm run build` where applicable.
+2. Necessary unit tests for core business logic.
+3. A smoke test of the core user path in the available built-in browser.
+4. Confirmation that key pages load, respond to interaction, and display data correctly.
+5. Fixes for any errors that affect main functionality.
 
-无法执行的检查 MUST 明确说明原因，MUST NOT 声称已经通过。
+Any check that cannot be run MUST be reported with the reason and MUST NOT be claimed as passed.
 
 ## Governance
 
-- 本宪章优先于其他开发惯例；`AGENTS.md` 提供运行时的具体开发指引，两者冲突时以本宪章为准，
-  并应修正 `AGENTS.md`。
-- 修订通过 `/speckit-constitution` 进行，须说明修改内容与理由，并更新版本号和修订日期。
-- 版本遵循语义化规则：MAJOR 为原则的删除或不兼容的重新定义；MINOR 为新增原则或章节、
-  实质性扩展指引；PATCH 为措辞澄清和非语义修正。
-- `/speckit-plan` 的 Constitution Check 与代码评审 MUST 核对是否符合本宪章；
-  违反原则的复杂度 MUST 在计划中写明理由，否则简化。
+- This constitution takes precedence over other development practices. `AGENTS.md` provides
+  concrete runtime development guidance; when the two conflict, this constitution wins and
+  `AGENTS.md` is corrected.
+- This English file is authoritative. The Chinese translation at
+  `.specify/memory/constitution.zh-CN.md` MUST be updated in the same change as any amendment.
+- Amendments are made through `/speckit-constitution`, must state what changed and why, and
+  update the version and amendment date.
+- Versioning follows semantic rules: MAJOR for removing a principle or redefining it
+  incompatibly; MINOR for adding a principle or section or materially expanding guidance;
+  PATCH for clarifications and non-semantic fixes.
+- The Constitution Check in `/speckit-plan` and code reviews MUST verify compliance with this
+  constitution; complexity that violates a principle MUST be justified in the plan, or else
+  simplified.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
+**Version**: 1.0.1 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
