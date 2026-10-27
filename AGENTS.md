@@ -30,6 +30,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Tailwind CSS v4 + shadcn/ui（`base-nova` 预设，Base UI）+ lucide-react 图标
 - Supabase（`@supabase/supabase-js` + `@supabase/ssr`，精确锁定版本）
 - Biome（格式化 + lint，替代 ESLint/Prettier）
+- Vercel 部署（Toby 的 Hobby 团队）：项目最初按静态站创建，Framework Preset 为 “Other”，因此用 `vercel.json` 的 `"framework": "nextjs"` 覆盖，不要删除
 - husky + lint-staged：提交前对暂存文件执行 `biome check --write`（格式化 + 安全修复），再全量 `tsc` 类型检查
 - npm
 
