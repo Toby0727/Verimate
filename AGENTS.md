@@ -11,6 +11,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Verimate
 
 > 本文件是后续开发的文档起点。**每次开发推进（新增依赖、目录、约定、决策）都必须同步更新本文件**，保持与代码一致。
+>
+> 开发原则、MVP 边界与质量门禁见 [项目宪章](.specify/memory/constitution.md)，与本文件冲突时以宪章为准。
 
 ## 项目速览
 

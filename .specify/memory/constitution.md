@@ -1,50 +1,94 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Verimate Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. 核心用户路径优先
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+- 每项任务 MUST 优先完成当前明确提出的功能，并优先打通端到端的核心用户路径。
+- 任务开始前 MUST 简要区分"本次必须实现"与"可延后"的部分，只实现前者。
+- MUST NOT 为尚未验证的需求提前开发功能、页面、模块或基础设施，
+  包括"未来可能商业化"所设想的支付、订阅、管理员后台等，除非当前需求明确涉及。
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+理由：MVP 的目标是尽快可运行、可演示、可验证产品价值；未验证的功能只会增加维护成本。
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. 简单、成熟的方案
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+- 默认采用最简单且合理的实现；存在多种方案时，选择当前开发成本低、未来迁移成本可控的一种。
+- MUST 优先使用现有框架和托管服务（Next.js、Supabase、Vercel、shadcn/ui 等）
+  提供的能力，而不是自行实现。
+- MUST NOT 引入过度抽象、过早优化、复杂架构模式或针对不可能发生情况的防御性代码。
+- 代码结构保持清晰、模块职责明确，允许逐步扩展，不追求一次性设计完美。
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+理由：成熟方案降低出错概率和学习成本；复杂度只在被真实需求证明时才值得付出。
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. 为商业化保留演进路径
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- 基础架构 MUST 能支持未来正式部署（当前即 Vercel + Supabase 的生产级组合）。
+- 用户身份、数据存储、权限控制、订阅状态 MUST 依托平台原生机制
+  （Supabase Auth、Postgres 表、RLS），以便后续扩展，而不是临时的本地状态或硬编码。
+- 核心业务规则 MUST NOT 硬编码在 UI 组件中；关键业务逻辑放在 `lib/` 或服务端函数中，
+  与页面展示适度分离，但不引入额外的分层架构。
+- 配置与密钥 MUST 通过环境变量管理，MUST NOT 提交到代码库；服务端密钥 MUST NOT
+  带 `NEXT_PUBLIC_` 前缀。
+- 数据库结构变更 MUST 通过迁移文件记录，保证可重复、可追溯。
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+理由：这些是事后补救代价最高的部分；现在用平台默认方式做对，几乎不增加 MVP 成本。
+
+### IV. 模拟与真实明确区分
+
+- 允许使用 Mock Data、测试账户或支付测试模式完成演示。
+- 模拟功能 MUST 在代码中可识别（命名、位置或注释），并在交付说明中明确标注哪些是模拟、
+  哪些是真实可用。
+- MUST NOT 让模拟数据或测试模式在用户和开发者面前冒充真实功能。
+
+理由：演示需要速度，但混淆模拟与真实会误导产品判断，并在上线时埋下隐患。
+
+### V. 安全与数据正确性不打折
+
+- 始终遵守基础安全实践：服务端鉴权使用 `getClaims()` 而不信任 `getSession()`；
+  新建表 MUST 开启 RLS 并显式授权；输入在服务端校验。
+- 涉及真实账户、用户数据、权限或支付的改动，MUST 增加对应的安全与正确性验证
+  （如 RLS 策略验证、越权访问检查），MUST NOT 为了开发速度省略。
+- 发现可能造成重大返工、安全风险或数据丢失的设计问题时，MUST 主动指出，
+  并采用更可靠的最小方案。
+
+理由：速度优先的边界在于不可逆的损失；安全事故和数据丢失无法靠后续迭代弥补。
+
+## MVP 实现边界
+
+当前默认按 Demo / MVP 模式执行，而非完整 Production 模式：
+
+- 不要求复杂的多环境管理、微服务、容器编排、负载均衡或大规模性能优化。
+- 不要求完整测试覆盖率，不建设复杂的集成测试体系。
+- MUST 保持基础的安全实践、语义化 HTML 和合理的错误处理（用户可见的失败要有可理解的提示）。
+- 不为了代码的理论可扩展性而牺牲开发速度。
+- 技术栈、目录约定和常用命令以 `AGENTS.md` 为准；新增依赖、目录或约定时 MUST 同步更新该文件。
+
+## 开发流程与质量门禁
+
+工作方式：
+
+- 优先直接实现并验证，不做冗长的技术规划。
+- 业务决策或影响效果的技术决策 MUST 先与用户对齐，并用非技术语言说明各方案的业务影响。
+
+每次完成开发任务后，MUST 至少执行：
+
+1. 静态检查：`npm run lint`、`npm run typecheck`，以及适用时的 `npm run build`。
+2. 核心业务逻辑的必要单元测试。
+3. 使用可用的内置浏览器，对核心用户路径执行 Smoke Test。
+4. 确认关键页面能够正常加载、交互和展示数据。
+5. 修复影响主要功能的错误。
+
+无法执行的检查 MUST 明确说明原因，MUST NOT 声称已经通过。
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- 本宪章优先于其他开发惯例；`AGENTS.md` 提供运行时的具体开发指引，两者冲突时以本宪章为准，
+  并应修正 `AGENTS.md`。
+- 修订通过 `/speckit-constitution` 进行，须说明修改内容与理由，并更新版本号和修订日期。
+- 版本遵循语义化规则：MAJOR 为原则的删除或不兼容的重新定义；MINOR 为新增原则或章节、
+  实质性扩展指引；PATCH 为措辞澄清和非语义修正。
+- `/speckit-plan` 的 Constitution Check 与代码评审 MUST 核对是否符合本宪章；
+  违反原则的复杂度 MUST 在计划中写明理由，否则简化。
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
