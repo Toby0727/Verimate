@@ -44,3 +44,6 @@ next-env.d.ts
 # Local test output and reference screenshots, never deploy
 .playwright-mcp/
 /*.jpg
+
+# Supabase CLI local cache
+/supabase/.temp/
