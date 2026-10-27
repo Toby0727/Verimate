@@ -10,7 +10,7 @@ export const FLOW_STATUS: FlowStatus[] = [
   {
     name: "Sign in",
     status: "sample",
-    note: "No Google account is connected; you pick a sample persona.",
+    note: "No Google account, phone or email is connected; you pick a sample persona.",
   },
   {
     name: "School email verification",

@@ -72,7 +72,7 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
 
 - 示例数据和示例操作只放在 `lib/demo/`，文件头注明"示例数据，替换为真实功能时删除"；组件通过 `useDemo()` 读数据（载入前返回 `null`，显示 `DemoSkeleton`），通过 `lib/demo/actions.ts` 改数据。
 - 业务规则只写在 `lib/rules/`，不写在组件里。
-- 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、Google 登录、验证码都不会真实发生。
+- 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、登录（Google / 手机号 / 邮箱）、验证码都不会真实发生。
 - 页面文件只输出静态外壳；动态路由不在顶层 `await params`，而是在 `<Suspense>` 里 `params.then(({ id }) => <X id={id} />)` 交给客户端组件。
 - `AccessGate` / `BanGate` 只是演示用的前端拦截，不构成安全边界；接入真实功能时必须用服务端鉴权和 RLS。
 - 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心绿色验证勾和开关（`verified-fill`）、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。
