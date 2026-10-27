@@ -1,6 +1,16 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  CigaretteOff,
+  GraduationCap,
+  Languages,
+  MapPin,
+  MessageCircle,
+  Moon,
+  PawPrint,
+  Sparkles,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
@@ -11,20 +21,19 @@ import { RequestComposer } from "@/components/messages/request-composer";
 import { SafetyMenu } from "@/components/report/safety-menu";
 import {
   CLEANLINESS,
-  formatDay,
   formatMonth,
   initials,
   labelOf,
   needSentence,
   PETS,
   PROMPTS,
+  QUESTIONS,
   SLEEP,
   SMOKING,
   stayLength,
 } from "@/components/shell/labels";
 import {
   FoundingBadge,
-  VerificationBadge,
   VerifiedMark,
 } from "@/components/shell/verification-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -59,7 +68,7 @@ function ReplyButton({
       aria-label={label}
       onClick={onClick}
       className={cn(
-        "flex size-10 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-black/5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        "flex size-11 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-black/5 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         className,
       )}
     >
@@ -68,22 +77,30 @@ function ReplyButton({
   );
 }
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+// Photo shapes vary so the two columns stagger.
+const PHOTO_SHAPES = [
+  "aspect-[4/5]",
+  "aspect-square",
+  "aspect-[3/4]",
+  "aspect-[5/4]",
+];
+
+function GaugeRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="min-w-0 px-3 py-2.5">
-      <p className="text-[13px] text-muted-foreground">{label}</p>
-      <p className="truncate font-semibold text-[15px] tabular-nums">
-        {children}
-      </p>
+    <div className="flex items-center gap-3 px-3.5 py-2.5 text-[15px]">
+      <span className="flex-1">{label}</span>
+      {children}
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex justify-between gap-4 px-4 py-3 text-[15px]">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right">{value}</span>
+    <div className="min-w-0 px-3.5 py-3">
+      <p className="text-[14px] text-muted-foreground">{label}</p>
+      <p className="truncate font-bold text-[18px] tabular-nums tracking-tight">
+        {children}
+      </p>
     </div>
   );
 }
@@ -149,71 +166,59 @@ export function ProfileDetail({ id }: { id: string }) {
   const prompts = blurred ? [] : profile.prompts.filter((p) => p.answer.trim());
   const photos = blurred ? [] : morePhotos;
 
-  // Prompts and the remaining photos alternate, Hinge style.
-  const sections: ReactNode[] = [];
-  for (let i = 0; i < Math.max(prompts.length, photos.length); i++) {
-    const prompt = prompts[i];
-    const photo = photos[i];
-    if (prompt) {
-      const question = labelOf(PROMPTS, prompt.promptId);
-      sections.push(
-        <div
-          key={`prompt-${prompt.promptId}`}
-          className="relative rounded-2xl bg-card px-4 pt-4 pb-5"
-        >
-          <p className="pr-12 font-semibold text-[13px]">{question}</p>
-          <p className="mt-1.5 pr-10 font-serif text-[22px] leading-tight">
-            {prompt.answer}
-          </p>
-          {canRequest ? (
-            <ReplyButton
-              label={`Say hi about "${question}"`}
-              className="absolute right-3 bottom-3"
-              onClick={() =>
-                setComposer({ quote: { kind: "prompt", ...prompt } })
-              }
-            />
-          ) : null}
-        </div>,
-      );
-    }
-    if (photo) {
-      sections.push(
-        <div
-          key={`photo-${photo}`}
-          className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted"
-        >
-          <Image
-            src={photo}
-            alt=""
-            fill
-            sizes="(max-width: 520px) 100vw, 520px"
-            className="object-cover"
-          />
-          {canRequest ? (
-            <ReplyButton
-              label="Say hi about this photo"
-              className="absolute right-3 bottom-3"
-              onClick={() => setComposer({ quote: { kind: "photo", photo } })}
-            />
-          ) : null}
-        </div>,
-      );
-    }
-  }
-
-  const details = [
-    profile.major ? { label: "Major", value: profile.major } : null,
-    profile.languages.length > 0
-      ? { label: "Languages", value: profile.languages.join(", ") }
+  // How they live: budget and move-in first, then habits on a 3-dot scale.
+  const firstName = name.split(" ")[0];
+  const q = profile.questionnaire;
+  const dots = [
+    profile.cleanliness
+      ? {
+          label: "Tidiness",
+          // Listed tidiest first, so more dots means tidier.
+          level:
+            3 - CLEANLINESS.findIndex((c) => c.value === profile.cleanliness),
+          text: labelOf(CLEANLINESS, profile.cleanliness),
+        }
       : null,
-    building ? { label: "Building or area", value: building.name } : null,
+    ...(q
+      ? QUESTIONS.filter((question) =>
+          ["guests", "noise", "cooking"].includes(question.key),
+        ).map((question) => ({
+          label: question.key[0].toUpperCase() + question.key.slice(1),
+          level:
+            question.options.findIndex((o) => o.value === q[question.key]) + 1,
+          text: labelOf(question.options, q[question.key]),
+        }))
+      : []),
   ].filter((d) => d !== null);
 
+  const details = [
+    profile.major
+      ? { icon: GraduationCap, label: "Major", value: profile.major }
+      : null,
+    profile.languages.length > 0
+      ? {
+          icon: Languages,
+          label: "Languages",
+          value: profile.languages.join(", "),
+        }
+      : null,
+    building
+      ? { icon: MapPin, label: "Building or area", value: building.name }
+      : null,
+  ].filter((d) => d !== null);
+
+  const habits = [
+    { icon: Moon, label: labelOf(SLEEP, profile.sleep) },
+    { icon: Sparkles, label: labelOf(CLEANLINESS, profile.cleanliness) },
+    { icon: CigaretteOff, label: labelOf(SMOKING, profile.smoking) },
+    { icon: PawPrint, label: labelOf(PETS, profile.pets) },
+  ];
+  const verifiedAt = verificationOf(world, id)?.verifiedAt ?? null;
+
   return (
-    <div className="flex flex-col gap-3 p-3">
-      {/* First screen: photo, then what they need, then habits. */}
-      <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-muted">
+    <div className="flex flex-col pb-3">
+      {/* First screen: photo with name, what they need, key numbers, habits. */}
+      <div className="relative aspect-[10/11] overflow-hidden bg-muted">
         {heroPhoto ? (
           <Image
             src={heroPhoto}
@@ -224,43 +229,38 @@ export function ProfileDetail({ id }: { id: string }) {
             className={cn("object-cover", blurred && "scale-110 blur-lg")}
           />
         ) : null}
-        <SampleBadge className="absolute top-3 left-3" />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-4 pt-16 pb-4 text-white">
-          <div className="flex items-center gap-1.5">
-            <h2 className="font-bold text-[26px] leading-tight tracking-tight">
+        <div className="absolute inset-x-3 top-3 flex items-center justify-between">
+          <Link
+            href="/roommates"
+            aria-label="Back"
+            className="flex size-9 items-center justify-center rounded-full bg-white/90 text-foreground backdrop-blur outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <ChevronLeft className="size-5" />
+          </Link>
+          <SampleBadge />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-4 pt-16 pb-5 text-white">
+          <div className="flex items-center gap-2">
+            <h1 className="font-bold text-[27px] leading-tight tracking-tight">
               {name}
-            </h2>
-            <VerifiedMark
-              badge={badge}
-              className="size-6 rounded-full bg-white p-0.5"
-            />
+            </h1>
+            <VerifiedMark badge={badge} className="size-[18px]" />
           </div>
           <p className="text-[15px] text-white/90">
             {profile.standing} at {profile.school}
             {profile.major && !blurred ? `, ${profile.major}` : ""}
           </p>
         </div>
-        {canRequest && heroPhoto ? (
-          <ReplyButton
-            label="Say hi about this photo"
-            className="absolute right-3 bottom-4"
-            onClick={() =>
-              setComposer({ quote: { kind: "photo", photo: heroPhoto } })
-            }
-          />
-        ) : null}
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-card">
-        <p className="border-b px-4 py-3 font-semibold text-[17px] leading-snug">
+      <div className="relative mx-4 -mt-2 overflow-hidden rounded-xl bg-card">
+        <p className="border-b px-3.5 pt-3.5 pb-3 font-bold text-[19px] leading-tight tracking-tight">
           {needSentence(profile, building?.name ?? null)}
         </p>
         <div className="grid grid-cols-3 divide-x">
           <Fact label="Rent">
             ${profile.budgetMin}
-            <span className="font-normal text-muted-foreground">
-              –{profile.budgetMax}
-            </span>
+            <span className="text-faint">–{profile.budgetMax}</span>
           </Fact>
           <Fact label="Move in">{formatMonth(profile.moveInFrom)}</Fact>
           <Fact label="Stay">
@@ -269,24 +269,20 @@ export function ProfileDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {[
-          labelOf(SLEEP, profile.sleep),
-          labelOf(CLEANLINESS, profile.cleanliness),
-          labelOf(SMOKING, profile.smoking),
-          labelOf(PETS, profile.pets),
-        ].map((habit) => (
+      <div className="mx-4 mt-2 flex flex-wrap gap-1.5">
+        {habits.map(({ icon: Icon, label }) => (
           <span
-            key={habit}
-            className="rounded-full bg-card px-3 py-1.5 text-[13px]"
+            key={label}
+            className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[14px]"
           >
-            {habit}
+            <Icon className="size-3.5" />
+            {label}
           </span>
         ))}
       </div>
 
       {blurred ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-4 text-center text-sm">
+        <div className="mx-4 mt-3 flex flex-col items-center gap-3 rounded-xl bg-card p-4 text-center text-sm">
           Sign up and verify your school email to see photos, full names and
           contact people.
           <Link href="/sign-in" className={buttonVariants()}>
@@ -295,37 +291,169 @@ export function ProfileDetail({ id }: { id: string }) {
         </div>
       ) : null}
 
-      <MatchPanel demo={demo} targetId={id} />
+      <div className="mt-3 flex flex-col gap-2.5 px-4">
+        <MatchPanel demo={demo} targetId={id} />
 
-      {profile.bio && !blurred ? (
-        <div className="rounded-2xl bg-card px-4 pt-4 pb-5">
-          <p className="font-semibold text-[13px]">About me</p>
-          <p className="mt-1.5 text-[15px] leading-relaxed">{profile.bio}</p>
-        </div>
-      ) : null}
+        <section className="flex flex-col gap-1.5">
+          <h2 className="px-1 text-[14px] text-muted-foreground">
+            How {firstName} lives
+          </h2>
+          <div className="divide-y rounded-xl bg-card">
+            <GaugeRow label="Budget">
+              <span className="font-semibold tabular-nums">
+                ${profile.budgetMin}
+                <span className="text-faint">–{profile.budgetMax}</span>
+              </span>
+            </GaugeRow>
+            <GaugeRow label="Move in">
+              <span className="font-semibold">
+                {formatMonth(profile.moveInFrom)} ·{" "}
+                {stayLength(profile.moveInFrom, profile.moveInTo)}
+              </span>
+            </GaugeRow>
+            {profile.sleep ? (
+              <GaugeRow label="Sleep">
+                <span className="font-semibold">
+                  {labelOf(SLEEP, profile.sleep)}
+                </span>
+              </GaugeRow>
+            ) : null}
+            {dots.map((d) => (
+              <GaugeRow key={d.label} label={d.label}>
+                <span
+                  role="img"
+                  aria-label={`${d.level} of 3`}
+                  className="flex gap-1"
+                >
+                  {[1, 2, 3].map((n) => (
+                    <span
+                      key={n}
+                      className={cn(
+                        "size-2 rounded-full",
+                        n <= d.level ? "bg-foreground" : "bg-input",
+                      )}
+                    />
+                  ))}
+                </span>
+                <span className="w-[84px] text-right text-[14px] text-muted-foreground">
+                  {d.text}
+                </span>
+              </GaugeRow>
+            ))}
+          </div>
+        </section>
 
-      {sections}
+        {(profile.bio && !blurred) || prompts.length > 0 ? (
+          <section className="flex flex-col gap-1.5">
+            <h2 className="px-1 text-[14px] text-muted-foreground">
+              In {firstName}'s words
+            </h2>
+            <div className="divide-y rounded-xl bg-card">
+              {profile.bio && !blurred ? (
+                <div className="px-3.5 py-3">
+                  <p className="text-[13px] text-muted-foreground">About me</p>
+                  <p className="mt-0.5 text-[15px] leading-relaxed">
+                    {profile.bio}
+                  </p>
+                </div>
+              ) : null}
+              {prompts.map((prompt) => {
+                const question = labelOf(PROMPTS, prompt.promptId);
+                return (
+                  <div key={prompt.promptId} className="relative px-3.5 py-3">
+                    <p className="text-[13px] text-muted-foreground">
+                      {question}
+                    </p>
+                    <p className="mt-0.5 pr-11 font-medium font-serif text-[18px] leading-tight">
+                      {prompt.answer}
+                    </p>
+                    {canRequest ? (
+                      <ReplyButton
+                        label={`Say hi about "${question}"`}
+                        className="absolute right-3 bottom-3 size-8 [&_svg]:size-4"
+                        onClick={() =>
+                          setComposer({ quote: { kind: "prompt", ...prompt } })
+                        }
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
-      {details.length > 0 && !blurred ? (
-        <div className="divide-y rounded-2xl bg-card">
-          {details.map((d) => (
-            <Row key={d.label} label={d.label} value={d.value} />
-          ))}
-        </div>
-      ) : null}
+        {photos.length > 0 ? (
+          <section className="flex flex-col gap-1.5">
+            <h2 className="px-1 text-[14px] text-muted-foreground">
+              Photos · {photos.length}
+            </h2>
+            <div className="flex items-start gap-2">
+              {/* Two staggered columns, like the home feed. */}
+              {[0, 1].map((column) => (
+                <div
+                  key={column}
+                  className="flex min-w-0 flex-1 flex-col gap-2"
+                >
+                  {photos
+                    .filter((_, i) => i % 2 === column)
+                    .map((photo, i) => (
+                      <div
+                        key={photo}
+                        className={cn(
+                          "relative overflow-hidden rounded-xl bg-muted",
+                          PHOTO_SHAPES[(i * 2 + column) % PHOTO_SHAPES.length],
+                        )}
+                      >
+                        <Image
+                          src={photo}
+                          alt=""
+                          fill
+                          sizes="(max-width: 520px) 50vw, 260px"
+                          className="object-cover"
+                        />
+                        {canRequest ? (
+                          <ReplyButton
+                            label="Say hi about this photo"
+                            className="absolute right-2 bottom-2 size-8 [&_svg]:size-4"
+                            onClick={() =>
+                              setComposer({ quote: { kind: "photo", photo } })
+                            }
+                          />
+                        ) : null}
+                      </div>
+                    ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-      <div className="flex flex-col items-center gap-2 py-2 text-center">
-        <div className="flex flex-wrap justify-center gap-1">
-          <VerificationBadge badge={badge} />
-          {world.memberships.some(
-            (m) => m.accountId === id && m.kind === "founding",
-          ) ? (
-            <FoundingBadge />
-          ) : null}
-        </div>
+        {details.length > 0 && !blurred ? (
+          <div className="divide-y rounded-xl bg-card">
+            {details.map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2.5 px-3.5 py-3 text-[15px]"
+              >
+                <Icon aria-label={label} className="size-4 shrink-0" />
+                {value}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="flex flex-col items-center gap-2 px-4 pt-4 pb-2 text-center">
         <p className="text-[13px] text-muted-foreground">
-          On Verimate since {formatDay(account.createdAt)}
+          On Verimate since {formatMonth(account.createdAt)}.
+          {verifiedAt ? ` Verified ${formatMonth(verifiedAt)}.` : ""}
         </p>
+        {world.memberships.some(
+          (m) => m.accountId === id && m.kind === "founding",
+        ) ? (
+          <FoundingBadge />
+        ) : null}
         {meId && !isMe ? (
           <SafetyMenu
             personId={id}
@@ -339,7 +467,7 @@ export function ProfileDetail({ id }: { id: string }) {
 
       {/* Main action stays above the tab bar while scrolling. */}
       {blurred ? null : (
-        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-10">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-10 mt-2 px-4">
           {isMe ? (
             <Link
               href="/me/profile"

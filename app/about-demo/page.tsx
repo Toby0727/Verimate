@@ -10,7 +10,7 @@ export default function AboutDemoPage() {
         scores and notifications are sample data. Your actions are saved only in
         this browser and you can reset them any time from Demo controls.
       </p>
-      <ul className="flex flex-col divide-y rounded-xl border">
+      <ul className="flex flex-col divide-y rounded-xl bg-card">
         {FLOW_STATUS.map((flow) => (
           <li key={flow.name} className="flex items-start gap-3 p-3">
             <div className="flex-1">

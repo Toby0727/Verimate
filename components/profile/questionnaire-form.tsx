@@ -51,7 +51,7 @@ function QuestionnaireContent() {
           />
         </div>
       ))}
-      <div className="flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3 text-sm">
         <span>
           <span className="font-medium">
             Allow Verimate to use this for AI matching

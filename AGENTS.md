@@ -75,7 +75,8 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
 - 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、Google 登录、验证码都不会真实发生。
 - 页面文件只输出静态外壳；动态路由不在顶层 `await params`，而是在 `<Suspense>` 里 `params.then(({ id }) => <X id={id} />)` 交给客户端组件。
 - `AccessGate` / `BanGate` 只是演示用的前端拦截，不构成安全边界；接入真实功能时必须用服务端鉴权和 RLS。
-- 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定，当前是中性占位值。
+- 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心绿色验证勾和开关（`verified-fill`）、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。
+- 尺寸按真实 390pt 手机：正文约 15px，标签页大标题 26px，页边距 16px。
 
 ## 注意事项
 

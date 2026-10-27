@@ -1,4 +1,10 @@
-import { BadgeCheck, Clock, GraduationCap, TriangleAlert } from "lucide-react";
+import {
+  BadgeCheck,
+  Check,
+  Clock,
+  GraduationCap,
+  TriangleAlert,
+} from "lucide-react";
 import type { Badge } from "@/lib/rules/verification";
 import { cn } from "@/lib/utils";
 
@@ -66,14 +72,22 @@ export function VerifiedMark({
   if (badge !== "student" && badge !== "admitted" && badge !== "graduate") {
     return null;
   }
-  const Icon = badge === "graduate" ? GraduationCap : BadgeCheck;
   return (
-    <Icon
+    <span
       role="img"
       aria-label={LABELS[badge]}
-      className={cn("size-4 shrink-0 text-verified", className)}
-    />
+      className={cn(
+        "inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-verified-fill text-white",
+        className,
+      )}
+    >
+      <Check className="size-[68%]" strokeWidth={3.5} />
+    </span>
   );
+}
+
+export function verificationLabel(badge: Badge) {
+  return LABELS[badge];
 }
 
 export function FoundingBadge({ className }: { className?: string }) {

@@ -45,7 +45,7 @@ export function MemberPerks({ demo }: { demo: Demo }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <section className="flex flex-col gap-2 rounded-xl border p-3">
+      <section className="flex flex-col gap-2 rounded-xl bg-card p-3">
         <div className="flex items-center gap-2">
           <Eye className="size-4" />
           <h3 className="font-medium text-sm">Who viewed you</h3>
@@ -82,7 +82,7 @@ export function MemberPerks({ demo }: { demo: Demo }) {
         })}
       </section>
 
-      <section className="flex flex-col gap-2 rounded-xl border p-3">
+      <section className="flex flex-col gap-2 rounded-xl bg-card p-3">
         <div className="flex items-center gap-2">
           <Bell className="size-4" />
           <h3 className="font-medium text-sm">New match alerts</h3>
@@ -107,7 +107,7 @@ export function MemberPerks({ demo }: { demo: Demo }) {
         ))}
       </section>
 
-      <section className="flex items-center gap-3 rounded-xl border p-3">
+      <section className="flex items-center gap-3 rounded-xl bg-card p-3">
         <Rocket className="size-4" />
         <p className="flex-1 text-sm">
           {boosted

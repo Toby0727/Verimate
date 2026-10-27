@@ -90,7 +90,7 @@ function ForYouContent() {
         return (
           <div
             key={match.targetId}
-            className="flex gap-3 rounded-xl border p-3"
+            className="flex gap-3 rounded-xl bg-card p-3"
           >
             <div className="relative size-14 shrink-0 overflow-hidden rounded-full bg-muted">
               {p.photo ? (

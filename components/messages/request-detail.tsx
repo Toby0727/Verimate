@@ -59,7 +59,7 @@ function RequestDetailContent({ id }: { id: string }) {
     <div className="flex flex-col gap-4 p-4">
       <Link
         href={`/roommates/${request.fromId}`}
-        className="flex items-center gap-3 rounded-xl border p-3"
+        className="flex items-center gap-3 rounded-xl bg-card p-3"
       >
         <div className="relative size-14 shrink-0 overflow-hidden rounded-full bg-muted">
           {sender?.photo ? (
@@ -109,7 +109,7 @@ function RequestDetailContent({ id }: { id: string }) {
       </div>
 
       {confirm ? (
-        <div className="flex flex-col gap-3 rounded-xl border p-3 text-sm">
+        <div className="flex flex-col gap-3 rounded-xl bg-card p-3 text-sm">
           {confirm === "delete"
             ? `Delete this request? ${name} won't be able to send you another one for ${REQUEST_COOLDOWN_AFTER_DELETE_DAYS} days.`
             : `Block ${name}? You won't see each other anywhere on Verimate.`}

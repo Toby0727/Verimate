@@ -38,7 +38,10 @@ function MySubletsContent() {
       {mine.map((s) => {
         const status = subletStatusAt(s, now);
         return (
-          <div key={s.id} className="flex flex-col gap-2 rounded-xl border p-3">
+          <div
+            key={s.id}
+            className="flex flex-col gap-2 rounded-xl bg-card p-3"
+          >
             <div className="flex items-center justify-between gap-2">
               <Link href={`/sublets/${s.id}`} className="truncate font-medium">
                 {s.title}

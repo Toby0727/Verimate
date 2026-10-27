@@ -113,7 +113,7 @@ export function SubletDetail({ id }: { id: string }) {
           )}
         </div>
 
-        <div className="divide-y rounded-xl border px-3 text-sm">
+        <div className="divide-y rounded-xl bg-card px-3 text-sm">
           <div className="flex justify-between py-2">
             <span className="text-muted-foreground">Dates</span>
             {formatRange(sublet.startDate, sublet.endDate)}
@@ -143,7 +143,7 @@ export function SubletDetail({ id }: { id: string }) {
         {author ? (
           <Link
             href={`/roommates/${sublet.authorId}`}
-            className="flex items-center gap-3 rounded-xl border p-3"
+            className="flex items-center gap-3 rounded-xl bg-card p-3"
           >
             <div className="relative size-10 overflow-hidden rounded-full bg-muted">
               {author.photo ? (

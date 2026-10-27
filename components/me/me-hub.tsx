@@ -1,12 +1,26 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import {
+  ChevronRight,
+  Eye,
+  House,
+  IdCard,
+  ListChecks,
+  type LucideIcon,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { DemoSkeleton } from "@/components/demo/demo-skeleton";
 import { MemberPerks } from "@/components/membership/member-perks";
 import { accessNotice } from "@/components/shell/access-gate";
-import { VerificationBadge } from "@/components/shell/verification-badge";
+import { formatMonth } from "@/components/shell/labels";
+import {
+  VerifiedMark,
+  verificationLabel,
+} from "@/components/shell/verification-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import * as actions from "@/lib/demo/actions";
@@ -14,13 +28,47 @@ import { useDemo } from "@/lib/demo/use-demo";
 import { missingRequiredFields, shouldAutoPause } from "@/lib/rules/profile";
 import { badgeFor } from "@/lib/rules/verification";
 
-const LINKS = [
-  { href: "/me/profile", label: "Edit profile" },
-  { href: "/me/questionnaire", label: "Detailed questionnaire" },
-  { href: "/me/sublets", label: "My sublets" },
-  { href: "/me/membership", label: "Membership" },
-  { href: "/me/settings", label: "Settings & privacy" },
-];
+function Row({
+  href,
+  icon: Icon,
+  label,
+  sub,
+  value,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  sub?: string;
+  value?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-3.5 py-3 text-[15px] hover:bg-muted/50"
+    >
+      <Icon className="size-[18px] shrink-0" />
+      <span className="min-w-0 flex-1">
+        {label}
+        {sub ? (
+          <span className="block text-[13px] text-muted-foreground">{sub}</span>
+        ) : null}
+      </span>
+      {value ? <span className="text-muted-foreground">{value}</span> : null}
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+    </Link>
+  );
+}
+
+function Group({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="mt-2 flex flex-col gap-1.5">
+      <h2 className="px-1 text-[14px] text-muted-foreground">{title}</h2>
+      <div className="flex flex-col divide-y overflow-hidden rounded-xl bg-card">
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export function MeHub() {
   const demo = useDemo();
@@ -31,6 +79,8 @@ export function MeHub() {
   if (!me) return null;
 
   const badge = badgeFor(verification, now);
+  const verified =
+    badge === "student" || badge === "admitted" || badge === "graduate";
   const autoPaused = shouldAutoPause(me, now);
   const looking = profile?.searchStatus === "active" && !autoPaused;
   const missing = profile ? missingRequiredFields(profile) : ["photo"];
@@ -40,30 +90,36 @@ export function MeHub() {
       ? membership?.kind === "founding"
         ? "Founding member"
         : membership?.kind === "internal"
-          ? "Internal · all features"
+          ? "Internal"
           : "Member"
       : "Free";
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="flex items-center gap-3">
-        <div className="relative size-16 overflow-hidden rounded-full bg-muted">
+    <div className="flex flex-col gap-2 px-4 pt-2 pb-4">
+      <div className="flex items-center gap-3 rounded-xl bg-card p-3.5">
+        <div className="min-w-0 flex-1">
+          <p className="text-[14px] text-muted-foreground">Verification</p>
+          <p className="flex items-center gap-1.5 font-bold text-[22px] tracking-tight">
+            {verified ? "Verified" : verificationLabel(badge)}
+            <VerifiedMark badge={badge} className="size-[18px]" />
+          </p>
+          <p className="truncate text-[14px] text-muted-foreground">
+            {me.displayName}
+            {verification?.expiresAt && verified
+              ? ` · valid until ${formatMonth(verification.expiresAt)}`
+              : ""}
+          </p>
+        </div>
+        <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-muted">
           {profile?.photo ? (
             <Image
               src={profile.photo}
               alt=""
               fill
-              sizes="64px"
+              sizes="48px"
               className="object-cover"
             />
           ) : null}
-        </div>
-        <div className="flex flex-col gap-1">
-          <p className="font-semibold text-lg">{me.displayName}</p>
-          <VerificationBadge badge={badge} />
-          <p className="text-muted-foreground text-xs">
-            Plan: {planLabel} · only you see this
-          </p>
         </div>
       </div>
 
@@ -81,44 +137,59 @@ export function MeHub() {
         </Link>
       ) : null}
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
-        <span>
-          <span className="font-medium">
-            {looking ? "Looking for roommates" : "Paused"}
-          </span>
-          <span className="block text-muted-foreground text-xs">
-            {autoPaused
-              ? "Paused after 30 days of inactivity. Turn back on to show up again."
-              : looking
-                ? "You appear in lists and For You."
-                : "You're hidden from lists. Existing chats stay."}
-          </span>
-        </span>
-        <Switch
-          aria-label="Looking for roommates"
-          checked={looking}
-          onCheckedChange={(checked) =>
-            actions.setSearchStatus(checked ? "active" : "paused")
+      <Group title="Your profile">
+        <Row
+          href="/me/profile"
+          icon={IdCard}
+          label="Edit profile"
+          value={
+            missing.length > 0 ? `${missing.length} to finish` : "Complete"
           }
         />
+        <Row
+          href="/me/questionnaire"
+          icon={ListChecks}
+          label="Detailed questionnaire"
+        />
+        <div className="flex items-center gap-3 px-3.5 py-3 text-[15px]">
+          <Eye className="size-[18px] shrink-0" />
+          <span className="min-w-0 flex-1">
+            {looking ? "Looking for roommates" : "Paused"}
+            <span className="block text-[13px] text-muted-foreground">
+              {autoPaused
+                ? "Paused after 30 days of inactivity. Turn back on to show up again."
+                : looking
+                  ? "You appear in lists and For You."
+                  : "You're hidden from lists. Existing chats stay."}
+            </span>
+          </span>
+          <Switch
+            aria-label="Looking for roommates"
+            checked={looking}
+            onCheckedChange={(checked) =>
+              actions.setSearchStatus(checked ? "active" : "paused")
+            }
+          />
+        </div>
+      </Group>
+
+      <Group title="Account">
+        <Row href="/me/sublets" icon={House} label="My sublets" />
+        <Row
+          href="/me/membership"
+          icon={Sparkles}
+          label="Membership"
+          sub="Only you see your plan"
+          value={planLabel}
+        />
+        <Row href="/me/settings" icon={Settings} label="Settings & privacy" />
+      </Group>
+
+      <div className="mt-2">
+        <MemberPerks demo={demo} />
       </div>
 
-      <nav className="flex flex-col divide-y rounded-xl border">
-        {LINKS.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className="flex items-center justify-between p-3 text-sm hover:bg-muted"
-          >
-            {l.label}
-            <ChevronRight className="size-4 text-muted-foreground" />
-          </Link>
-        ))}
-      </nav>
-
-      <MemberPerks demo={demo} />
-
-      <div className="flex gap-4 text-muted-foreground text-xs">
+      <div className="mt-2 flex gap-4 px-1 text-muted-foreground text-xs">
         <Link href="/terms">Terms</Link>
         <Link href="/privacy">Privacy</Link>
         <Link href="/about-demo">About this demo</Link>

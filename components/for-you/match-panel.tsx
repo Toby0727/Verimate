@@ -4,6 +4,7 @@ import { Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { SampleBadge } from "@/components/demo/sample-badge";
 import type { Demo } from "@/lib/demo/use-demo";
+import { cn } from "@/lib/utils";
 
 // Match score area on a profile. Free users see it blurred.
 export function MatchPanel({
@@ -24,7 +25,7 @@ export function MatchPanel({
 
   if (!match || !consent) {
     return (
-      <div className="rounded-2xl border border-dashed border-foreground/15 p-3 text-muted-foreground text-sm">
+      <div className="rounded-xl bg-card p-3.5 text-[14px] text-muted-foreground">
         <Sparkles className="mr-1 inline size-4" />
         AI match needs both people to allow matching in their questionnaire.{" "}
         <Link
@@ -39,30 +40,38 @@ export function MatchPanel({
 
   const unlocked = entitlements.has("aiFull");
   return (
-    <div className="match-glow relative overflow-hidden rounded-2xl p-4 text-white">
-      <div className="mb-1 flex items-center gap-2">
-        <Sparkles className="size-4" />
-        <span className="font-semibold text-sm">Your match</span>
-        <SampleBadge />
+    <div className="match-glow relative overflow-hidden rounded-xl p-3.5 text-white">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="flex items-center gap-1.5 font-semibold text-[15px]">
+          Your match
+          <SampleBadge />
+        </span>
+        <span
+          className={cn(
+            "font-bold text-[22px] tabular-nums",
+            !unlocked && "select-none blur-sm",
+          )}
+          aria-hidden={!unlocked}
+        >
+          {match.score}%
+        </span>
       </div>
-      <div
-        className={unlocked ? "" : "select-none blur-sm"}
+      <p
+        className={cn(
+          "mt-0.5 text-[15px] leading-snug",
+          !unlocked && "select-none blur-sm",
+        )}
         aria-hidden={!unlocked}
       >
-        <p className="font-bold text-3xl tabular-nums">{match.score}%</p>
-        <ul className="mt-1 list-disc pl-5 text-[15px] leading-snug">
-          {match.reasons.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-      </div>
+        {match.reasons.join(" ")}
+      </p>
       {unlocked ? null : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/10">
-          <Lock className="size-5" />
+        <div className="absolute inset-0 flex items-center justify-center bg-white/10">
           <Link
             href="/me/membership"
-            className="rounded-full bg-white px-4 py-2 font-semibold text-foreground text-sm"
+            className="flex items-center gap-1.5 rounded-full bg-white px-4 py-2 font-semibold text-foreground text-sm"
           >
+            <Lock className="size-4" />
             Members only · See your match
           </Link>
         </div>

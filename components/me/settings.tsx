@@ -21,7 +21,7 @@ function SettingsContent() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <div className="flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3 text-sm">
         <span>
           <span className="font-medium">Email notifications</span>
           <span className="block text-muted-foreground text-xs">
@@ -35,7 +35,7 @@ function SettingsContent() {
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-xl border p-3 text-sm">
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-card p-3 text-sm">
         <span>
           <span className="font-medium">Show me in my building's list</span>
           <span className="block text-muted-foreground text-xs">

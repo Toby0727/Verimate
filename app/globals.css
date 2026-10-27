@@ -39,6 +39,8 @@
   --color-primary-tint: var(--primary-tint);
   --color-verified: var(--verified);
   --color-verified-tint: var(--verified-tint);
+  --color-verified-fill: var(--verified-fill);
+  --color-faint: var(--faint);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -65,6 +67,8 @@
   --primary-tint: #e6e6ea;
   --verified: #178a4c;
   --verified-tint: #e3f5ea;
+  --verified-fill: #1fa463;
+  --faint: #c4c4c8;
   --secondary: #e6e6ea;
   --secondary-foreground: #111111;
   --muted: #e6e6ea;

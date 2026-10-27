@@ -59,7 +59,7 @@ function MembershipContent() {
           return (
             <div
               key={perk}
-              className="flex items-start gap-3 rounded-xl border p-3"
+              className="flex items-start gap-3 rounded-xl bg-card p-3"
             >
               {on ? (
                 <Check className="mt-0.5 size-4 text-verified" />
@@ -142,8 +142,8 @@ function MembershipContent() {
               showSampleNotice("no payment is taken in this demo");
             }}
             className={cn(
-              "flex items-center justify-between rounded-xl border p-4 text-left hover:bg-muted",
-              plan.featured && "border-primary",
+              "flex items-center justify-between rounded-xl bg-card p-4 text-left hover:bg-muted",
+              plan.featured && "ring-2 ring-primary",
             )}
           >
             <span>

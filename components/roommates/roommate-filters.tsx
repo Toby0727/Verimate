@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import type { Building } from "@/lib/rules/types";
+import { cn } from "@/lib/utils";
 import {
   activeFilterCount,
   EMPTY_FILTERS,
@@ -71,12 +72,55 @@ export function RoommateFilters({
   const set = (patch: Partial<Filters>) => onChange({ ...value, ...patch });
   const count = activeFilterCount(value);
 
+  // Shortcuts for the most common filters; everything else is in the sheet.
+  const quick = [
+    {
+      label: "Fall",
+      on: value.term === "fall",
+      flip: () => set({ term: toggle(value.term, "fall") }),
+    },
+    {
+      label: "Under $900",
+      on: value.maxBudget === 900,
+      flip: () => set({ maxBudget: value.maxBudget === 900 ? null : 900 }),
+    },
+    {
+      label: "Early bird",
+      on: value.sleep === "early",
+      flip: () => set({ sleep: toggle(value.sleep, "early") }),
+    },
+  ];
+
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        <SlidersHorizontal />
-        Filters{count > 0 ? ` · ${count}` : ""}
-      </Button>
+      <div className="flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none]">
+        {quick.map((q) => (
+          <button
+            key={q.label}
+            type="button"
+            aria-pressed={q.on}
+            onClick={q.flip}
+            className={cn(
+              "h-8 shrink-0 rounded-full px-3.5 font-medium text-[14px]",
+              q.on ? "bg-primary text-primary-foreground" : "bg-card",
+            )}
+          >
+            {q.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-label="All filters"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "flex h-8 shrink-0 items-center gap-1 rounded-full px-3 font-medium text-[14px]",
+            count > 0 ? "bg-primary text-primary-foreground" : "bg-card",
+          )}
+        >
+          <SlidersHorizontal className="size-4" />
+          {count > 0 ? count : null}
+        </button>
+      </div>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"

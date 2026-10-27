@@ -36,7 +36,7 @@ export function SubletCard({
   return (
     <Link
       href={`/sublets/${sublet.id}`}
-      className="flex flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:bg-muted/50"
+      className="flex flex-col overflow-hidden rounded-xl bg-card transition-colors hover:bg-muted/50"
     >
       <div className="relative aspect-[16/9] bg-muted">
         {sublet.photos[0] ? (

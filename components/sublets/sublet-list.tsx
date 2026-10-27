@@ -63,7 +63,7 @@ export function SubletList() {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      <div className="flex flex-col gap-2 rounded-xl border p-3">
+      <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
         <div className="flex gap-2">
           <Input
             aria-label="Max rent"

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { DemoSkeleton } from "@/components/demo/demo-skeleton";
+import { PageHeader } from "@/components/shell/page-header";
 import {
   buildingOf,
   listedProfiles,
@@ -44,22 +45,25 @@ export function RoommateList() {
   );
 
   return (
-    <div className="flex flex-col gap-3 px-2 py-3">
-      <div className="flex items-center justify-between gap-2 px-2">
-        <p className="text-muted-foreground text-sm">
-          {people.length} verified {people.length === 1 ? "person" : "people"}
-        </p>
-        <RoommateFilters
-          value={filters}
-          onChange={setFilters}
-          buildings={world.buildings.filter((b) => b.active)}
-          myBuildingName={myBuilding?.name ?? null}
-          canUseSameBuilding={canUseSameBuilding}
-        />
-      </div>
+    <div className="flex flex-col gap-2.5 pb-3">
+      <PageHeader
+        title="Roommates"
+        action={
+          <span className="shrink-0 text-[14px] text-muted-foreground">
+            {people.length} verified
+          </span>
+        }
+      />
+      <RoommateFilters
+        value={filters}
+        onChange={setFilters}
+        buildings={world.buildings.filter((b) => b.active)}
+        myBuildingName={myBuilding?.name ?? null}
+        canUseSameBuilding={canUseSameBuilding}
+      />
 
       {blurred ? (
-        <div className="rounded-xl bg-primary-tint p-3 text-sm">
+        <div className="mx-2.5 rounded-xl bg-card p-3 text-sm">
           You're browsing as a visitor. Photos and names are hidden.{" "}
           <Link
             href="/sign-in"
@@ -72,7 +76,7 @@ export function RoommateList() {
       ) : null}
 
       {people.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed p-8 text-center">
+        <div className="mx-2.5 flex flex-col items-center gap-2 rounded-xl border border-dashed p-8 text-center">
           <p className="font-medium">No one matches these filters</p>
           <p className="text-muted-foreground text-sm">
             Try a higher budget, another move-in term or fewer habit filters.
@@ -88,7 +92,7 @@ export function RoommateList() {
       ) : (
         // Two-column masonry. Alternating columns keeps the list order
         // (boosted people first) reading left to right.
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-2 px-2.5">
           {[0, 1].map((column) => (
             <div key={column} className="flex min-w-0 flex-1 flex-col gap-2">
               {people

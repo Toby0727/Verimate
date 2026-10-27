@@ -5,7 +5,7 @@ export function SampleBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-4 shrink-0 items-center rounded-sm border border-dashed border-amber-500/60 bg-amber-50 px-1 font-medium text-[10px] text-amber-700 uppercase tracking-wide",
+        "inline-flex h-[18px] shrink-0 items-center rounded-full bg-black/40 px-1.5 font-medium text-[10px] text-white backdrop-blur-sm",
         className,
       )}
     >

@@ -28,7 +28,7 @@ export function VisitorPreview() {
         {people.map((p) => (
           <div
             key={p.accountId}
-            className="flex flex-col items-center gap-1 rounded-xl border p-3"
+            className="flex flex-col items-center gap-1 rounded-xl bg-card p-3"
           >
             <div className="flex size-12 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground blur-[2px]">
               {initials(p.displayName)}
@@ -43,7 +43,7 @@ export function VisitorPreview() {
       {sublets.map((s) => (
         <div
           key={s.id}
-          className="flex items-center gap-3 rounded-xl border p-3"
+          className="flex items-center gap-3 rounded-xl bg-card p-3"
         >
           <div className="size-14 shrink-0 rounded-lg bg-muted blur-[2px]" />
           <div className="min-w-0 flex-1">
