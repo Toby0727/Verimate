@@ -38,6 +38,8 @@
 | `FOUNDING_SEATS` | 30 | |
 | `FOUNDING_MIN_ACCOUNT_AGE_DAYS` | 7 | |
 | `BOOST_DAYS` | 7 | |
+| `MAX_PROFILE_PHOTOS` | 6 | 头像加更多照片的总数上限 |
+| `MAX_PROMPTS` | 3 | 问答卡上限 |
 | `REPORT_SLA_HOURS` | 48 | |
 | `PRICES` | 月订阅 $4.99；季票 $9.99 / 3 个月；7 天试用 | 只用于展示 |
 | `FRAUD_KEYWORDS` | 手机号格式、`wechat`/`weixin`/`微信`、`instagram`/`ig`、`whatsapp`、`deposit`、`定金`、`押金`、`zelle`、`venmo`、`wire`、`transfer`、`转账` 等 | 由 `detectFraudSignals()` 使用 |
@@ -98,7 +100,7 @@
 | 部分 | 字段 |
 | --- | --- |
 | 必填 | `photo`、`displayName`、`school`、`standing`（年级，或已录取的入学学期）、`gender`、`budgetMin` / `budgetMax`、`moveInFrom` / `moveInTo`、`housingStatus`（`has-place` / `needs-place` / `group`，选 `group` 时再填 `groupHave` 和 `groupNeed`）、`sleep`、`cleanliness`、`smoking`、`pets` |
-| 选填 | `major`、`languages[]`、`bio`、`buildingId`、`roommateGenderPref` |
+| 选填 | `major`、`languages[]`、`bio`、`buildingId`、`roommateGenderPref`、`extraPhotos[]`（头像之外的照片，最多 5 张）、`prompts[]`（`{ promptId, answer }`，最多 3 条，`promptId` 来自固定题目列表 `PROMPTS`） |
 | 详细问卷 | `guests`、`noise`、`cooking`、`study`、`sharing` 等；`aiMatchConsent`（布尔值） |
 | 状态 | `searchStatus`（`active` 或 `paused`）、`pausedReason`（`manual` 或 `inactive`）、`showInBuilding`（布尔值，默认关闭）、`boostedUntil` |
 
@@ -113,7 +115,7 @@
 | --- | --- |
 | `id`、`fromId`、`toId` | |
 | `message` | 只有一条，不能为空 |
-| `context` | `{ type: 'profile' }` 或 `{ type: 'sublet', subletId }` |
+| `context` | `{ type: 'profile', quote? }` 或 `{ type: 'sublet', subletId }`。`quote` 可选，为 `{ kind: 'photo', photo }` 或 `{ kind: 'prompt', promptId, answer }` |
 | `status` | `pending`、`accepted`、`deleted` 或 `expired` |
 | `createdAt`、`respondedAt` | |
 

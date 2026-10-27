@@ -99,8 +99,8 @@
   - 登录后的页面在 `app/(app)/` 路由组下共用一个带底部 5 个标签的布局。
   - 入驻流程在 `app/(onboarding)/` 下，后台在 `app/admin/` 下，各用独立布局。
   - UI 组件按需通过 `npx shadcn@latest add` 添加，预计包括 input、label、textarea、select、checkbox、switch、tabs、dialog、sheet、avatar、separator、sonner。
-  - 品牌色参考旧 demo 的红色 `#D81E28` 和验证绿色 `#16A34A`，以主题变量的方式写入 `app/globals.css`。
-- **Rationale**：沿用项目既定技术栈（宪章 II），视觉上与路演保持一致。
+  - 颜色、字体等视觉 token 以主题变量的方式写入 `app/globals.css`，具体风格由产品负责人决定，不沿用旧 demo。
+- **Rationale**：沿用项目既定技术栈（宪章 II）。
 
 ## R9. 示例中的"时间"
 
