@@ -16,8 +16,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 项目速览
 
-面向 Syracuse University / SUNY ESF 的已验证学生转租平台。当前为 Next.js 骨架 + 占位首页，已接入 Supabase（尚未建表），业务功能尚未开发。
+面向 Syracuse University / SUNY ESF 的已验证学生找室友平台（找室友为主线，转租资讯为辅）。当前为 Next.js 骨架 + 占位首页，已接入 Supabase（尚未建表），业务功能尚未开发。
 
+- `docs/product-requirements.md`：产品需求定稿（2026-10-27 访谈），写规格前先读
+- `specs/`：spec-kit 生成的功能规格，每个功能一个编号目录（当前：`001-clickable-flow-demo`，全流程可点通的示例 demo）
 - `app/`：App Router 页面与布局
 - `components/ui/`：shadcn/ui 组件（通过 CLI 添加，可直接修改）
 - `lib/`：工具函数（`cn` 等）
