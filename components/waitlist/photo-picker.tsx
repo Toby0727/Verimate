@@ -10,6 +10,7 @@ import {
   type WaitlistSession,
   waitlistPhotoUrl,
 } from "@/lib/waitlist/api";
+import { PhotoCropper } from "./photo-cropper";
 
 // Optional photo of the student. Uploading one earns a bonus raffle entry.
 export function PhotoPicker({
@@ -24,6 +25,7 @@ export function PhotoPicker({
   const input = useRef<HTMLInputElement>(null);
   const [src, setSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [cropping, setCropping] = useState<File | null>(null);
 
   // Show a photo saved on an earlier visit.
   useEffect(() => {
@@ -37,7 +39,9 @@ export function PhotoPicker({
     };
   }, [path, src]);
 
-  async function pick(file: File | undefined) {
+  // A picked photo goes to the cropper first; only the framed square is
+  // uploaded.
+  function pick(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Choose an image file");
@@ -47,6 +51,11 @@ export function PhotoPicker({
       toast.error("That photo is over 20 MB. Try a smaller one.");
       return;
     }
+    setCropping(file);
+  }
+
+  async function upload(file: File) {
+    setCropping(null);
     setUploading(true);
     try {
       onChange(await uploadWaitlistPhoto(session, file));
@@ -102,6 +111,11 @@ export function PhotoPicker({
           pick(e.target.files?.[0]);
           e.target.value = "";
         }}
+      />
+      <PhotoCropper
+        file={cropping}
+        onCancel={() => setCropping(null)}
+        onDone={upload}
       />
     </div>
   );
