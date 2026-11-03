@@ -14,7 +14,11 @@ export const YEARS = [
   { value: "sophomore", label: "Sophomore" },
   { value: "junior", label: "Junior" },
   { value: "senior", label: "Senior" },
-  { value: "graduate", label: "Graduate" },
+  { value: "fifth-year", label: "5th year" },
+  { value: "grad-1", label: "Grad 1st year" },
+  { value: "grad-2", label: "Grad 2nd year" },
+  { value: "grad-3", label: "Grad 3rd year" },
+  { value: "phd", label: "PhD" },
 ] as const satisfies Choice<string>[];
 
 export const BUDGETS = [
@@ -43,6 +47,46 @@ export const STUDY_ABROAD = [
   { value: "spring-2028", label: "Spring 2028" },
   { value: "not-sure", label: "Not sure yet" },
 ] as const satisfies Choice<string>[];
+
+// Where a student going away would be, from SU Abroad's centers and partner
+// programs (suabroad.syr.edu) and SU's US "study away" semesters. Shown only
+// after a term is picked. Keep in sync with the study_abroad_where check.
+export const ABROAD_PLACES = {
+  us: [
+    { value: "los-angeles", label: "Los Angeles" },
+    { value: "new-york", label: "New York City" },
+    { value: "washington-dc", label: "Washington, DC" },
+  ],
+  centers: [
+    { value: "florence", label: "Florence" },
+    { value: "london", label: "London" },
+    { value: "madrid", label: "Madrid" },
+    { value: "santiago", label: "Santiago" },
+    { value: "strasbourg", label: "Strasbourg" },
+  ],
+  partners: [
+    { value: "seoul", label: "Seoul" },
+    { value: "tokyo", label: "Tokyo" },
+    { value: "hong-kong", label: "Hong Kong" },
+    { value: "shanghai", label: "Shanghai" },
+    { value: "taipei", label: "Taipei" },
+    { value: "copenhagen", label: "Copenhagen" },
+    { value: "stockholm", label: "Stockholm" },
+    { value: "prague", label: "Prague" },
+    { value: "dublin", label: "Dublin" },
+    { value: "edinburgh", label: "Edinburgh" },
+    { value: "barcelona", label: "Barcelona" },
+    { value: "rome", label: "Rome" },
+    { value: "berlin", label: "Berlin" },
+    { value: "paris", label: "Paris" },
+  ],
+  // SU Abroad's SEA Semester partner, or Semester at Sea.
+  sea: [{ value: "at-sea", label: "Semester at sea" }],
+  other: [
+    { value: "other", label: "Somewhere else" },
+    { value: "not-sure", label: "Not sure yet" },
+  ],
+} as const satisfies Record<string, Choice<string>[]>;
 
 export const TERMS = [
   { value: "spring-2027", label: "Spring 2027" },
@@ -96,6 +140,9 @@ export type Year = ValueOf<typeof YEARS>;
 export type Budget = ValueOf<typeof BUDGETS>;
 export type Area = ValueOf<typeof AREAS>;
 export type StudyAbroad = ValueOf<typeof STUDY_ABROAD>;
+export type AbroadPlace = ValueOf<
+  (typeof ABROAD_PLACES)[keyof typeof ABROAD_PLACES]
+>;
 export type Term = ValueOf<typeof TERMS>;
 export type Drinking = ValueOf<typeof DRINKING>;
 export type Smoking = ValueOf<typeof SMOKING>;

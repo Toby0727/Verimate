@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  decodeAbroadPlans,
   EMPTY_ANSWERS,
+  encodeAbroadPlans,
   firstOpenStep,
   isComplete,
   isStepDone,
   raffleEntries,
+  setAbroadPlace,
   stepsLeft,
   toggle,
+  toggleAbroad,
   toggleArea,
   type WaitlistAnswers,
 } from "./waitlist";
@@ -20,6 +24,7 @@ const COMPLETE: WaitlistAnswers = {
   budget: ["800-1000"],
   areas: ["university-hill"],
   studyAbroad: "no",
+  studyAbroadPlans: null,
   subletOutTerms: [],
   subletInTerms: ["summer-2027"],
   roommateTerms: ["fall-2027"],
@@ -52,6 +57,26 @@ describe("isStepDone", () => {
   it("needs a non-blank name", () => {
     expect(isStepDone("about", { ...COMPLETE, name: " " })).toBe(false);
     expect(isStepDone("about", { ...COMPLETE, name: null })).toBe(false);
+  });
+
+  it("needs a place for every term away", () => {
+    expect(
+      isStepDone("abroad", {
+        ...COMPLETE,
+        studyAbroad: "fall-2027",
+        studyAbroadPlans: [{ term: "fall-2027", place: null }],
+      }),
+    ).toBe(false);
+    expect(
+      isStepDone("abroad", {
+        ...COMPLETE,
+        studyAbroad: "fall-2027",
+        studyAbroadPlans: [{ term: "fall-2027", place: "london" }],
+      }),
+    ).toBe(true);
+    expect(isStepDone("abroad", { ...COMPLETE, studyAbroad: "not-sure" })).toBe(
+      true,
+    );
   });
 
   it("needs a gender", () => {
@@ -125,5 +150,49 @@ describe("toggle", () => {
   it("adds a missing value and removes a present one", () => {
     expect(toggle(null, "a")).toEqual(["a"]);
     expect(toggle(["a", "b"], "a")).toEqual(["b"]);
+  });
+});
+
+describe("study abroad plans", () => {
+  it("adds terms in calendar order and keeps the earliest as the answer", () => {
+    const one = toggleAbroad(null, "spring-2028");
+    const two = toggleAbroad(one.studyAbroadPlans, "fall-2027");
+    expect(two.studyAbroad).toBe("fall-2027");
+    expect(two.studyAbroadPlans?.map((p) => p.term)).toEqual([
+      "fall-2027",
+      "spring-2028",
+    ]);
+  });
+
+  it("removes a term and clears when none are left", () => {
+    const one = toggleAbroad(null, "fall-2027");
+    expect(toggleAbroad(one.studyAbroadPlans, "fall-2027")).toEqual({
+      studyAbroad: null,
+      studyAbroadPlans: null,
+    });
+  });
+
+  it("drops every term for No plans", () => {
+    const one = toggleAbroad(null, "fall-2027");
+    expect(toggleAbroad(one.studyAbroadPlans, "no")).toEqual({
+      studyAbroad: "no",
+      studyAbroadPlans: null,
+    });
+  });
+
+  it("sets a place for one term and round-trips through storage", () => {
+    const plans = setAbroadPlace(
+      [
+        { term: "fall-2027", place: null },
+        { term: "spring-2028", place: null },
+      ],
+      "spring-2028",
+      "seoul",
+    );
+    expect(encodeAbroadPlans(plans)).toEqual([
+      "fall-2027:",
+      "spring-2028:seoul",
+    ]);
+    expect(decodeAbroadPlans(encodeAbroadPlans(plans))).toEqual(plans);
   });
 });

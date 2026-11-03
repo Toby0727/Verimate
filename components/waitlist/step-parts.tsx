@@ -3,64 +3,16 @@
 import { Check, type LucideIcon } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 import type { Choice } from "@/components/shell/choice-chips";
+import type { AbroadPlan } from "@/lib/rules/waitlist";
 import { cn } from "@/lib/utils";
-import { TERM_MONTHS, TERMS, type Term } from "@/lib/waitlist/options";
-
-function termMonths(value: string): string | null {
-  const info = TERM_MONTHS[value as Term];
-  return info ? `${info.months} · ${info.count} months` : null;
-}
-
-// Single choice shown as a full-width list, with each term's months on the
-// right, e.g. "Spring 2027 … Jan–May · 5 months".
-export function TermList<T extends string>({
-  options,
-  value,
-  onChange,
-  label,
-}: {
-  options: readonly Choice<T>[];
-  value: T | null;
-  onChange: (value: T) => void;
-  label: string;
-}) {
-  return (
-    <div role="radiogroup" aria-label={label} className="flex flex-col gap-2">
-      {options.map((option) => {
-        const on = value === option.value;
-        const months = termMonths(option.value);
-        return (
-          // biome-ignore lint/a11y/useSemanticElements: list-style radio button with aria-checked
-          <button
-            key={option.value}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            onClick={() => onChange(option.value)}
-            className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-              on
-                ? "border-foreground bg-foreground text-background"
-                : "bg-background hover:bg-muted",
-            )}
-          >
-            <span className="font-medium text-[15px]">{option.label}</span>
-            {months && (
-              <span
-                className={cn(
-                  "text-[13px]",
-                  on ? "text-background/70" : "text-muted-foreground",
-                )}
-              >
-                {months}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+import {
+  ABROAD_PLACES,
+  type AbroadPlace,
+  STUDY_ABROAD,
+  TERM_MONTHS,
+  TERMS,
+  type Term,
+} from "@/lib/waitlist/options";
 
 type TimingColumn = {
   label: string;
@@ -178,6 +130,118 @@ export function IconQuestion({
         <span className="font-medium text-[15px]">{label}</span>
       </div>
       {children}
+    </div>
+  );
+}
+
+const PLACE_GROUPS: {
+  label: string;
+  options: readonly Choice<AbroadPlace>[];
+}[] = [
+  { label: "US semesters", options: ABROAD_PLACES.us },
+  { label: "SU Abroad centers", options: ABROAD_PLACES.centers },
+  { label: "Partner programs", options: ABROAD_PLACES.partners },
+  { label: "At sea", options: ABROAD_PLACES.sea },
+  { label: "Other", options: ABROAD_PLACES.other },
+];
+
+type AbroadValue = (typeof STUDY_ABROAD)[number]["value"];
+
+// Study abroad, term by term: "No plans" and "Not sure yet" stand alone;
+// any number of terms can be picked, and each picked term asks where.
+export function AbroadPlanList({
+  studyAbroad,
+  plans,
+  onToggle,
+  onPlace,
+}: {
+  studyAbroad: AbroadValue | null;
+  plans: AbroadPlan[] | null;
+  onToggle: (value: AbroadValue) => void;
+  onPlace: (term: Term, place: AbroadPlace) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {STUDY_ABROAD.map((option) => {
+        const info = TERM_MONTHS[option.value as Term];
+        const plan = plans?.find((p) => p.term === option.value);
+        const on = info ? plan !== undefined : studyAbroad === option.value;
+        return (
+          <div
+            key={option.value}
+            className={cn(
+              "overflow-hidden rounded-xl border transition-colors",
+              on
+                ? "border-foreground bg-foreground text-background"
+                : "bg-background",
+            )}
+          >
+            <button
+              type="button"
+              aria-pressed={on}
+              onClick={() => onToggle(option.value)}
+              className={cn(
+                "flex w-full items-center justify-between gap-3 px-4 py-3 text-left",
+                !on && "hover:bg-muted",
+              )}
+            >
+              <span className="flex items-center gap-2.5">
+                {info && (
+                  <span
+                    className={cn(
+                      "grid size-5 place-items-center rounded-md border",
+                      on
+                        ? "border-background bg-background text-foreground"
+                        : "",
+                    )}
+                  >
+                    {on && <Check className="size-3.5" strokeWidth={3} />}
+                  </span>
+                )}
+                <span className="font-medium text-[15px]">{option.label}</span>
+              </span>
+              {info && (
+                <span
+                  className={cn(
+                    "text-[13px]",
+                    on ? "text-background/70" : "text-muted-foreground",
+                  )}
+                >
+                  {info.months} · {info.count} months
+                </span>
+              )}
+            </button>
+            {plan && (
+              <div className="px-4 pb-3">
+                <select
+                  aria-label={`Where for ${option.label}`}
+                  value={plan.place ?? ""}
+                  onChange={(e) =>
+                    onPlace(plan.term, e.target.value as AbroadPlace)
+                  }
+                  className={cn(
+                    "h-11 w-full rounded-lg bg-background px-3 text-[15px] text-foreground",
+                    !plan.place && "text-muted-foreground",
+                  )}
+                >
+                  <option value="" disabled>
+                    Where are you going?
+                  </option>
+                  {PLACE_GROUPS.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.options.map((place) => (
+                        <option key={place.value} value={place.value}>
+                          {place.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

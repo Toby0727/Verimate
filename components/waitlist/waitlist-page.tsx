@@ -27,13 +27,16 @@ import {
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
   raffleEntries,
+  setAbroadPlace,
   stepsLeft,
   toggle,
+  toggleAbroad,
   toggleArea,
   WAITLIST_STEPS,
   type WaitlistAnswers,
   type WaitlistStep,
 } from "@/lib/rules/waitlist";
+import { cn } from "@/lib/utils";
 import {
   loadWaitlist,
   saveWaitlist,
@@ -49,14 +52,14 @@ import {
   PETS,
   RAFFLE,
   SMOKING,
-  STUDY_ABROAD,
   YEARS,
 } from "@/lib/waitlist/options";
 import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
 import { PhotoPicker } from "./photo-picker";
-import { IconQuestion, TermList, TimingGrid } from "./step-parts";
+import { Confetti, GiftCard, RafflePill } from "./raffle-hype";
+import { AbroadPlanList, IconQuestion, TimingGrid } from "./step-parts";
 
 type SignedIn = Extract<WaitlistSession, { status: "signed-in" }>;
 type View =
@@ -151,15 +154,6 @@ export function WaitlistPage() {
   );
 }
 
-function RafflePill() {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-verified-tint px-2.5 py-1 font-medium text-[12px] text-verified">
-      <Gift className="size-3.5" />
-      Win a $50 Amazon gift card
-    </span>
-  );
-}
-
 function GoogleButton({ label }: { label: string }) {
   const [redirecting, setRedirecting] = useState(false);
   return (
@@ -182,6 +176,7 @@ function GoogleButton({ label }: { label: string }) {
 function Landing() {
   return (
     <>
+      <GiftCard />
       <section className="flex flex-col gap-3 rounded-2xl bg-card p-5">
         <h1 className="font-semibold text-[26px] leading-tight tracking-tight">
           Roommates and sublets, only with verified SU & ESF students.
@@ -371,7 +366,13 @@ function Progress({
         <span className="font-medium">
           Step {index + 1} of {total}
         </span>
-        <span className="text-muted-foreground">
+        <span
+          className={cn(
+            entered || left <= 1
+              ? "font-medium text-verified"
+              : "text-muted-foreground",
+          )}
+        >
           {entered
             ? "You're already in the raffle"
             : left <= 1
@@ -379,10 +380,19 @@ function Progress({
               : `Only ${left} steps left to enter the raffle`}
         </span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-verified-fill transition-all"
-          style={{ width: `${((index + 1) / total) * 100}%` }}
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-verified-fill transition-all duration-500"
+            style={{ width: `${((index + 1) / total) * 100}%` }}
+          />
+        </div>
+        <Gift
+          aria-hidden
+          className={cn(
+            "size-4 text-verified",
+            (entered || left <= 2) && "hype-wiggle",
+          )}
         />
       </div>
     </div>
@@ -486,12 +496,22 @@ function StepFields({
       );
     case "abroad":
       return (
-        <Question label="If so, which term? You may need to sublet your place.">
-          <TermList
-            label="Study abroad"
-            options={STUDY_ABROAD}
-            value={answers.studyAbroad}
-            onChange={(studyAbroad) => set({ studyAbroad })}
+        <Question label="Pick every term you'll be away and where. You may need to sublet your place.">
+          <AbroadPlanList
+            studyAbroad={answers.studyAbroad}
+            plans={answers.studyAbroadPlans}
+            onToggle={(value) =>
+              set(toggleAbroad(answers.studyAbroadPlans, value))
+            }
+            onPlace={(term, place) =>
+              set({
+                studyAbroadPlans: setAbroadPlace(
+                  answers.studyAbroadPlans ?? [],
+                  term,
+                  place,
+                ),
+              })
+            }
           />
         </Question>
       );
@@ -583,8 +603,12 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
 
   return (
     <>
+      <div className="relative">
+        <Confetti />
+        <GiftCard entries={raffleEntries(session.answers)} />
+      </div>
       <section className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center">
-        <span className="grid size-12 place-items-center rounded-full bg-verified-fill text-white">
+        <span className="hype-pop grid size-12 place-items-center rounded-full bg-verified-fill text-white">
           <Check className="size-6" strokeWidth={3} />
         </span>
         <h1 className="font-semibold text-[24px] tracking-tight">

@@ -1,6 +1,7 @@
 // Waitlist survey steps. A student is entered in the raffle once every step
 // is answered.
 import type {
+  AbroadPlace,
   Area,
   Budget,
   Cannabis,
@@ -13,6 +14,11 @@ import type {
   Term,
   Year,
 } from "@/lib/waitlist/options";
+import { TERMS } from "@/lib/waitlist/options";
+
+const TERM_ORDER: Term[] = TERMS.map((term) => term.value);
+
+export type AbroadPlan = { term: Term; place: AbroadPlace | null };
 
 export type WaitlistAnswers = {
   name: string | null;
@@ -24,6 +30,10 @@ export type WaitlistAnswers = {
   budget: Budget[] | null;
   areas: Area[] | null;
   studyAbroad: StudyAbroad | null;
+  // One entry per term away, each with where (null until picked). Null when
+  // there's no term away; studyAbroad then holds "no" or "not-sure", and
+  // otherwise the earliest term.
+  studyAbroadPlans: AbroadPlan[] | null;
   // Empty array means "not needed"; null means not answered yet.
   subletOutTerms: Term[] | null;
   subletInTerms: Term[] | null;
@@ -44,6 +54,7 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   budget: null,
   areas: null,
   studyAbroad: null,
+  studyAbroadPlans: null,
   subletOutTerms: null,
   subletInTerms: null,
   roommateTerms: null,
@@ -84,7 +95,13 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
     case "areas":
       return a.areas !== null && a.areas.length > 0;
     case "abroad":
-      return a.studyAbroad !== null;
+      return (
+        a.studyAbroad !== null &&
+        (!isAwayTerm(a.studyAbroad) ||
+          (a.studyAbroadPlans !== null &&
+            a.studyAbroadPlans.length > 0 &&
+            a.studyAbroadPlans.every((plan) => plan.place !== null)))
+      );
     case "timing":
       return (
         a.subletOutTerms !== null &&
@@ -100,6 +117,55 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
         a.pets !== null
       );
   }
+}
+
+// True for an actual term away, as opposed to "No plans" or "Not sure yet".
+export function isAwayTerm(value: StudyAbroad | null): boolean {
+  return value !== null && value !== "no" && value !== "not-sure";
+}
+
+// Tapping "No plans" or "Not sure yet" clears any terms; tapping a term adds
+// or removes it (several terms can be away), kept in calendar order.
+export function toggleAbroad(
+  plans: AbroadPlan[] | null,
+  value: StudyAbroad,
+): Pick<WaitlistAnswers, "studyAbroad" | "studyAbroadPlans"> {
+  if (!isAwayTerm(value)) return { studyAbroad: value, studyAbroadPlans: null };
+  const term = value as Term;
+  const current = plans ?? [];
+  const next = current.some((plan) => plan.term === term)
+    ? current.filter((plan) => plan.term !== term)
+    : [...current, { term, place: null }];
+  next.sort((a, b) => TERM_ORDER.indexOf(a.term) - TERM_ORDER.indexOf(b.term));
+  if (next.length === 0) return { studyAbroad: null, studyAbroadPlans: null };
+  return { studyAbroad: next[0].term, studyAbroadPlans: next };
+}
+
+export function setAbroadPlace(
+  plans: AbroadPlan[],
+  term: Term,
+  place: AbroadPlace,
+): AbroadPlan[] {
+  return plans.map((plan) => (plan.term === term ? { ...plan, place } : plan));
+}
+
+// Stored as "fall-2027:london" so the database can check each pair.
+export function encodeAbroadPlans(plans: AbroadPlan[] | null): string[] | null {
+  if (!plans) return null;
+  return plans.map((plan) => `${plan.term}:${plan.place ?? ""}`);
+}
+
+export function decodeAbroadPlans(
+  stored: string[] | null,
+): AbroadPlan[] | null {
+  if (!stored) return null;
+  return stored.map((item) => {
+    const [term, place] = item.split(":");
+    return {
+      term: term as Term,
+      place: place ? (place as AbroadPlace) : null,
+    };
+  });
 }
 
 export function stepsLeft(a: WaitlistAnswers): number {

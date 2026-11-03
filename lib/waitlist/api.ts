@@ -3,7 +3,10 @@
 import type { School } from "@/lib/rules/types";
 import { schoolOfGoogleAccount } from "@/lib/rules/verification";
 import {
+  decodeAbroadPlans,
   EMPTY_ANSWERS,
+  encodeAbroadPlans,
+  isAwayTerm,
   isComplete,
   type WaitlistAnswers,
 } from "@/lib/rules/waitlist";
@@ -29,6 +32,7 @@ type Row = {
   budget: WaitlistAnswers["budget"];
   areas: WaitlistAnswers["areas"];
   study_abroad: WaitlistAnswers["studyAbroad"];
+  study_abroad_plans: string[] | null;
   sublet_out_terms: WaitlistAnswers["subletOutTerms"];
   sublet_in_terms: WaitlistAnswers["subletInTerms"];
   roommate_terms: WaitlistAnswers["roommateTerms"];
@@ -41,7 +45,7 @@ type Row = {
 };
 
 const COLUMNS =
-  "name, photo_path, gender, year, major, budget, areas, study_abroad, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
+  "name, photo_path, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
 
 // Imported lazily so pages still render when the Supabase env vars are missing.
 async function supabase() {
@@ -50,7 +54,8 @@ async function supabase() {
 }
 
 // `npm run dev` only: /?preview shows the survey as a signed-in SU student
-// without touching Supabase, for design review.
+// without touching Supabase, for design review; /?preview=landing shows the
+// signed-out homepage.
 function isPreview() {
   return (
     process.env.NODE_ENV === "development" &&
@@ -59,6 +64,12 @@ function isPreview() {
 }
 
 export async function loadWaitlist(): Promise<WaitlistSession> {
+  if (
+    isPreview() &&
+    new URLSearchParams(window.location.search).get("preview") === "landing"
+  ) {
+    return { status: "signed-out" };
+  }
   if (isPreview()) {
     return {
       status: "signed-in",
@@ -100,6 +111,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       budget: row?.budget ?? null,
       areas: row?.areas ?? null,
       studyAbroad: row?.study_abroad ?? null,
+      studyAbroadPlans: decodeAbroadPlans(row?.study_abroad_plans ?? null),
       subletOutTerms: row?.sublet_out_terms ?? null,
       subletInTerms: row?.sublet_in_terms ?? null,
       roommateTerms: row?.roommate_terms ?? null,
@@ -208,6 +220,13 @@ export async function saveWaitlist(
         budget: answers.budget,
         areas: answers.areas,
         study_abroad: answers.studyAbroad,
+        // Saved only once every term has a place; the database rejects
+        // half-filled pairs.
+        study_abroad_plans:
+          isAwayTerm(answers.studyAbroad) &&
+          answers.studyAbroadPlans?.every((plan) => plan.place !== null)
+            ? encodeAbroadPlans(answers.studyAbroadPlans)
+            : null,
         sublet_out_terms: answers.subletOutTerms,
         sublet_in_terms: answers.subletInTerms,
         roommate_terms: answers.roommateTerms,
