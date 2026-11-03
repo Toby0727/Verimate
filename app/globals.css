@@ -65,9 +65,11 @@
   --primary-foreground: #ffffff;
   --primary-deep: #000000;
   --primary-tint: #e6e6ea;
-  --verified: #178a4c;
-  --verified-tint: #e3f5ea;
-  --verified-fill: #1fa463;
+  /* The one brand color, Crimson (2026-11-03, replaces green): verified
+     badges, progress, the raffle pill. Text shade is darker for contrast. */
+  --verified: #a1202f;
+  --verified-tint: #fbeaec;
+  --verified-fill: #b8283a;
   --faint: #c4c4c8;
   --secondary: #e6e6ea;
   --secondary-foreground: #111111;

@@ -7,8 +7,8 @@ import { AREA_SHAPES, CAMPUSES } from "@/lib/waitlist/map-shapes";
 import type { Area } from "@/lib/waitlist/options";
 
 const INK = "#111111";
-const CAMPUS_FILL = "#1fa463"; // --verified-fill
-const CAMPUS_LINE = "#178a4c"; // --verified
+const CAMPUS_FILL = "#b8283a"; // --verified-fill
+const CAMPUS_LINE = "#a1202f"; // --verified
 
 // Map of Syracuse with SU and ESF shaded and each housing area as a tappable
 // zone. Leaflet touches `window`, so it loads after mount.
