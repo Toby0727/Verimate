@@ -64,7 +64,12 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
   - `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`：可公开，会打包进浏览器端。
   - `SECRET_KEY`：Supabase secret key（`sb_secret_...`），绕过 RLS，**只能在服务端使用，绝不能加 `NEXT_PUBLIC_` 前缀**，需在控制台 Project Settings → API Keys 获取后手动填入。
 - 用法：Client Component 用 `@/lib/supabase/client` 的 `createClient()`；Server Component / Server Function / Route Handler 用 `@/lib/supabase/server` 的 `await createClient()`，每个请求新建，不要放全局变量。
-- 尚未添加 `proxy.ts`（Next.js 16 中替代 middleware）。接入 Auth 时必须按 supabase skill / 官方 SSR 文档添加，用 `getClaims()` 刷新会话；服务端鉴权不要信任 `getSession()`。
+- 根目录 `proxy.ts`（Next.js 16 中替代 middleware）调用 `lib/supabase/proxy.ts` 的 `updateSession()`，每个请求用 `getClaims()` 刷新会话 cookie；只刷新不拦截（demo 允许未登录浏览），未配置 Supabase 环境变量时直接跳过。服务端鉴权不要信任 `getSession()`。
+- Google 登录（已真实接入）：`components/onboarding/google-sign-in.ts` 调 `signInWithOAuth` → Google → Supabase → `app/auth/callback/route.ts`（`exchangeCodeForSession`）→ `/auth/finish`（`GoogleFinish` 读取真实姓名和邮箱，调用 `actions.startGoogleUser()` 写入示例世界，继续引导流程）；失败跳 `/auth/error`。删除账号时同时 `signOut()`。
+  - Google Cloud OAuth client（Web application）的 Authorized redirect URI 是 `https://cuwenjxpuiirncxwbmyc.supabase.co/auth/v1/callback`，JavaScript origins 是 `http://localhost:3000` 和 Vercel 域名。
+  - Supabase 控制台 Authentication → URL Configuration 的 Redirect URLs 需包含 `http://localhost:3000/**` 和 Vercel 域名 `/**`，否则登录后会跳回 Site URL。
+  - 学校 Google 账号（`SCHOOL_GOOGLE_DOMAINS`：`syr.edu`、`g.syr.edu`、`esf.edu`，规则函数 `schoolOfGoogleAccount()`）登录即视为学校邮箱已验证：`startGoogleUser()` 直接写入"在校生"验证，生日一步之后跳过选择路径和验证码，直接到填资料。未满 18 岁仍须走录取材料路径。其他 Google 账号照常走学校邮箱验证码（仍是示例）。
+  - Google 账号目前只用于登录，还没有建表，登录后的资料、验证等仍是示例数据，只存在 `localStorage`；验证状态只在前端，不构成安全边界，接入真实功能时要在服务端根据 Google 返回的邮箱重新判断。
 - 新建表默认不会自动暴露给 Data API，需要显式 `GRANT` 并开启 RLS；涉及数据库的改动先加载 `supabase-postgres-best-practices` skill。
 - `supabase/.temp/` 是 CLI 本地缓存，已忽略。
 
@@ -72,7 +77,7 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
 
 - 示例数据和示例操作只放在 `lib/demo/`，文件头注明"示例数据，替换为真实功能时删除"；组件通过 `useDemo()` 读数据（载入前返回 `null`，显示 `DemoSkeleton`），通过 `lib/demo/actions.ts` 改数据。
 - 业务规则只写在 `lib/rules/`，不写在组件里。
-- 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、登录（Google / 手机号 / 邮箱）、验证码都不会真实发生。
+- 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、验证码都不会真实发生（Google 登录是真实的，见上方 Supabase 一节）。手机号 / 邮箱登录按钮暂时从登录卡片隐藏（2026-11-03 决定）：短信要付费且需 A2P 10DLC 注册；邮箱登录需先接自定义 SMTP（如 Resend），Supabase 自带邮件服务只发给项目成员。
 - 页面文件只输出静态外壳；动态路由不在顶层 `await params`，而是在 `<Suspense>` 里 `params.then(({ id }) => <X id={id} />)` 交给客户端组件。
 - `AccessGate` / `BanGate` 只是演示用的前端拦截，不构成安全边界；接入真实功能时必须用服务端鉴权和 RLS。
 - 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心绿色验证勾和开关（`verified-fill`）、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。

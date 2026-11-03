@@ -13,12 +13,15 @@ import {
 import { missingSubletFields } from "@/lib/rules/sublets";
 import { addDays, addMonths, daysBetween } from "@/lib/rules/time";
 import type {
+  Account,
   Building,
   Profile,
   Questionnaire,
   Report,
   RequestContext,
+  School,
   Sublet,
+  Verification,
 } from "@/lib/rules/types";
 import {
   ageOn,
@@ -26,6 +29,7 @@ import {
   isEmailTaken,
   isSchoolEmail,
   isVerificationValid,
+  schoolOfGoogleAccount,
   type VerificationPath,
 } from "@/lib/rules/verification";
 import {
@@ -202,7 +206,46 @@ export function setReturnTo(path: string | null) {
 
 // ---------- Onboarding ----------
 
-export function startNewUser() {
+// Signed in with a real Google account: keep that account's onboarding
+// progress in this browser, or start it fresh with the real name and email.
+// A school Google account also verifies the student.
+export function startGoogleUser(identity: {
+  displayName: string;
+  googleEmail: string;
+}): { step: Account["onboardingStep"]; verifiedSchool: School | null } {
+  const existing = accountOf(getSnapshot(), NEW_USER_ID);
+  if (
+    existing?.status === "active" &&
+    existing.googleEmail === identity.googleEmail
+  ) {
+    setWorld((w) => ({
+      ...w,
+      currentPersonaId: "new-user",
+      viewAsFree: false,
+      returnTo: null,
+    }));
+  } else {
+    startNewUser(identity);
+  }
+  setWorld((w) => withGoogleVerification(w, NEW_USER_ID, identity.googleEmail));
+
+  const w = getSnapshot();
+  const verification = verificationOf(w, NEW_USER_ID);
+  const verifiedByGoogle =
+    isVerificationValid(verification, now()) &&
+    verification?.schoolEmail === identity.googleEmail.trim().toLowerCase();
+  return {
+    step: accountOf(w, NEW_USER_ID)?.onboardingStep ?? "birthday",
+    verifiedSchool: verifiedByGoogle ? (verification?.school ?? null) : null,
+  };
+}
+
+export function startNewUser(
+  identity = {
+    displayName: "New user",
+    googleEmail: "new.user@gmail.example",
+  },
+) {
   setWorld((w) => {
     const cleared = removeAccountData(w, NEW_USER_ID);
     const timestamp = now().toISOString();
@@ -214,8 +257,7 @@ export function startNewUser() {
         ...cleared.accounts.filter((a) => a.id !== NEW_USER_ID),
         {
           id: NEW_USER_ID,
-          displayName: "New user",
-          googleEmail: "new.user@gmail.example",
+          ...identity,
           birthDate: null,
           role: "user",
           status: "active",
@@ -235,11 +277,24 @@ export function submitBirthday(
   const w = getSnapshot();
   const id = me(w);
   if (!id || !birthDate) return { ok: false, reason: "missing" };
-  if (ageOn(birthDate, now()) < 17) return { ok: false, reason: "too-young" };
-  setWorld((world) =>
-    updateAccount(world, id, { birthDate, onboardingStep: "path" }),
-  );
+  const age = ageOn(birthDate, now());
+  if (age < 17) return { ok: false, reason: "too-young" };
+  // Already verified by a school Google account: skip path and verify.
+  setWorld((world) => {
+    const verified =
+      isVerificationValid(verificationOf(world, id), now()) &&
+      canProceedWithAge(age, "student");
+    return updateAccount(world, id, {
+      birthDate,
+      onboardingStep: verified ? "profile" : "path",
+    });
+  });
   return { ok: true };
+}
+
+export function myOnboardingStep(): Account["onboardingStep"] | null {
+  const w = getSnapshot();
+  return accountOf(w, me(w))?.onboardingStep ?? null;
 }
 
 export function choosePath(path: VerificationPath): ActionResult<"age"> {
@@ -267,38 +322,70 @@ export function verifySchoolEmail(
   if (code.trim() !== SAMPLE_CODE) return { ok: false, reason: "wrong-code" };
 
   setWorld((world) => {
-    const existing = verificationOf(world, id);
-    const verifiedAt = now().toISOString();
-    const verification = {
-      id: existing?.id ?? uid("v"),
-      accountId: id,
-      type:
-        existing?.type === "graduate"
-          ? ("graduate" as const)
-          : ("student" as const),
-      schoolEmail: email.trim().toLowerCase(),
-      school: email.toLowerCase().endsWith("esf.edu")
-        ? ("ESF" as const)
-        : ("SU" as const),
-      status: "approved" as const,
-      verifiedAt,
-      expiresAt: addMonths(verifiedAt, VERIFICATION_VALID_MONTHS),
-      documentName: null,
-      submittedAt: verifiedAt,
-    };
-    const account = accountOf(world, id);
-    const next = {
-      ...world,
-      verifications: [
-        ...world.verifications.filter((v) => v.accountId !== id),
-        verification,
-      ],
-    };
-    return account?.onboardingStep === "done"
+    const school = email.toLowerCase().endsWith("esf.edu") ? "ESF" : "SU";
+    const next = withApprovedStudent(world, id, email, school);
+    return accountOf(world, id)?.onboardingStep === "done"
       ? next
       : updateAccount(next, id, { onboardingStep: "profile" });
   });
   return { ok: true };
+}
+
+// Replaces the account's verification with an approved school-email one.
+function withApprovedStudent(
+  world: DemoWorld,
+  id: string,
+  email: string,
+  school: School,
+): DemoWorld {
+  const existing = verificationOf(world, id);
+  const verifiedAt = now().toISOString();
+  const verification: Verification = {
+    id: existing?.id ?? uid("v"),
+    accountId: id,
+    type: existing?.type === "graduate" ? "graduate" : "student",
+    schoolEmail: email.trim().toLowerCase(),
+    school,
+    status: "approved",
+    verifiedAt,
+    expiresAt: addMonths(verifiedAt, VERIFICATION_VALID_MONTHS),
+    documentName: null,
+    submittedAt: verifiedAt,
+  };
+  return {
+    ...world,
+    verifications: [
+      ...world.verifications.filter((v) => v.accountId !== id),
+      verification,
+    ],
+  };
+}
+
+// A school Google account already proves the school email, so it verifies the
+// student without a code. Accounts already past the birthday step skip ahead.
+function withGoogleVerification(
+  world: DemoWorld,
+  id: string,
+  email: string,
+): DemoWorld {
+  const school = schoolOfGoogleAccount(email);
+  if (
+    !school ||
+    isVerificationValid(verificationOf(world, id), now()) ||
+    isEmailTaken(email, world.verifications, id)
+  ) {
+    return world;
+  }
+  const next = withApprovedStudent(world, id, email, school);
+  const account = accountOf(next, id);
+  const pastBirthday =
+    (account?.onboardingStep === "path" ||
+      account?.onboardingStep === "verify") &&
+    account.birthDate !== null &&
+    canProceedWithAge(ageOn(account.birthDate, now()), "student");
+  return pastBirthday
+    ? updateAccount(next, id, { onboardingStep: "profile" })
+    : next;
 }
 
 export function submitAdmittedDocument(

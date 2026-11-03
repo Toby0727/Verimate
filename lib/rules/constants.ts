@@ -3,6 +3,14 @@
 
 export const SCHOOL_EMAIL_DOMAINS = ["syr.edu", "esf.edu"] as const;
 
+// Google sign-in with one of these accounts proves the school email, so it
+// verifies the student without a code. SU's Google Workspace uses g.syr.edu.
+export const SCHOOL_GOOGLE_DOMAINS = {
+  "syr.edu": "SU",
+  "g.syr.edu": "SU",
+  "esf.edu": "ESF",
+} as const;
+
 export const MIN_AGE = 18;
 export const VERIFICATION_VALID_MONTHS = 12;
 export const ADMITTED_GRACE_AFTER_TERM_START_DAYS = 60;

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ONBOARDING_ROUTES } from "@/components/shell/access-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,7 @@ export function BirthdayForm() {
         e.preventDefault();
         const result = actions.submitBirthday(date);
         if (result.ok) {
-          router.push("/onboarding/path");
+          router.push(ONBOARDING_ROUTES[actions.myOnboardingStep() ?? "path"]);
         } else {
           setError(
             result.reason === "missing"

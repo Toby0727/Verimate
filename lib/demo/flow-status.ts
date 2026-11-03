@@ -8,9 +8,19 @@ export type FlowStatus = {
 
 export const FLOW_STATUS: FlowStatus[] = [
   {
-    name: "Sign in",
+    name: "Sign in with Google",
+    status: "live",
+    note: "Uses your real Google account. Your name and email carry into onboarding; everything after that is still sample.",
+  },
+  {
+    name: "Sign in with phone or email",
     status: "sample",
-    note: "No Google account, phone or email is connected; you pick a sample persona.",
+    note: "Hidden for now. Only Google sign-in is offered.",
+  },
+  {
+    name: "Verification with a school Google account",
+    status: "live",
+    note: "Signing in with an SU or ESF Google account verifies you as a student, so you skip the email code. Saved only in this browser.",
   },
   {
     name: "School email verification",

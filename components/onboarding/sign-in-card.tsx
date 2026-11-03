@@ -1,16 +1,16 @@
 "use client";
 
-import { ChevronDown, Mail, Smartphone } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SampleBadge } from "@/components/demo/sample-badge";
-import { showSampleNotice } from "@/components/demo/sample-notice";
 import { Button } from "@/components/ui/button";
 import * as actions from "@/lib/demo/actions";
 import { PERSONAS } from "@/lib/demo/personas";
 import type { PersonaId } from "@/lib/demo/types";
 import { cn } from "@/lib/utils";
+import { signInWithGoogle } from "./google-sign-in";
 
 function GoogleMark() {
   return (
@@ -33,11 +33,14 @@ export function SignInCard() {
   const router = useRouter();
   const [showPersonas, setShowPersonas] = useState(false);
 
-  // Every sign-in method is a sample: each starts a brand-new user.
-  function startSample(method: string) {
-    actions.startNewUser();
-    if (method !== "Google") showSampleNotice(`no ${method} code is sent.`);
-    router.push("/onboarding/birthday");
+  const [redirecting, setRedirecting] = useState(false);
+
+  // Phone and email sign-in are hidden until they are real.
+  async function startGoogle() {
+    setRedirecting(true);
+    await signInWithGoogle();
+    // Only reached when the redirect to Google failed.
+    setRedirecting(false);
   }
 
   return (
@@ -54,33 +57,15 @@ export function SignInCard() {
             Sign in to keep browsing
           </h2>
           <p className="text-[14px] text-muted-foreground">
-            Only verified Syracuse University and SUNY ESF students. You'll
-            verify your school email next.
+            Only verified Syracuse University and SUNY ESF students. Sign in
+            with your SU or ESF Google account to get verified right away.
           </p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Button size="lg" onClick={() => startSample("Google")}>
-            <GoogleMark />
-            Continue with Google
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => startSample("SMS")}
-          >
-            <Smartphone />
-            Continue with phone
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => startSample("email")}
-          >
-            <Mail />
-            Continue with email
-          </Button>
-        </div>
+        <Button size="lg" disabled={redirecting} onClick={startGoogle}>
+          <GoogleMark />
+          Continue with Google
+        </Button>
 
         <p className="text-center text-[12px] text-faint">
           By continuing you agree to the{" "}

@@ -71,7 +71,7 @@ export function accessNotice(
         title="Sign in to continue"
         body="Verimate is only for verified SU and ESF students."
         href="/sign-in"
-        cta="Sign in with Google (Sample)"
+        cta="Sign in with Google"
       />
     );
   }

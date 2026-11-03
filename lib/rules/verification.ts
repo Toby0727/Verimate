@@ -1,5 +1,9 @@
-import { MIN_AGE, SCHOOL_EMAIL_DOMAINS } from "./constants";
-import type { Verification } from "./types";
+import {
+  MIN_AGE,
+  SCHOOL_EMAIL_DOMAINS,
+  SCHOOL_GOOGLE_DOMAINS,
+} from "./constants";
+import type { School, Verification } from "./types";
 
 export type VerificationPath = "student" | "admitted";
 
@@ -18,6 +22,15 @@ export function isSchoolEmail(email: string): boolean {
     domain !== undefined &&
     (SCHOOL_EMAIL_DOMAINS as readonly string[]).includes(domain)
   );
+}
+
+// The school a Google account belongs to, or null for any other account.
+export function schoolOfGoogleAccount(email: string): School | null {
+  const domain = email.trim().toLowerCase().split("@")[1];
+  if (domain === undefined || !Object.hasOwn(SCHOOL_GOOGLE_DOMAINS, domain)) {
+    return null;
+  }
+  return SCHOOL_GOOGLE_DOMAINS[domain as keyof typeof SCHOOL_GOOGLE_DOMAINS];
 }
 
 // One school email can belong to one account only.

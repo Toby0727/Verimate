@@ -8,7 +8,23 @@ import {
   isEmailTaken,
   isSchoolEmail,
   isVerificationValid,
+  schoolOfGoogleAccount,
 } from "./verification";
+
+describe("schoolOfGoogleAccount", () => {
+  it("maps SU and ESF Google accounts to their school", () => {
+    expect(schoolOfGoogleAccount("jamie@syr.edu")).toBe("SU");
+    expect(schoolOfGoogleAccount("Jamie@G.SYR.EDU")).toBe("SU");
+    expect(schoolOfGoogleAccount("sam@esf.edu")).toBe("ESF");
+  });
+
+  it("returns null for other accounts and malformed input", () => {
+    expect(schoolOfGoogleAccount("jamie@gmail.com")).toBeNull();
+    expect(schoolOfGoogleAccount("jamie@syr.edu.fake.com")).toBeNull();
+    expect(schoolOfGoogleAccount("jamie@constructor")).toBeNull();
+    expect(schoolOfGoogleAccount("not-an-email")).toBeNull();
+  });
+});
 
 describe("isSchoolEmail", () => {
   it("accepts SU and ESF addresses regardless of case", () => {

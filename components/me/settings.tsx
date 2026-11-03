@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { DemoSkeleton } from "@/components/demo/demo-skeleton";
+import { signOutOfGoogle } from "@/components/onboarding/google-sign-in";
 import { AccessGate } from "@/components/shell/access-gate";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -70,8 +71,9 @@ function SettingsContent() {
           <div className="flex gap-2">
             <Button
               variant="destructive"
-              onClick={() => {
+              onClick={async () => {
                 actions.deleteAccount();
+                await signOutOfGoogle();
                 router.push("/");
               }}
             >
