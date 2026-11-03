@@ -4,6 +4,7 @@ import { Check, Gift, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Logo } from "@/components/brand/logo";
 import {
   signInWithGoogle,
   signOutOfGoogle,
@@ -92,7 +93,7 @@ export function WaitlistPage() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-background">
       <header className="flex items-center justify-between px-4 pt-5 pb-2">
-        <span className="font-bold text-[20px] tracking-tight">Verimate</span>
+        <Logo className="h-8 w-auto" />
         <RafflePill />
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4">

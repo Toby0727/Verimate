@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Logo } from "@/components/brand/logo";
 import { RAFFLE } from "@/lib/waitlist/options";
 
 export const metadata: Metadata = {
@@ -12,8 +13,8 @@ export default function RaffleRulesPage() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-background">
       <header className="px-4 pt-5 pb-2">
-        <Link href="/" className="font-bold text-[20px] tracking-tight">
-          Verimate
+        <Link href="/" className="inline-block">
+          <Logo className="h-8 w-auto" />
         </Link>
       </header>
       <main className="flex flex-col gap-4 p-4">

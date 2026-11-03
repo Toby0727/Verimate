@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Verimate Lean V mark">
+<title>Verimate Lean V mark</title>
+<rect width="64" height="64" rx="14" fill="#ffffff"/>
+<defs><clipPath id="v08l"><rect x="0" y="0" width="30.8" height="64"/></clipPath><clipPath id="v08r"><rect x="33.2" y="0" width="30.8" height="64"/></clipPath></defs>
+<line clip-path="url(#v08l)" x1="18" y1="18.5" x2="32" y2="45" stroke="#111111" stroke-width="10" stroke-linecap="round"/>
+<line clip-path="url(#v08r)" x1="46" y1="18.5" x2="32" y2="45" stroke="#cc0034" stroke-width="10" stroke-linecap="round"/>
+</svg>

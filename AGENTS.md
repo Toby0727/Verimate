@@ -95,6 +95,7 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
 - 页面文件只输出静态外壳；动态路由不在顶层 `await params`，而是在 `<Suspense>` 里 `params.then(({ id }) => <X id={id} />)` 交给客户端组件。
 - `AccessGate` / `BanGate` 只是演示用的前端拦截，不构成安全边界；接入真实功能时必须用服务端鉴权和 RLS。
 - 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心红色验证勾和开关（`verified-fill`，2026-11-03 起由绿色改为 Crimson `#b8283a`，文字用更深的 `#a1202f`；token 名仍叫 `verified-*`）、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。
+- Logo（2026-11-03 定稿）：08a Bold V，Crimson 方块里一个白色粗体对称 V，旁边是 Figtree Bold 转成轮廓的 "Verimate"。页面里用 `components/brand/logo.tsx`（内联 SVG），浏览器标签图标是 `app/icon.svg`（`proxy.ts` matcher 已放行）。全部候选方案、竞品调研和预览页在 `docs/brand/logo-options/`（`index.html`）。
 - 尺寸按真实 390pt 手机：正文约 15px，标签页大标题 26px，页边距 16px。
 
 ## 注意事项

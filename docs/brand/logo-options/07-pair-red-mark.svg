@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Verimate Pair mark, red">
+<title>Verimate Pair mark, red</title>
+<rect width="64" height="64" rx="14" fill="#ffffff"/>
+<line x1="15" y1="30.5" x2="27" y2="43.5" stroke="#111111" stroke-width="9.5" stroke-linecap="round"/>
+<line x1="27" y1="43.5" x2="48" y2="19" stroke="#ffffff" stroke-width="13.5" stroke-linecap="round"/>
+<line x1="27" y1="43.5" x2="48" y2="19" stroke="#b8283a" stroke-width="9.5" stroke-linecap="round"/>
+</svg>

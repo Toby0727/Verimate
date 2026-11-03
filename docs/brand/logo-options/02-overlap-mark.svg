@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Verimate Overlap mark">
+<title>Verimate Overlap mark</title>
+<rect width="64" height="64" rx="14" fill="#ffffff"/>
+<path d="M32,18.73 A15,15 0 0 1 32,45.27 A15,15 0 0 1 32,18.73 Z" fill="#1fa463"/>
+<circle cx="25" cy="32" r="15" fill="none" stroke="#111111" stroke-width="5.5"/>
+<circle cx="39" cy="32" r="15" fill="none" stroke="#111111" stroke-width="5.5"/>
+</svg>

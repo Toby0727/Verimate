@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Verimate Mates M mark">
+<title>Verimate Mates M mark</title>
+<rect width="64" height="64" rx="14" fill="#111111"/>
+<path d="M16,46V29M48,18V46" stroke="#ffffff" stroke-width="8" stroke-linecap="round" fill="none"/>
+<polyline points="16,29 27,40 48,18" fill="none" stroke="#1fa463" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
