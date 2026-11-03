@@ -28,8 +28,9 @@ verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用
 - 照片（2026-11-03 决定）：第一步可选上传本人照片，上传即多一次抽奖机会（最多 2 次，`raffleEntries()`），规则页已写明。浏览器先重画成最长边 1280px 的 JPEG（去掉 EXIF 里的 GPS 位置）再上传到私有 bucket `waitlist-photos`，每人固定一个文件 `<user_id>/photo.jpg`；只有学校邮箱且已有问卷行的账号能上传，只能读写删自己的；前端用 1 小时有效的签名链接显示。抽奖时只有 storage 里真有这张照片才算加的那次。名字默认取 Google 账号姓名。
 - 服务端说了算的字段：`created_at`、`updated_at`、`completed_at` 由触发器 `set_waitlist_server_fields()` 写，浏览器传什么都不算；`completed_at` 在全部答完时盖章，之后不变，2026-11-30 23:59（美东）后不再盖章（日期与 `RAFFLE` 同步）。`saveWaitlist()` 保存后读回 `completed_at`。名字和专业不能以 `= + - @` 开头（防导出 CSV 时被表格当公式执行）。
 - 房源列表：选完区域后，地图下方列出这些区的公寓户型（月租、租期、总价、卧室、卫生间、面积），规则在 `lib/rules/listings.ts`，数据在 `lib/waitlist/listings.ts`，来源和调研笔记在 `docs/research/`。**目前关闭**（`LISTINGS_ENABLED = false`）：用户发现不少价格不对（如 The Standard 3 室实际约 $1,300），人工核对后再打开。
+- 隐私政策 `/privacy`（2026-11-03 起是真实页面，不再是 demo 草稿）：也是 Google OAuth 同意屏幕上填的隐私政策链接，首页页脚有链接。改了收集的数据（`lib/waitlist/api.ts`）要同步改这页。公开联系邮箱是 `CONTACT_EMAIL`（`lib/waitlist/options.ts`）。承诺：删除请求 30 天内处理；没上线的话抽奖后 12 个月内删除。
 - 个人 Gmail 登录会提示换学校账号；登录失败回到 `/?signin=failed`。
-- demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
+- demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/privacy`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 
 - `docs/product-requirements.md`：产品需求定稿（2026-10-27 访谈），写规格前先读
 - `specs/`：spec-kit 生成的功能规格，每个功能一个编号目录（当前：`001-clickable-flow-demo`，全流程可点通的示例 demo）

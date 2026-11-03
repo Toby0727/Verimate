@@ -130,6 +130,10 @@ export function WaitlistPage() {
         <Link href="/raffle-rules" className="underline underline-offset-2">
           Official rules
         </Link>
+        {" · "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          Privacy
+        </Link>
       </footer>
     </div>
   );

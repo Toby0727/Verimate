@@ -72,6 +72,9 @@ export type Drinking = ValueOf<typeof DRINKING>;
 export type Smoking = ValueOf<typeof SMOKING>;
 export type Cannabis = ValueOf<typeof CANNABIS>;
 
+// Public contact for privacy requests and raffle questions.
+export const CONTACT_EMAIL = "hpang05@syr.edu";
+
 export const RAFFLE = {
   prize: "$50 Amazon gift card",
   endsLabel: "November 30, 2026",

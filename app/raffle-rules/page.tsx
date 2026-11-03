@@ -62,7 +62,11 @@ export default function RaffleRulesPage() {
             We use your school email, name, photo and answers to run the raffle,
             contact you, and plan Verimate. Your photo is stored privately and
             only the Verimate team can see it. We won't sell your information.
-            Ask us to delete it any time by replying to any Verimate email.
+            Details and how to delete it are in our{" "}
+            <Link href="/privacy" className="underline underline-offset-2">
+              privacy policy
+            </Link>
+            .
           </Rule>
           <Rule title="Not affiliated">
             Amazon is not a sponsor of this raffle and isn't involved in it.

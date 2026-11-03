@@ -7,7 +7,7 @@ import { useDemo } from "@/lib/demo/use-demo";
 import { DemoPanel } from "./demo-panel";
 
 // Real pages (the waitlist) never show the demo banner.
-const REAL_PAGES = new Set(["/", "/raffle-rules"]);
+const REAL_PAGES = new Set(["/", "/raffle-rules", "/privacy"]);
 
 export function DemoBanner() {
   const pathname = usePathname();
