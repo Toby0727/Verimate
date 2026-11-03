@@ -4,12 +4,15 @@ import {
   firstOpenStep,
   isComplete,
   isStepDone,
+  raffleEntries,
   stepsLeft,
   toggleArea,
   type WaitlistAnswers,
 } from "./waitlist";
 
 const COMPLETE: WaitlistAnswers = {
+  name: "Alex Kim",
+  photoPath: null,
   year: "junior",
   major: "Information Management",
   budget: "800-1000",
@@ -42,6 +45,15 @@ describe("stepsLeft", () => {
 });
 
 describe("isStepDone", () => {
+  it("needs a non-blank name", () => {
+    expect(isStepDone("about", { ...COMPLETE, name: " " })).toBe(false);
+    expect(isStepDone("about", { ...COMPLETE, name: null })).toBe(false);
+  });
+
+  it("doesn't need a photo", () => {
+    expect(isStepDone("about", { ...COMPLETE, photoPath: null })).toBe(true);
+  });
+
   it("needs a year and a non-blank major", () => {
     expect(isStepDone("about", { ...COMPLETE, major: "   " })).toBe(false);
     expect(isStepDone("about", { ...COMPLETE, major: "x".repeat(81) })).toBe(
@@ -73,5 +85,16 @@ describe("toggleArea", () => {
       "not-sure",
     ]);
     expect(toggleArea(["not-sure"], "euclid")).toEqual(["euclid"]);
+  });
+});
+
+describe("raffleEntries", () => {
+  it("is zero until the survey is finished", () => {
+    expect(raffleEntries({ ...COMPLETE, cannabis: null })).toBe(0);
+  });
+
+  it("gives one entry for finishing and one more for a photo", () => {
+    expect(raffleEntries(COMPLETE)).toBe(1);
+    expect(raffleEntries({ ...COMPLETE, photoPath: "u/photo" })).toBe(2);
   });
 });

@@ -15,6 +15,8 @@ import {
   firstOpenStep,
   isStepDone,
   MAJOR_MAX_LENGTH,
+  NAME_MAX_LENGTH,
+  raffleEntries,
   stepsLeft,
   toggleArea,
   WAITLIST_STEPS,
@@ -38,8 +40,10 @@ import {
   type Term,
   YEARS,
 } from "@/lib/waitlist/options";
+import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
+import { PhotoPicker } from "./photo-picker";
 
 type SignedIn = Extract<WaitlistSession, { status: "signed-in" }>;
 type View =
@@ -304,7 +308,7 @@ function Survey({
         <h1 className="font-semibold text-[22px] leading-tight tracking-tight">
           {STEP_TITLES[step]}
         </h1>
-        <StepFields step={step} answers={answers} set={set} />
+        <StepFields step={step} session={session} answers={answers} set={set} />
       </section>
 
       <div className="flex gap-2">
@@ -409,10 +413,12 @@ function TermRow({
 
 function StepFields({
   step,
+  session,
   answers,
   set,
 }: {
   step: WaitlistStep;
+  session: SignedIn;
   answers: WaitlistAnswers;
   set: (patch: Partial<WaitlistAnswers>) => void;
 }) {
@@ -420,6 +426,21 @@ function StepFields({
     case "about":
       return (
         <>
+          <Question label="Name">
+            <Input
+              aria-label="Name"
+              placeholder="First and last name"
+              autoComplete="name"
+              maxLength={NAME_MAX_LENGTH}
+              value={answers.name ?? ""}
+              onChange={(e) => set({ name: e.target.value || null })}
+            />
+          </Question>
+          <PhotoPicker
+            session={session}
+            path={answers.photoPath}
+            onChange={(photoPath) => set({ photoPath })}
+          />
           <Question label="Year">
             <ChoiceChips
               label="Year"
@@ -463,6 +484,7 @@ function StepFields({
             value={answers.areas}
             onToggle={(area) => set({ areas: toggleArea(answers.areas, area) })}
           />
+          <AreaListings areas={answers.areas} />
         </Question>
       );
     case "abroad":
@@ -554,8 +576,11 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
           You're entered!
         </h1>
         <p className="text-[15px] text-muted-foreground">
-          You're on the Verimate waitlist and in the {RAFFLE.prize} raffle.
-          We'll draw the winner by {RAFFLE.drawnBy} and email{" "}
+          You're on the Verimate waitlist and in the {RAFFLE.prize} raffle with{" "}
+          {raffleEntries(session.answers) === 2
+            ? "2 entries (one bonus for your photo)"
+            : "1 entry"}
+          . We'll draw the winner by {RAFFLE.drawnBy} and email{" "}
           <span className="text-foreground">{session.email}</span> if you win,
           and again when Verimate launches.
         </p>

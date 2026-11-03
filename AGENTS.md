@@ -20,11 +20,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ### 等候名单问卷（线上首页，2026-11-03 上线）
 
-verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用 SU / ESF 学校 Google 账号登录，答 6 步问题（年级和专业、预算、区域、study abroad、转租和找室友的学期、喝酒 / 抽烟 / 大麻），全部答完即加入 waitlist 并参加 $50 Amazon 礼品卡抽奖（2026-11-30 截止，规则页 `/raffle-rules`）。
+verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用 SU / ESF 学校 Google 账号登录，答 6 步问题（名字、可选照片、年级和专业、预算、区域、study abroad、转租和找室友的学期、喝酒 / 抽烟 / 大麻），全部答完即加入 waitlist 并参加 $50 Amazon 礼品卡抽奖（2026-11-30 截止，规则页 `/raffle-rules`）。
 
 - 页面：`components/waitlist/waitlist-page.tsx`；步骤和完成判断是纯函数 `lib/rules/waitlist.ts`；选项和抽奖日期在 `lib/waitlist/options.ts`（改选项必须同步改数据库 check 约束）；读写在 `lib/waitlist/api.ts`。
 - 数据：`public.waitlist_responses`（迁移文件 `supabase/migrations/20261103070000_waitlist_responses.sql`，在 SQL Editor 手动执行），每个学生一行，每答一步保存一次，`completed_at` 不为空即抽奖资格。浏览器直接读写，RLS 只允许读写自己的行，且 email 必须等于登录 token 里的 email；check 约束只接受 `syr.edu` / `g.syr.edu` / `esf.edu`。团队在 Supabase Table Editor 查看和导出数据。
 - "想住哪"一步是地图选区（`components/waitlist/area-map.tsx`，Leaflet，精确锁定版本）：OpenStreetMap 图块用 CSS 滤镜洗成白色（`.map-tiles`），SU / ESF 校区标绿，点区域即选中，下方选项同步。区域和校区轮廓在 `lib/waitlist/map-shapes.ts`：SU 主校区和 South Campus 取自 OSM，ESF 和其他区域是手画的大致范围，不是官方边界。CARTO 白色底图现在需要 API key，所以没用。
+- 照片（2026-11-03 决定）：第一步可选上传本人照片，上传即多一次抽奖机会（最多 2 次，`raffleEntries()`），规则页已写明。浏览器先重画成最长边 1280px 的 JPEG（去掉 EXIF 里的 GPS 位置）再上传到私有 bucket `waitlist-photos`，每人固定一个文件 `<user_id>/photo.jpg`；只有学校邮箱且已有问卷行的账号能上传，只能读写删自己的；前端用 1 小时有效的签名链接显示。抽奖时只有 storage 里真有这张照片才算加的那次。名字默认取 Google 账号姓名。
+- 服务端说了算的字段：`created_at`、`updated_at`、`completed_at` 由触发器 `set_waitlist_server_fields()` 写，浏览器传什么都不算；`completed_at` 在全部答完时盖章，之后不变，2026-11-30 23:59（美东）后不再盖章（日期与 `RAFFLE` 同步）。`saveWaitlist()` 保存后读回 `completed_at`。名字和专业不能以 `= + - @` 开头（防导出 CSV 时被表格当公式执行）。
+- 房源列表：选完区域后，地图下方列出这些区的公寓户型（月租、租期、总价、卧室、卫生间、面积），规则在 `lib/rules/listings.ts`，数据在 `lib/waitlist/listings.ts`，来源和调研笔记在 `docs/research/`。**目前关闭**（`LISTINGS_ENABLED = false`）：用户发现不少价格不对（如 The Standard 3 室实际约 $1,300），人工核对后再打开。
 - 个人 Gmail 登录会提示换学校账号；登录失败回到 `/?signin=failed`。
 - demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 
@@ -80,6 +83,7 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
   - Supabase 控制台 Authentication → URL Configuration 的 Redirect URLs 需包含 `http://localhost:3000/**` 和 Vercel 域名 `/**`，否则登录后会跳回 Site URL。
   - 学校 Google 账号（`SCHOOL_GOOGLE_DOMAINS`：`syr.edu`、`g.syr.edu`、`esf.edu`，规则函数 `schoolOfGoogleAccount()`）登录即视为学校邮箱已验证：`startGoogleUser()` 直接写入"在校生"验证，生日一步之后跳过选择路径和验证码，直接到填资料。未满 18 岁仍须走录取材料路径。其他 Google 账号照常走学校邮箱验证码（仍是示例）。
   - Google 账号目前只用于登录，还没有建表，登录后的资料、验证等仍是示例数据，只存在 `localStorage`；验证状态只在前端，不构成安全边界，接入真实功能时要在服务端根据 Google 返回的邮箱重新判断。
+- 安全头在 `next.config.ts` 的 `headers()`：CSP（不用 script nonce，否则 Cache Components 下所有页面变动态）、`nosniff`、`Referrer-Policy`。新增外部图片、接口或脚本域名时要同步加进 CSP，否则会被浏览器拦下。`proxy.ts` 的 matcher 不按扩展名跳过（否则 `/roommates/a.png` 能绕过 demo 拦截）。
 - 新建表默认不会自动暴露给 Data API，需要显式 `GRANT` 并开启 RLS；涉及数据库的改动先加载 `supabase-postgres-best-practices` skill。
 - `supabase/.temp/` 是 CLI 本地缓存，已忽略。
 

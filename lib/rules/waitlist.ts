@@ -12,6 +12,9 @@ import type {
 } from "@/lib/waitlist/options";
 
 export type WaitlistAnswers = {
+  name: string | null;
+  // Storage path of the optional photo; a photo earns a bonus raffle entry.
+  photoPath: string | null;
   year: Year | null;
   major: string | null;
   budget: Budget | null;
@@ -27,6 +30,8 @@ export type WaitlistAnswers = {
 };
 
 export const EMPTY_ANSWERS: WaitlistAnswers = {
+  name: null,
+  photoPath: null,
   year: null,
   major: null,
   budget: null,
@@ -50,16 +55,19 @@ export const WAITLIST_STEPS = [
 ] as const;
 export type WaitlistStep = (typeof WAITLIST_STEPS)[number];
 
+export const NAME_MAX_LENGTH = 80;
 export const MAJOR_MAX_LENGTH = 80;
+
+const filled = (text: string | null, max: number) =>
+  text !== null && text.trim().length > 0 && text.trim().length <= max;
 
 export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
   switch (step) {
     case "about":
       return (
+        filled(a.name, NAME_MAX_LENGTH) &&
         a.year !== null &&
-        a.major !== null &&
-        a.major.trim().length > 0 &&
-        a.major.trim().length <= MAJOR_MAX_LENGTH
+        filled(a.major, MAJOR_MAX_LENGTH)
       );
     case "budget":
       return a.budget !== null;
@@ -84,6 +92,12 @@ export function stepsLeft(a: WaitlistAnswers): number {
 
 export function isComplete(a: WaitlistAnswers): boolean {
   return stepsLeft(a) === 0;
+}
+
+// One entry for finishing the survey, plus one for adding a photo.
+export function raffleEntries(a: WaitlistAnswers): number {
+  if (!isComplete(a)) return 0;
+  return a.photoPath ? 2 : 1;
 }
 
 // Where to resume: the first unanswered step, or null when all are done.

@@ -36,8 +36,14 @@ export default function RaffleRulesPage() {
           </Rule>
           <Rule title="How to enter">
             Sign in at verimate.org with your @syr.edu or @esf.edu Google
-            account and answer every waitlist question. One entry per person;
+            account and answer every waitlist question. That's one entry;
             editing your answers doesn't add entries.
+          </Rule>
+          <Rule title="Bonus entry">
+            Add a clear photo of your own face while filling out the survey to
+            get one extra entry, for at most two entries per person. Photos that
+            aren't of you don't earn the bonus entry. A photo is optional and
+            not needed to enter.
           </Rule>
           <Rule title="Entry period">
             Entries close at 11:59 PM Eastern on {RAFFLE.endsLabel}.
@@ -52,9 +58,10 @@ export default function RaffleRulesPage() {
             winner doesn't reply within 7 days, we'll draw another winner.
           </Rule>
           <Rule title="Your information">
-            We use your school email and answers to run the raffle, contact you,
-            and plan Verimate. We won't sell your information. Ask us to delete
-            it any time by replying to any Verimate email.
+            We use your school email, name, photo and answers to run the raffle,
+            contact you, and plan Verimate. Your photo is stored privately and
+            only the Verimate team can see it. We won't sell your information.
+            Ask us to delete it any time by replying to any Verimate email.
           </Rule>
           <Rule title="Not affiliated">
             Amazon is not a sponsor of this raffle and isn't involved in it.
