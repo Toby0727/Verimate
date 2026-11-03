@@ -58,6 +58,7 @@ import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
 import { PhotoPicker } from "./photo-picker";
+import { ProfileCard } from "./profile-card";
 import { Confetti, GiftCard, RafflePill } from "./raffle-hype";
 import { AbroadPlanList, IconQuestion, TimingGrid } from "./step-parts";
 
@@ -609,22 +610,26 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
         <Confetti />
         <GiftCard entries={raffleEntries(session.answers)} />
       </div>
-      <section className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center">
-        <span className="hype-pop grid size-12 place-items-center rounded-full bg-verified-fill text-white">
-          <Check className="size-6" strokeWidth={3} />
-        </span>
-        <h1 className="font-semibold text-[24px] tracking-tight">
-          You're entered!
-        </h1>
-        <p className="text-[15px] text-muted-foreground">
-          You're on the Verimate waitlist and in the {RAFFLE.prize} raffle with{" "}
-          {raffleEntries(session.answers) === 2
-            ? "2 entries (one bonus for your photo)"
-            : "1 entry"}
-          . We'll draw the winner by {RAFFLE.drawnBy} and email{" "}
-          <span className="text-foreground">{session.email}</span> if you win,
-          and again when Verimate launches.
-        </p>
+      <section className="flex flex-col gap-4 rounded-2xl bg-card p-5">
+        <ProfileCard answers={session.answers} school={session.school} />
+        <div className="h-px bg-border" />
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="hype-pop grid size-12 place-items-center rounded-full bg-verified-fill text-white">
+            <Check className="size-6" strokeWidth={3} />
+          </span>
+          <h1 className="font-semibold text-[24px] tracking-tight">
+            You're entered!
+          </h1>
+          <p className="text-[15px] text-muted-foreground">
+            You're on the Verimate waitlist and in the {RAFFLE.prize} raffle
+            with{" "}
+            {raffleEntries(session.answers) === 2
+              ? "2 entries (one bonus for your photo)"
+              : "1 entry"}
+            . Entries close {RAFFLE.endsLabel}, and we'll email the result to
+            your school email. We'll also let you know when Verimate launches.
+          </p>
+        </div>
       </section>
 
       <div className="flex flex-col gap-2">
