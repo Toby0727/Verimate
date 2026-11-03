@@ -3,6 +3,38 @@
 > 每次开发结束后在最上面追加一段：做了什么、线上是什么状态、还有什么没做 / 没决定。
 > 约定、架构、规则写在 `AGENTS.md`；这里只记"发生了什么、走到哪了"。
 
+> 这个仓库是**公开的**：这里不写学生姓名 / 邮箱等个人信息，也不写还没修好的安全问题细节（细节在本地和 Supabase 后台）。
+
+---
+
+## 2026-11-03 晚：Instagram story、安全审查 #2
+
+### 做了什么
+- **Instagram story 图** `docs/brand/flyer/verimate-ig-story.png`：1080×1920，没有二维码。红卡上写 "Sign up to find your sublease / roomie and win a $50 Amazon gift card + one month free account"。发的时候在 verimate.org 那行上面加一个 Link sticker。
+- **图片生成说明** `docs/brand/IMAGE_GENERATION.md`：品牌规则、每张图的版式、重新生成的命令、自检清单。
+- **英文版今日工作记录** `docs/worklog/2026-11-03.md`。
+- **报名**：截至 11-03 17:31，3 人答完问卷进入抽奖（都是学校账号），2 个账号只登录没答。名单在 Supabase → Table Editor → `waitlist_responses`。
+- **安全审查 #2**：没有严重问题，任何人都读不到别人的数据。
+  - **已上线（只改代码）**：
+    - 生产环境的会话 cookie 加 `Secure`
+    - 加 `Permissions-Policy`
+    - 留学数据格式异常时页面不会崩溃
+    - 邀请链接里的码保存后会清掉
+    - 失效的邀请码会自动去掉
+    - 隐私政策和抽奖规则的措辞已更正
+  - **数据库加固（v5）**：已写好并在本地测过，**还没在线上跑**，文件是 `supabase/migrations/20261104020000_waitlist_security_review_2.sql`。内容包括：
+    - 学校账号的认定更严格
+    - 抽奖截止后锁定邀请码
+    - 数据检查更严格
+    - 以后新建的表默认不对外开放
+  - **配套前端改动**在分支 `001-clickable-flow-demo` 上，还没进 `main`。**顺序：先在 SQL Editor 跑 v5，再把分支推到 `main`。**
+
+### 你需要做 / 决定的
+- [ ] 在 SQL Editor 跑 v5，然后让 Claude 把分支推到 `main`。
+- [ ] Supabase → Authentication → URL Configuration：确认 Redirect URLs 只有我们自己的地址，没有宽泛的通配符。
+- [ ] 开奖前按本地的开奖流程核对：账号去重、照片和邀请只算截止前的。
+- [ ] 删除用户时，Storage 里的照片要一起删掉。
+
 ---
 
 ## 2026-11-02 ~ 11-03：Google 登录 + 等候名单问卷上线
@@ -63,7 +95,7 @@
 - [ ] 真机测一遍：手机上照片裁剪的手指拖动 / 双指缩放；第 4 步多学期目的地；完成页邀请码。
 - [ ] 海报目前是 17×11（约 3:2）；放进 16:9 课件会有白边，需要的话再出一个 16:9 版本。
 - [ ] Google client secret 曾在聊天里出现过，正式推广前建议在 Google Cloud 轮换，再更新到 Supabase 的 Google provider。
-- [ ] 安全审查 #2 的结论和修复见下一段（11-03 晚）。
+- [x] 安全审查 #2：见上面 "11-03 晚" 一段。
 
 ### 在另一台设备上继续
 
