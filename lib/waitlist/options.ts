@@ -88,6 +88,12 @@ export const ABROAD_PLACES = {
   ],
 } as const satisfies Record<string, Choice<string>[]>;
 
+export const ABROAD_PLACE_LABELS: Record<string, string> = Object.fromEntries(
+  Object.values(ABROAD_PLACES)
+    .flat()
+    .map((place) => [place.value, place.label]),
+);
+
 export const TERMS = [
   { value: "spring-2027", label: "Spring 2027" },
   { value: "summer-2027", label: "Summer 2027" },

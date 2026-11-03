@@ -518,10 +518,12 @@ function StepFields({
     case "timing":
       return (
         <TimingGrid
+          away={answers.studyAbroadPlans}
           columns={[
             {
               label: "Sublet my place",
               value: answers.subletOutTerms,
+              initial: answers.studyAbroadPlans?.map((plan) => plan.term),
               onChange: (subletOutTerms) => set({ subletOutTerms }),
             },
             {

@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, type LucideIcon } from "lucide-react";
+import { Check, type LucideIcon, Plane } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 import type { Choice } from "@/components/shell/choice-chips";
 import type { AbroadPlan } from "@/lib/rules/waitlist";
 import { cn } from "@/lib/utils";
 import {
+  ABROAD_PLACE_LABELS,
   ABROAD_PLACES,
   type AbroadPlace,
   STUDY_ABROAD,
@@ -18,15 +19,25 @@ type TimingColumn = {
   label: string;
   value: Term[] | null;
   onChange: (terms: Term[]) => void;
+  // Ticked the first time the grid shows, before the student changes it.
+  initial?: Term[];
 };
 
 // Terms down the side, the three needs across the top; tap a box for every
 // term you need that for. An empty column means "not needed", so the step
 // counts as answered as soon as it's shown.
-export function TimingGrid({ columns }: { columns: TimingColumn[] }) {
+// Terms away from step 4 are tagged with where, so the student sees why
+// subletting their place might matter that term.
+export function TimingGrid({
+  columns,
+  away,
+}: {
+  columns: TimingColumn[];
+  away: AbroadPlan[] | null;
+}) {
   useEffect(() => {
     for (const column of columns) {
-      if (column.value === null) column.onChange([]);
+      if (column.value === null) column.onChange(column.initial ?? []);
     }
   }, [columns]);
 
@@ -52,7 +63,12 @@ export function TimingGrid({ columns }: { columns: TimingColumn[] }) {
         </thead>
         <tbody>
           {TERMS.map((term) => (
-            <TimingRow key={term.value} term={term} columns={columns} />
+            <TimingRow
+              key={term.value}
+              term={term}
+              columns={columns}
+              place={away?.find((plan) => plan.term === term.value)?.place}
+            />
           ))}
         </tbody>
       </table>
@@ -66,9 +82,11 @@ export function TimingGrid({ columns }: { columns: TimingColumn[] }) {
 function TimingRow({
   term,
   columns,
+  place,
 }: {
   term: Choice<Term>;
   columns: TimingColumn[];
+  place?: AbroadPlace | null;
 }) {
   const info = TERM_MONTHS[term.value];
   return (
@@ -78,6 +96,12 @@ function TimingRow({
         <span className="block text-[12px] text-muted-foreground">
           {info.months} · {info.count} mo
         </span>
+        {place && (
+          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-verified-tint px-2 py-0.5 font-medium text-[11px] text-verified">
+            <Plane className="size-3" aria-hidden />
+            {ABROAD_PLACE_LABELS[place]}
+          </span>
+        )}
       </th>
       {columns.map((column) => {
         const on = column.value?.includes(term.value) ?? false;
