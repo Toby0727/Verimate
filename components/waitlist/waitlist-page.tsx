@@ -28,7 +28,7 @@ import {
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
   normalizeReferralCode,
-  REFERRAL_BOOST,
+  raffleBoost,
   raffleEntries,
   setAbroadPlace,
   stepsLeft,
@@ -191,7 +191,7 @@ const PERKS: { title: string; body: string }[] = [
   },
   {
     title: "Better odds, your way",
-    body: "Sign in with your school account and add a real photo for a bonus entry each, and get +10% for every friend who joins with your code.",
+    body: "Sign in with your school account for +5%, add a real photo for a bonus entry, and get +10% for every friend who joins with your code.",
   },
 ];
 
@@ -216,11 +216,12 @@ function Landing() {
           <GoogleButton label="Continue with Google" />
           <p className="text-[12px] text-muted-foreground">
             Use your <b className="font-semibold text-foreground">@g.syr.edu</b>{" "}
-            or <b className="font-semibold text-foreground">@esf.edu</b> account
-            to get verified and a{" "}
-            <b className="font-semibold text-verified">bonus raffle entry</b>. A
-            personal Google account works too. We only use your email to contact
-            you.
+            account (SU and ESF students both have one) to get verified and a{" "}
+            <b className="font-semibold text-verified">
+              5% better chance to win the {RAFFLE.prize}
+            </b>
+            . A personal Google account works too. We only use your email to
+            contact you.
           </p>
         </div>
       </section>
@@ -263,8 +264,9 @@ function SchoolNudge() {
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-verified-tint p-3">
       <span className="text-[13px] text-verified">
-        You're on a personal account. Sign in with your <b>@g.syr.edu</b> or{" "}
-        <b>@esf.edu</b> account to get verified and a bonus raffle entry.
+        You're on a personal account. Sign in with your <b>@g.syr.edu</b>{" "}
+        account (SU and ESF students both have one) to get verified and a 5%
+        better chance to win the {RAFFLE.prize}.
       </span>
       <Button
         size="sm"
@@ -285,14 +287,13 @@ function SchoolNudge() {
 }
 
 function entriesText(session: SignedIn): string {
-  const entries = raffleEntries(session.answers, session.school !== null);
-  const bonuses = [
-    session.school && "your school account",
-    session.answers.photoPath && "your photo",
-  ].filter(Boolean);
-  return bonuses.length
-    ? `${entries} entries (a bonus for ${bonuses.join(" and ")})`
-    : "1 entry";
+  const entries =
+    raffleEntries(session.answers) === 2
+      ? "2 entries (one bonus for your photo)"
+      : "1 entry";
+  return session.school
+    ? `${entries}, plus a 5% better chance for your school account`
+    : entries;
 }
 
 function ErrorCard() {
@@ -711,8 +712,10 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
       <div className="relative">
         <Confetti />
         <GiftCard
-          entries={raffleEntries(session.answers, session.school !== null)}
-          boost={Math.round(friends * REFERRAL_BOOST * 100)}
+          entries={raffleEntries(session.answers)}
+          boost={Math.round(
+            raffleBoost(session.school !== null, friends) * 100,
+          )}
         />
       </div>
       <section className="flex flex-col gap-4 rounded-2xl bg-card p-5">

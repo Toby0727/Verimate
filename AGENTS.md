@@ -32,7 +32,7 @@ verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用
 - 服务端说了算的字段：`created_at`、`updated_at`、`completed_at` 由触发器 `set_waitlist_server_fields()` 写，浏览器传什么都不算；`completed_at` 在全部答完时盖章，之后不变，2026-11-30 23:59（美东）后不再盖章（日期与 `RAFFLE` 同步）。`saveWaitlist()` 保存后读回 `completed_at`。名字和专业不能以 `= + - @` 开头（防导出 CSV 时被表格当公式执行）。
 - 房源列表：选完区域后，地图下方列出这些区的公寓户型（月租、租期、总价、卧室、卫生间、面积），规则在 `lib/rules/listings.ts`，数据在 `lib/waitlist/listings.ts`，来源和调研笔记在 `docs/research/`。**目前关闭**（`LISTINGS_ENABLED = false`）：用户发现不少价格不对（如 The Standard 3 室实际约 $1,300），人工核对后再打开。
 - 隐私政策 `/privacy`（2026-11-03 起是真实页面，不再是 demo 草稿）：也是 Google OAuth 同意屏幕上填的隐私政策链接，首页页脚有链接。改了收集的数据（`lib/waitlist/api.ts`）要同步改这页。公开联系邮箱是 `CONTACT_EMAIL`（`lib/waitlist/options.ts`）。承诺：删除请求 30 天内处理；没上线的话抽奖后 12 个月内删除。
-- 个人 Google 账号也能参加（2026-11-03 决定）：`school` 为 null 表示"个人账号，未验证"，会看到"Switch to my school account"提示。学校账号（`@g.syr.edu`、`@esf.edu`，SU 的 Google 账号是 `@g.syr.edu`）多一次抽奖机会：条目 = 答完 1 + 学校账号 1 + 照片 1（最多 3），见 `raffleEntries(answers, schoolAccount)`。个人账号中奖要先出示在读证明。邀请加成只算用学校账号答完的朋友（个人 Gmail 谁都能注册，防刷）。数据库约束：`school` 必须和邮箱后缀一致。登录失败回到 `/?signin=failed`。
+- 个人 Google 账号也能参加（2026-11-03 决定）：`school` 为 null 表示"个人账号，未验证"，会看到"Switch to my school account"提示。学校账号（`@g.syr.edu`、`@esf.edu`）中奖概率 +5%（`SCHOOL_BOOST`），条目仍是答完 1 + 照片 1（最多 2）；权重 = 条目 ×（1 + 5% 学校账号 + 10% × 邀请人数），见 `raffleWeight()`。文案只推荐 `@g.syr.edu`：ESF 学生通过 SU NetID 也有 SU 账号，`@esf.edu` 邮箱在微软上、不是 Google 账号（it.esf.edu）；`@g.syr.edu` 分不出 SU 还是 ESF，所以卡片只写 "Verified student"。个人账号中奖要先出示在读证明。邀请加成只算用学校账号答完的朋友（个人 Gmail 谁都能注册，防刷）。数据库约束：`school` 必须和邮箱后缀一致。登录失败回到 `/?signin=failed`。
 - demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/privacy`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 
 - `docs/product-requirements.md`：产品需求定稿（2026-10-27 访谈），写规格前先读

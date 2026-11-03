@@ -180,15 +180,14 @@ export function isComplete(a: WaitlistAnswers): boolean {
   return stepsLeft(a) === 0;
 }
 
-// One entry for finishing the survey, plus one for signing in with a school
-// account and one for adding a photo.
-export function raffleEntries(
-  a: WaitlistAnswers,
-  schoolAccount: boolean,
-): number {
+// One entry for finishing the survey, plus one for adding a photo.
+export function raffleEntries(a: WaitlistAnswers): number {
   if (!isComplete(a)) return 0;
-  return 1 + (schoolAccount ? 1 : 0) + (a.photoPath ? 1 : 0);
+  return a.photoPath ? 2 : 1;
 }
+
+// Signing in with a school account raises your chance this much.
+export const SCHOOL_BOOST = 0.05;
 
 export const REFERRAL_CODE_LENGTH = 6;
 // Each friend who finishes the survey with your code adds this share of
@@ -208,9 +207,20 @@ export function isReferralCode(code: string): boolean {
   return new RegExp(`^[A-Z0-9]{${REFERRAL_CODE_LENGTH}}$`).test(code);
 }
 
-// Chance weight in the drawing: entries, raised 10% per friend who joined.
-export function raffleWeight(entries: number, referrals: number): number {
-  return Math.round(entries * (1 + REFERRAL_BOOST * referrals) * 100) / 100;
+// Extra chance on top of your entries, as a fraction: 5% for a school
+// account and 10% per friend who joined with your code.
+export function raffleBoost(schoolAccount: boolean, referrals: number): number {
+  return (schoolAccount ? SCHOOL_BOOST : 0) + REFERRAL_BOOST * referrals;
+}
+
+// Chance weight in the drawing: entries raised by the boost.
+export function raffleWeight(
+  entries: number,
+  schoolAccount: boolean,
+  referrals: number,
+): number {
+  const weight = entries * (1 + raffleBoost(schoolAccount, referrals));
+  return Math.round(weight * 100) / 100;
 }
 
 // Where to resume: the first unanswered step, or null when all are done.

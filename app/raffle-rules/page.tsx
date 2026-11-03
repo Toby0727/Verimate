@@ -42,20 +42,24 @@ export default function RaffleRulesPage() {
             waitlist question. That's one entry; editing your answers doesn't
             add entries. Use one account per person.
           </Rule>
-          <Rule title="Bonus entries">
-            Get one extra entry for signing in with your school Google account
-            (@g.syr.edu or @esf.edu), and one for adding a clear photo of your
-            own face, for at most three entries per person. Photos that aren't
-            of you don't earn the bonus. Both are optional and not needed to
-            enter.
+          <Rule title="Bonus entry">
+            Add a clear photo of your own face while filling out the survey to
+            get one extra entry, for at most two entries per person. Photos that
+            aren't of you don't earn the bonus entry. A photo is optional and
+            not needed to enter.
+          </Rule>
+          <Rule title="School account bonus">
+            Signing in with your school Google account (@g.syr.edu, which SU and
+            ESF students both have, or @esf.edu) raises your chance by 5% of
+            your entries. It's optional.
           </Rule>
           <Rule title="Referral bonus">
             After you finish, you get a referral code. Each other eligible
             student who signs in with their own school Google account, enters
             your code and finishes every question raises your chance by 10% of
-            your entries (for example, 3 friends make 1 entry count as 1.3).
-            Your own code and codes from your other accounts don't count, and
-            each student can use only one code.
+            your entries (for example, a school account and 3 friends make 1
+            entry count as 1.35). Your own code and codes from your other
+            accounts don't count, and each student can use only one code.
           </Rule>
           <Rule title="Entry period">
             Entries close at 11:59 PM Eastern on {RAFFLE.endsLabel}.

@@ -1,7 +1,7 @@
 -- Waitlist v4 (2026-11-03): personal Google accounts can join too.
 -- school is now null for a personal account (not verified as a student);
 -- SU / ESF accounts still get school set from their email. A school account
--- earns a bonus raffle entry, and only school-account friends count toward
+-- raises the raffle chance 5%, and only school-account friends count toward
 -- referral bonuses, since anyone can make a personal account.
 
 alter table public.waitlist_responses

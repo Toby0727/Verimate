@@ -60,7 +60,7 @@ export function ProfileCard({
         {school ? (
           <span className="mt-0.5 inline-flex items-center gap-1 font-medium text-[12px] text-verified">
             <BadgeCheck className="size-3.5" aria-hidden />
-            Verified {school} student
+            Verified student
           </span>
         ) : (
           <span className="mt-0.5 text-[12px] text-muted-foreground">
