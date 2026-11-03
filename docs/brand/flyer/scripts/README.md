@@ -12,6 +12,7 @@ node $SCRIPTS/assets.cjs $REPO .                         # 生成 qr.png（指�
 python3 -I $SCRIPTS/flyer.py . $SCRIPTS/figtree-latin.ttf $REPO/docs/brand/flyer/verimate-flyer        # 竖版宣传单 PNG + PDF
 python3 -I $SCRIPTS/poster_render.py . $SCRIPTS/figtree-latin.ttf $REPO/docs/brand/final/verimate-logo.png $REPO/docs/brand/flyer/verimate-poster   # 横版海报 PNG + PDF
 NODE_PATH=./node_modules node $SCRIPTS/poster_image.js $REPO/docs/brand/flyer/verimate-poster.png $REPO/docs/brand/flyer/verimate-poster.pptx       # 海报整页图放进 PPTX
+python3 -I $SCRIPTS/story.py . $SCRIPTS/figtree-latin.ttf $REPO/docs/brand/flyer/verimate-ig-story   # Instagram story 1080x1920，没有二维码
 node $SCRIPTS/scan.cjs $REPO $REPO/docs/brand/flyer/verimate-flyer.png   # 扫码自检
 ```
 
