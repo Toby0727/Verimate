@@ -24,6 +24,7 @@ verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用
 
 - 页面：`components/waitlist/waitlist-page.tsx`；步骤和完成判断是纯函数 `lib/rules/waitlist.ts`；选项和抽奖日期在 `lib/waitlist/options.ts`（改选项必须同步改数据库 check 约束）；读写在 `lib/waitlist/api.ts`。
 - 数据：`public.waitlist_responses`（迁移文件 `supabase/migrations/20261103070000_waitlist_responses.sql`，在 SQL Editor 手动执行），每个学生一行，每答一步保存一次，`completed_at` 不为空即抽奖资格。浏览器直接读写，RLS 只允许读写自己的行，且 email 必须等于登录 token 里的 email；check 约束只接受 `syr.edu` / `g.syr.edu` / `esf.edu`。团队在 Supabase Table Editor 查看和导出数据。
+- "想住哪"一步是地图选区（`components/waitlist/area-map.tsx`，Leaflet，精确锁定版本）：OpenStreetMap 图块用 CSS 滤镜洗成白色（`.map-tiles`），SU / ESF 校区标绿，点区域即选中，下方选项同步。区域和校区轮廓在 `lib/waitlist/map-shapes.ts`：SU 主校区和 South Campus 取自 OSM，ESF 和其他区域是手画的大致范围，不是官方边界。CARTO 白色底图现在需要 API key，所以没用。
 - 个人 Gmail 登录会提示换学校账号；登录失败回到 `/?signin=failed`。
 - demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 

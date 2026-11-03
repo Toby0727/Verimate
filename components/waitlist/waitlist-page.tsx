@@ -38,6 +38,7 @@ import {
   type Term,
   YEARS,
 } from "@/lib/waitlist/options";
+import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
 
 type SignedIn = Extract<WaitlistSession, { status: "signed-in" }>;
@@ -451,7 +452,11 @@ function StepFields({
       );
     case "areas":
       return (
-        <Question label="Pick all that work for you">
+        <Question label="Tap every area on the map that works for you">
+          <AreaMap
+            value={answers.areas}
+            onToggle={(area) => set({ areas: toggleArea(answers.areas, area) })}
+          />
           <MultiChips
             label="Areas"
             options={AREAS}

@@ -148,3 +148,33 @@
     radial-gradient(120% 100% at 100% 100%, #ff9ec7 0%, transparent 55%),
     #6f7bf7;
 }
+
+/* Waitlist area map (components/waitlist/area-map.tsx): OpenStreetMap tiles
+   washed out to near-white so the zones carry the color. */
+.map-tiles {
+  filter: grayscale(1) contrast(0.45) brightness(1.4);
+}
+.leaflet-tooltip.map-label {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow:
+    0 0 3px #fff,
+    0 0 3px #fff;
+}
+.leaflet-tooltip.map-label::before {
+  display: none;
+}
+.leaflet-tooltip.map-label-on {
+  color: #fff;
+  text-shadow: none;
+}
+.leaflet-tooltip.map-label-campus {
+  color: var(--verified);
+  font-size: 11px;
+}
