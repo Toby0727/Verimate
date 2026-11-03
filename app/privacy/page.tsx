@@ -56,8 +56,9 @@ export default function PrivacyPage() {
             or landlords. If the app later uses them in your profile, we'll ask
             you first. We use these services to run the site, and they handle
             data only to provide them: Supabase (database, photo storage and
-            sign-in), Vercel (hosting), Google (sign-in) and OpenStreetMap (the
-            map on the survey, which your browser loads directly).
+            sign-in), Vercel (hosting), Google (sign-in) and OpenFreeMap (the
+            map on the survey, built on OpenStreetMap data, which your browser
+            loads directly).
           </Section>
           <Section title="How long we keep it">
             Until Verimate launches, so we can invite you, or until you ask us

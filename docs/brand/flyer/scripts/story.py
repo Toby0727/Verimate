@@ -37,7 +37,7 @@ def text_top(x, y, s, f, fill):
 logo = Image.open(f"{D}/logo.png").convert("RGBA")
 lw = 360
 logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
-img.paste(logo, (M, 250), logo)
+img.paste(logo, (M, 240), logo)
 
 # Slogan, four lines sized to the width
 LINES = [
@@ -46,14 +46,14 @@ LINES = [
     [("roommate", RED), (" matching", INK)],
     [("for off-campus living.", INK)],
 ]
-size = 120
+size = 108
 while True:
     sf = font(size, 700)
     widest = max(sum(d.textlength(s, font=sf) for s, _ in line) for line in LINES)
     if widest <= W - 2 * M:
         break
     size -= 2
-y = 410
+y = 390
 for line in LINES:
     x = M
     for s, c in line:
@@ -61,16 +61,18 @@ for line in LINES:
     y += round(size * 1.12)
 
 # Gift card
-cx, cy, cw, ch = M, y + 50, W - 2 * M, 500
+cx, cy, cw, ch = M, y + 44, W - 2 * M, 560
 d.rounded_rectangle((cx, cy, cx + cw, cy + ch), radius=40, fill=RED)
 lc = (214, 120, 131)
 d.line((cx + cw - 130, cy, cx + cw - 130, cy + ch), fill=lc, width=3)
-d.line((cx, cy + 110, cx + cw, cy + 110), fill=lc, width=3)
+d.line((cx, cy + 168, cx + cw, cy + 168), fill=lc, width=3)
 d.rounded_rectangle((cx + 16, cy + 16, cx + cw - 16, cy + ch - 16), radius=28,
                     outline=(200, 82, 96), width=2)
-text_top(cx + 52, cy + 48, "S I G N   U P   T O   W I N", font(26, 700), PINK)
+lf = font(36, 700)
+text_top(cx + 52, cy + 46, "Sign up to find your sublease / roomie", lf, WHITE)
+text_top(cx + 52, cy + 96, "and win a", lf, PINK)
 nf, df = font(200, 800), font(100, 500)
-top = cy + 150
+top = cy + 200
 _, n_t, _, n_b = d.textbbox((0, 0), "50", font=nf)
 dw = text_top(cx + 52, top + 6, "$", df, WHITE)
 nx = cx + 52 + dw + 6
@@ -85,13 +87,13 @@ text_top(cx + 52, cy + ch - 120, "+ one month free account", font(46, 700), WHIT
 text_top(cx + 52, cy + ch - 56, "Ends Nov 30", font(28, 500), PINK)
 
 # Call to action
-y = cy + ch + 56
+y = cy + ch + 44
 text_top(M, y, "Join the waitlist at", font(44, 500), MUTED)
 text_top(M, y + 64, "verimate.org", font(76, 800), INK)
 
 # Sign-in policy
 pf, pb = font(30, 500), font(30, 750)
-y += 164
+y += 150
 x = M
 for s, f, c in [("Use your ", pf, MUTED), ("@g.syr.edu", pb, INK),
                 (" account for a", pf, MUTED)]:

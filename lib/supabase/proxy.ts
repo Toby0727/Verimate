@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { cookieOptions } from "./cookies";
 
 // 每个请求刷新 Supabase 会话 cookie，由根目录 proxy.ts 调用。只刷新，不拦截页面：
 // demo 允许未登录浏览，访问控制以后用服务端 getClaims() 和 RLS 做。
@@ -13,6 +14,7 @@ export async function updateSession(request: NextRequest) {
 
   // 每个请求新建 client，不要放全局变量
   const supabase = createServerClient(url, key, {
+    cookieOptions,
     cookies: {
       getAll() {
         return request.cookies.getAll();

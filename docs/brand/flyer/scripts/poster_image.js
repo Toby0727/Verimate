@@ -10,8 +10,14 @@ const [, , IMAGE, OUT] = process.argv;
   const s = pres.addSlide({ sectionTitle: "Poster" });
   s.background = { color: "F4F4F5" };
   s.addImage({
-    path: IMAGE, x: 0, y: 0, w: 17, h: 11, objectName: "Poster",
-    altText: "Verimate waitlist poster: Building the most complete sublet + roommate matching for off-campus living. Sign up to win a $50 Amazon gift card plus one month free. Scan the QR code or visit verimate.org; sign in with your @g.syr.edu account for a 5% better chance to win.",
+    path: IMAGE,
+    x: 0,
+    y: 0,
+    w: 17,
+    h: 11,
+    objectName: "Poster",
+    altText:
+      "Verimate waitlist poster: Building the most complete sublet + roommate matching for off-campus living. Sign up to win a $50 Amazon gift card plus one month free. Scan the QR code or visit verimate.org; sign in with your @g.syr.edu account for a 5% better chance to win.",
   });
   await pres.writeFile({ fileName: OUT });
   console.log("wrote", OUT);

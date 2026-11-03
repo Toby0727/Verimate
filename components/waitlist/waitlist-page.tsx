@@ -41,6 +41,7 @@ import {
 } from "@/lib/rules/waitlist";
 import { cn } from "@/lib/utils";
 import {
+  forgetReferral,
   InvalidReferralCode,
   loadReferralCount,
   loadWaitlist,
@@ -348,12 +349,33 @@ function Survey({
   async function next() {
     setSaving(true);
     try {
-      const { completedAt, referralCode } = await saveWaitlist(
-        session,
-        answers,
-      );
-      const saved = { ...session, answers, completedAt, referralCode };
-      const open = firstOpenStep(answers);
+      let toSave = answers;
+      let result: Awaited<ReturnType<typeof saveWaitlist>>;
+      try {
+        result = await saveWaitlist(session, toSave);
+      } catch (error) {
+        // A code saved earlier stops working if its owner deleted their
+        // data: drop it and save again instead of blocking the student.
+        const stale =
+          error instanceof InvalidReferralCode &&
+          toSave.referredBy !== null &&
+          toSave.referredBy === session.answers.referredBy;
+        if (!stale) throw error;
+        toSave = { ...toSave, referredBy: null };
+        setAnswers(toSave);
+        result = await saveWaitlist(session, toSave);
+        toast("That referral code no longer exists, so we removed it.");
+      }
+      // The friend's code from an invite link has done its job.
+      if (toSave.referredBy) forgetReferral();
+      const { completedAt, referralCode } = result;
+      const saved = {
+        ...session,
+        answers: toSave,
+        completedAt,
+        referralCode,
+      };
+      const open = firstOpenStep(toSave);
       if (isLast) {
         if (open) onStep(open, saved);
         else onDone(saved);

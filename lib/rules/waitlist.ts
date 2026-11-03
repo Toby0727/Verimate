@@ -163,13 +163,17 @@ export function decodeAbroadPlans(
   stored: string[] | null,
 ): AbroadPlan[] | null {
   if (!stored) return null;
-  return stored.map((item) => {
-    const [term, place] = item.split(":");
-    return {
-      term: term as Term,
-      place: place ? (place as AbroadPlace) : null,
-    };
-  });
+  // Skips anything that isn't a "term:place" string rather than crashing.
+  const plans = stored
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => {
+      const [term, place] = item.split(":");
+      return {
+        term: term as Term,
+        place: place ? (place as AbroadPlace) : null,
+      };
+    });
+  return plans.length ? plans : null;
 }
 
 export function stepsLeft(a: WaitlistAnswers): number {

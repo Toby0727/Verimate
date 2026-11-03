@@ -70,8 +70,9 @@ export default function RaffleRulesPage() {
           </Rule>
           <Rule title="Drawing and notification">
             We'll draw one winner at random from all eligible entries by{" "}
-            {RAFFLE.drawnBy} and email them at their school address. If the
-            winner doesn't reply within 7 days, we'll draw another winner.
+            {RAFFLE.drawnBy} and email them at the address they signed in with.
+            If the winner doesn't reply within 7 days, we'll draw another
+            winner.
           </Rule>
           <Rule title="Your information">
             We use your school email, name, photo and answers to run the raffle,

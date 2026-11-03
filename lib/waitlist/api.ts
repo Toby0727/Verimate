@@ -210,6 +210,12 @@ export function rememberReferral(code: string) {
   } catch {}
 }
 
+export function forgetReferral() {
+  try {
+    localStorage.removeItem(REF_KEY);
+  } catch {}
+}
+
 export function rememberedReferral(): string | null {
   try {
     return localStorage.getItem(REF_KEY);

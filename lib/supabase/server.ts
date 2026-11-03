@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cookieOptions } from "./cookies";
 import { supabasePublishableKey, supabaseUrl } from "./env";
 
 // Server Components / Server Functions / Route Handlers 使用；每个请求新建一个
@@ -7,6 +8,7 @@ export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, supabasePublishableKey, {
+    cookieOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();
