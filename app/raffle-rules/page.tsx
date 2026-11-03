@@ -32,19 +32,22 @@ export default function RaffleRulesPage() {
           </Rule>
           <Rule title="Who can enter">
             Students currently enrolled at Syracuse University or SUNY ESF who
-            are 18 or older and sign in with their school Google account.
-            Verimate team members can't win. Void where prohibited.
+            are 18 or older. You can sign in with your school Google account or
+            a personal one; if you win on a personal account, we'll ask for
+            proof that you're enrolled before sending the prize. Verimate team
+            members can't win. Void where prohibited.
           </Rule>
           <Rule title="How to enter">
-            Sign in at verimate.org with your @syr.edu or @esf.edu Google
-            account and answer every waitlist question. That's one entry;
-            editing your answers doesn't add entries.
+            Sign in at verimate.org with a Google account and answer every
+            waitlist question. That's one entry; editing your answers doesn't
+            add entries. Use one account per person.
           </Rule>
-          <Rule title="Bonus entry">
-            Add a clear photo of your own face while filling out the survey to
-            get one extra entry, for at most two entries per person. Photos that
-            aren't of you don't earn the bonus entry. A photo is optional and
-            not needed to enter.
+          <Rule title="Bonus entries">
+            Get one extra entry for signing in with your school Google account
+            (@g.syr.edu or @esf.edu), and one for adding a clear photo of your
+            own face, for at most three entries per person. Photos that aren't
+            of you don't earn the bonus. Both are optional and not needed to
+            enter.
           </Rule>
           <Rule title="Referral bonus">
             After you finish, you get a referral code. Each other eligible

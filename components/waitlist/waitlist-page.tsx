@@ -75,7 +75,6 @@ type View =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "signed-out" }
-  | { kind: "not-school"; email: string }
   | { kind: "survey"; session: SignedIn; step: WaitlistStep }
   | { kind: "done"; session: SignedIn };
 
@@ -83,9 +82,6 @@ const WAITLIST_PATH = "/";
 
 function viewFor(session: WaitlistSession): View {
   if (session.status === "signed-out") return { kind: "signed-out" };
-  if (session.status === "not-school") {
-    return { kind: "not-school", email: session.email };
-  }
   const open = firstOpenStep(session.answers);
   return open
     ? { kind: "survey", session, step: open }
@@ -133,8 +129,6 @@ export function WaitlistPage() {
           <ErrorCard />
         ) : view.kind === "signed-out" ? (
           <Landing />
-        ) : view.kind === "not-school" ? (
-          <NotSchool email={view.email} />
         ) : view.kind === "survey" ? (
           <Survey
             session={view.session}
@@ -197,7 +191,7 @@ const PERKS: { title: string; body: string }[] = [
   },
   {
     title: "Better odds, your way",
-    body: "Add a real photo for a bonus entry, and get +10% for every friend who joins with your code.",
+    body: "Sign in with your school account and add a real photo for a bonus entry each, and get +10% for every friend who joins with your code.",
   },
 ];
 
@@ -216,13 +210,17 @@ function Landing() {
           off-campus living.
         </h1>
         <p className="max-w-[34ch] text-[16px] text-muted-foreground leading-relaxed">
-          Only verified SU & ESF students. Join the waitlist in about a minute.
+          For SU & ESF students. Join the waitlist in about a minute.
         </p>
         <div className="flex flex-col gap-2">
-          <GoogleButton label="Continue with school Google" />
+          <GoogleButton label="Continue with Google" />
           <p className="text-[12px] text-muted-foreground">
-            Use your @syr.edu or @esf.edu account. We only use it to confirm
-            you're a student and to contact you.
+            Use your <b className="font-semibold text-foreground">@g.syr.edu</b>{" "}
+            or <b className="font-semibold text-foreground">@esf.edu</b> account
+            to get verified and a{" "}
+            <b className="font-semibold text-verified">bonus raffle entry</b>. A
+            personal Google account works too. We only use your email to contact
+            you.
           </p>
         </div>
       </section>
@@ -258,20 +256,20 @@ function Landing() {
   );
 }
 
-function NotSchool({ email }: { email: string }) {
+// Shown to students on a personal Google account: switching to their school
+// account verifies them and earns a bonus entry.
+function SchoolNudge() {
   const [switching, setSwitching] = useState(false);
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-card p-5">
-      <h1 className="font-semibold text-[22px] leading-tight tracking-tight">
-        Use your school account
-      </h1>
-      <p className="text-[15px] text-muted-foreground">
-        You signed in as <span className="text-foreground">{email}</span>.
-        Verimate is only for SU and ESF students, so sign in with your @syr.edu
-        or @esf.edu Google account instead.
-      </p>
+    <div className="flex flex-col gap-2 rounded-xl bg-verified-tint p-3">
+      <span className="text-[13px] text-verified">
+        You're on a personal account. Sign in with your <b>@g.syr.edu</b> or{" "}
+        <b>@esf.edu</b> account to get verified and a bonus raffle entry.
+      </span>
       <Button
-        size="lg"
+        size="sm"
+        variant="outline"
+        className="self-start bg-white"
         disabled={switching}
         onClick={async () => {
           setSwitching(true);
@@ -282,8 +280,19 @@ function NotSchool({ email }: { email: string }) {
       >
         Switch to my school account
       </Button>
-    </section>
+    </div>
   );
+}
+
+function entriesText(session: SignedIn): string {
+  const entries = raffleEntries(session.answers, session.school !== null);
+  const bonuses = [
+    session.school && "your school account",
+    session.answers.photoPath && "your photo",
+  ].filter(Boolean);
+  return bonuses.length
+    ? `${entries} entries (a bonus for ${bonuses.join(" and ")})`
+    : "1 entry";
 }
 
 function ErrorCard() {
@@ -481,6 +490,7 @@ function StepFields({
     case "about":
       return (
         <>
+          {session.school === null && <SchoolNudge />}
           <Question label="Name">
             <Input
               aria-label="Name"
@@ -537,7 +547,8 @@ function StepFields({
               }
             />
             <span className="text-[12px] text-muted-foreground">
-              Your friend gets a 10% better chance to win when you finish.
+              Your friend gets a 10% better chance to win when you finish on
+              your school account.
             </span>
           </Question>
         </>
@@ -700,7 +711,7 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
       <div className="relative">
         <Confetti />
         <GiftCard
-          entries={raffleEntries(session.answers)}
+          entries={raffleEntries(session.answers, session.school !== null)}
           boost={Math.round(friends * REFERRAL_BOOST * 100)}
         />
       </div>
@@ -716,16 +727,13 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
           </h1>
           <p className="text-[15px] text-muted-foreground">
             You're on the Verimate waitlist and in the {RAFFLE.prize} raffle
-            with{" "}
-            {raffleEntries(session.answers) === 2
-              ? "2 entries (one bonus for your photo)"
-              : "1 entry"}
-            . Entries close {RAFFLE.endsLabel}, and we'll email the result to
-            your school email. Your first month of Verimate is free when we
-            launch.
+            with {entriesText(session)}. Entries close {RAFFLE.endsLabel}, and
+            we'll email you the result. Your first month of Verimate is free
+            when we launch.
           </p>
         </div>
       </section>
+      {session.school === null && <SchoolNudge />}
       <ReferralCard code={session.referralCode} friends={friends} />
 
       <div className="flex flex-col gap-2">

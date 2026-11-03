@@ -79,8 +79,8 @@ export function PhotoPicker({
         </span>
         <span className="text-[12px] text-verified">
           {path
-            ? "You're twice as likely to win the gift card."
-            : "Real photos get a bonus entry: 2× as likely to win the gift card."}
+            ? "One more entry for the gift card raffle."
+            : "Real photos get a bonus raffle entry for the gift card."}
         </span>
         <Button
           size="sm"

@@ -140,12 +140,13 @@ describe("toggleArea", () => {
 
 describe("raffleEntries", () => {
   it("is zero until the survey is finished", () => {
-    expect(raffleEntries({ ...COMPLETE, cannabis: null })).toBe(0);
+    expect(raffleEntries({ ...COMPLETE, cannabis: null }, true)).toBe(0);
   });
 
-  it("gives one entry for finishing and one more for a photo", () => {
-    expect(raffleEntries(COMPLETE)).toBe(1);
-    expect(raffleEntries({ ...COMPLETE, photoPath: "u/photo" })).toBe(2);
+  it("adds one entry each for a school account and a photo", () => {
+    expect(raffleEntries(COMPLETE, false)).toBe(1);
+    expect(raffleEntries(COMPLETE, true)).toBe(2);
+    expect(raffleEntries({ ...COMPLETE, photoPath: "u/photo" }, true)).toBe(3);
   });
 });
 

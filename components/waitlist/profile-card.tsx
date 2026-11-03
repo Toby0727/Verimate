@@ -13,13 +13,14 @@ function initials(name: string | null): string {
 }
 
 // The student's own card on the done screen: photo, name, year and major,
-// and their verified school.
+// and their verified school (or a note that a personal account isn't
+// verified).
 export function ProfileCard({
   answers,
   school,
 }: {
   answers: WaitlistAnswers;
-  school: School;
+  school: School | null;
 }) {
   const [photo, setPhoto] = useState<string | null>(null);
 
@@ -56,10 +57,16 @@ export function ProfileCard({
             {details}
           </span>
         )}
-        <span className="mt-0.5 inline-flex items-center gap-1 font-medium text-[12px] text-verified">
-          <BadgeCheck className="size-3.5" aria-hidden />
-          Verified {school} student
-        </span>
+        {school ? (
+          <span className="mt-0.5 inline-flex items-center gap-1 font-medium text-[12px] text-verified">
+            <BadgeCheck className="size-3.5" aria-hidden />
+            Verified {school} student
+          </span>
+        ) : (
+          <span className="mt-0.5 text-[12px] text-muted-foreground">
+            Personal account · not verified yet
+          </span>
+        )}
       </div>
     </div>
   );

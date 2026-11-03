@@ -180,10 +180,14 @@ export function isComplete(a: WaitlistAnswers): boolean {
   return stepsLeft(a) === 0;
 }
 
-// One entry for finishing the survey, plus one for adding a photo.
-export function raffleEntries(a: WaitlistAnswers): number {
+// One entry for finishing the survey, plus one for signing in with a school
+// account and one for adding a photo.
+export function raffleEntries(
+  a: WaitlistAnswers,
+  schoolAccount: boolean,
+): number {
   if (!isComplete(a)) return 0;
-  return a.photoPath ? 2 : 1;
+  return 1 + (schoolAccount ? 1 : 0) + (a.photoPath ? 1 : 0);
 }
 
 export const REFERRAL_CODE_LENGTH = 6;

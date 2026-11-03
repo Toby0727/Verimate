@@ -13,12 +13,12 @@ import {
 
 export type WaitlistSession =
   | { status: "signed-out" }
-  | { status: "not-school"; email: string }
   | {
       status: "signed-in";
       userId: string;
       email: string;
-      school: School;
+      // Null for a personal Google account, which isn't verified as a student.
+      school: School | null;
       answers: WaitlistAnswers;
       completedAt: string | null;
       // Their own code to share; made by the database on first save.
@@ -59,7 +59,7 @@ async function supabase() {
 
 // `npm run dev` only: /?preview shows the survey as a signed-in SU student
 // without touching Supabase, for design review; /?preview=landing shows the
-// signed-out homepage.
+// signed-out homepage; /?preview=personal signs in with a personal account.
 function isPreview() {
   return (
     process.env.NODE_ENV === "development" &&
@@ -75,11 +75,13 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
     return { status: "signed-out" };
   }
   if (isPreview()) {
+    const personal =
+      new URLSearchParams(window.location.search).get("preview") === "personal";
     return {
       status: "signed-in",
       userId: "preview",
-      email: "preview@g.syr.edu",
-      school: "SU",
+      email: personal ? "preview@gmail.com" : "preview@g.syr.edu",
+      school: personal ? null : "SU",
       answers: EMPTY_ANSWERS,
       completedAt: null,
       referralCode: null,
@@ -92,7 +94,6 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
 
   const email = user.email.toLowerCase();
   const school = schoolOfGoogleAccount(email);
-  if (!school) return { status: "not-school", email };
 
   const { data: row, error: rowError } = await client
     .from("waitlist_responses")
