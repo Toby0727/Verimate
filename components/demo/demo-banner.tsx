@@ -1,13 +1,20 @@
 "use client";
 
 import { FlaskConical, SlidersHorizontal } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useDemo } from "@/lib/demo/use-demo";
 import { DemoPanel } from "./demo-panel";
 
+// Real pages (the waitlist) never show the demo banner.
+const REAL_PAGES = new Set(["/", "/raffle-rules"]);
+
 export function DemoBanner() {
+  const pathname = usePathname();
   const demo = useDemo();
   const [open, setOpen] = useState(false);
+
+  if (REAL_PAGES.has(pathname)) return null;
 
   return (
     <>

@@ -74,7 +74,7 @@ function SettingsContent() {
               onClick={async () => {
                 actions.deleteAccount();
                 await signOutOfGoogle();
-                router.push("/");
+                router.push("/demo");
               }}
             >
               Yes, delete everything

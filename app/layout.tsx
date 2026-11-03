@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Geist_Mono, Newsreader } from "next/font/google";
+import { Suspense } from "react";
 import { DemoBanner } from "@/components/demo/demo-banner";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -32,7 +33,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${figtree.variable} ${newsreader.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-neutral-100">
-        <DemoBanner />
+        {/* The banner reads the path to hide itself on the waitlist. */}
+        <Suspense fallback={null}>
+          <DemoBanner />
+        </Suspense>
         {children}
         <Toaster theme="light" position="top-center" />
       </body>

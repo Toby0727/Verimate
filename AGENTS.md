@@ -16,7 +16,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 项目速览
 
-面向 Syracuse University / SUNY ESF 的已验证学生找室友平台（找室友为主线，转租资讯为辅）。当前是全流程可点通的示例 demo：所有页面和流程都能走通，但数据全是示例，只存在浏览器 `localStorage` 里；已接入 Supabase（尚未建表），真实功能后续逐条替换（见 `lib/demo/flow-status.ts`）。
+面向 Syracuse University / SUNY ESF 的已验证学生找室友平台（找室友为主线，转租资讯为辅）。当前是全流程可点通的示例 demo：所有页面和流程都能走通，但数据全是示例，只存在浏览器 `localStorage` 里；已接入 Supabase（目前只有等候名单问卷一张表），真实功能后续逐条替换（见 `lib/demo/flow-status.ts`）。
+
+### 等候名单问卷（线上首页，2026-11-03 上线）
+
+verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用 SU / ESF 学校 Google 账号登录，答 6 步问题（年级和专业、预算、区域、study abroad、转租和找室友的学期、喝酒 / 抽烟 / 大麻），全部答完即加入 waitlist 并参加 $50 Amazon 礼品卡抽奖（2026-11-30 截止，规则页 `/raffle-rules`）。
+
+- 页面：`components/waitlist/waitlist-page.tsx`；步骤和完成判断是纯函数 `lib/rules/waitlist.ts`；选项和抽奖日期在 `lib/waitlist/options.ts`（改选项必须同步改数据库 check 约束）；读写在 `lib/waitlist/api.ts`。
+- 数据：`public.waitlist_responses`（迁移文件 `supabase/migrations/20261103070000_waitlist_responses.sql`，在 SQL Editor 手动执行），每个学生一行，每答一步保存一次，`completed_at` 不为空即抽奖资格。浏览器直接读写，RLS 只允许读写自己的行，且 email 必须等于登录 token 里的 email；check 约束只接受 `syr.edu` / `g.syr.edu` / `esf.edu`。团队在 Supabase Table Editor 查看和导出数据。
+- 个人 Gmail 登录会提示换学校账号；登录失败回到 `/?signin=failed`。
+- demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 
 - `docs/product-requirements.md`：产品需求定稿（2026-10-27 访谈），写规格前先读
 - `specs/`：spec-kit 生成的功能规格，每个功能一个编号目录（当前：`001-clickable-flow-demo`，全流程可点通的示例 demo）

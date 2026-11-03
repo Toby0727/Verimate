@@ -4,7 +4,7 @@ import { FLOW_STATUS } from "@/lib/demo/flow-status";
 
 export default function AboutDemoPage() {
   return (
-    <SimplePage title="About this demo" backHref="/">
+    <SimplePage title="About this demo" backHref="/demo">
       <p className="text-muted-foreground text-sm">
         This is a clickable demo of every Verimate flow. All people, posts,
         scores and notifications are sample data. Your actions are saved only in

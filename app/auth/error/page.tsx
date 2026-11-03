@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export default function AuthErrorPage() {
   return (
-    <SimplePage title="Sign in" backHref="/">
+    <SimplePage title="Sign in" backHref="/demo">
       <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
         <h2 className="font-semibold text-lg">Google sign-in didn't finish</h2>
         <p className="max-w-xs text-muted-foreground text-sm">

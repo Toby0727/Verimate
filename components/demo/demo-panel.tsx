@@ -19,7 +19,7 @@ import { useDemo } from "@/lib/demo/use-demo";
 import { cn } from "@/lib/utils";
 
 const LANDING: Record<string, string> = {
-  visitor: "/",
+  visitor: "/demo",
   "new-user": "/onboarding/birthday",
   admin: "/admin",
 };
@@ -133,7 +133,7 @@ export function DemoPanel({
                     actions.resetDemo();
                     setConfirmReset(false);
                     onOpenChange(false);
-                    router.push("/");
+                    router.push("/demo");
                   }}
                 >
                   Reset

@@ -3,7 +3,7 @@ import { SimplePage } from "@/components/shell/simple-page";
 
 export default function SignInPage() {
   return (
-    <SimplePage title="Sign in" backHref="/">
+    <SimplePage title="Sign in" backHref="/demo">
       <SignInCard />
     </SimplePage>
   );

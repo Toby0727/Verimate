@@ -3,7 +3,7 @@ import { SimplePage } from "@/components/shell/simple-page";
 
 export default function TermsPage() {
   return (
-    <SimplePage title="Terms of service" backHref="/">
+    <SimplePage title="Terms of service" backHref="/demo">
       <p className="flex items-center gap-2 text-muted-foreground text-sm">
         Draft for the demo, not legal advice <SampleBadge />
       </p>

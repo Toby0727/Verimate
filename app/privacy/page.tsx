@@ -3,7 +3,7 @@ import { SimplePage } from "@/components/shell/simple-page";
 
 export default function PrivacyPage() {
   return (
-    <SimplePage title="Privacy policy" backHref="/">
+    <SimplePage title="Privacy policy" backHref="/demo">
       <p className="flex items-center gap-2 text-muted-foreground text-sm">
         Draft for the demo, not legal advice <SampleBadge />
       </p>
