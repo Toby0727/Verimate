@@ -1,7 +1,8 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import type { Polygon } from "leaflet";
+import "maplibre-gl/dist/maplibre-gl.css";
+import type { FeatureCollection, Polygon } from "geojson";
+import type { ExpressionSpecification, Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import { AREA_SHAPES, CAMPUSES } from "@/lib/waitlist/map-shapes";
 import type { Area } from "@/lib/waitlist/options";
@@ -10,8 +11,50 @@ const INK = "#111111";
 const CAMPUS_FILL = "#b8283a"; // --verified-fill
 const CAMPUS_LINE = "#a1202f"; // --verified
 
+// OpenFreeMap's light style: free, no API key, OpenStreetMap data. Its text
+// layers are hidden so only our area names show.
+const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+// MapLibre runs tile decoding in a worker it loads by URL; this copy in
+// public/vendor must match the pinned maplibre-gl version in package.json.
+const WORKER_URL = "/vendor/maplibre-gl-worker-6.14.0.mjs";
+
+type Ring = [number, number][];
+
+// Our outlines are [lat, lng]; GeoJSON wants closed rings of [lng, lat].
+function polygons(
+  shapes: { ring: Ring; id: string }[],
+): FeatureCollection<Polygon, { id: string }> {
+  return {
+    type: "FeatureCollection",
+    features: shapes.map(({ ring, id }) => {
+      const coords = ring.map(([lat, lng]) => [lng, lat]);
+      return {
+        type: "Feature",
+        properties: { id },
+        geometry: { type: "Polygon", coordinates: [[...coords, coords[0]]] },
+      };
+    }),
+  };
+}
+
+function center(ring: Ring): [number, number] {
+  const lats = ring.map(([lat]) => lat);
+  const lngs = ring.map(([, lng]) => lng);
+  return [
+    (Math.min(...lngs) + Math.max(...lngs)) / 2,
+    (Math.min(...lats) + Math.max(...lats)) / 2,
+  ];
+}
+
+function label(text: string, className: string): HTMLElement {
+  const el = document.createElement("span");
+  el.className = className;
+  el.textContent = text;
+  return el;
+}
+
 // Map of Syracuse with SU and ESF shaded and each housing area as a tappable
-// zone. Leaflet touches `window`, so it loads after mount.
+// zone. MapLibre touches `window`, so it loads after mount.
 export function AreaMap({
   value,
   onToggle,
@@ -20,7 +63,8 @@ export function AreaMap({
   onToggle: (area: Area) => void;
 }) {
   const container = useRef<HTMLDivElement>(null);
-  const zones = useRef(new Map<Area, Polygon>());
+  const map = useRef<MapLibreMap | null>(null);
+  const labels = useRef(new Map<string, HTMLElement>());
   const toggle = useRef(onToggle);
   const [ready, setReady] = useState(false);
 
@@ -30,74 +74,130 @@ export function AreaMap({
 
   useEffect(() => {
     let cancelled = false;
-    let remove: (() => void) | undefined;
-    import("leaflet").then(({ default: L }) => {
+    import("maplibre-gl").then((lib) => {
       const el = container.current;
       if (cancelled || !el) return;
-      const map = L.map(el, {
-        scrollWheelZoom: false,
-        zoomControl: false,
-        zoomSnap: 0.1,
-        attributionControl: false,
-      });
-      L.control.attribution({ prefix: false }).addTo(map);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        className: "map-tiles",
-        attribution: "© OpenStreetMap contributors",
-      }).addTo(map);
-
+      lib.setWorkerUrl(WORKER_URL);
+      const bounds = new lib.LngLatBounds();
       for (const shape of AREA_SHAPES) {
-        const zone = L.polygon(shape.ring, { weight: 1, color: INK })
-          .bindTooltip(shape.label, {
-            permanent: true,
-            direction: "center",
-            className: "map-label",
-          })
-          .on("click", () => toggle.current(shape.area))
-          .addTo(map);
-        zones.current.set(shape.area, zone);
+        for (const [lat, lng] of shape.ring) bounds.extend([lng, lat]);
       }
-      for (const campus of CAMPUSES) {
-        L.polygon(campus.ring, {
-          interactive: false,
-          weight: 1,
-          color: CAMPUS_LINE,
-          fillColor: CAMPUS_FILL,
-          fillOpacity: 0.35,
-        })
-          .bindTooltip(campus.label, {
-            permanent: true,
-            direction: "center",
-            className: "map-label map-label-campus",
-          })
-          .addTo(map);
-      }
+      const m = new lib.Map({
+        container: el,
+        style: STYLE_URL,
+        bounds,
+        fitBoundsOptions: { padding: 6 },
+        attributionControl: { compact: true },
+        scrollZoom: false,
+        dragRotate: false,
+        pitchWithRotate: false,
+        touchPitch: false,
+      });
+      m.touchZoomRotate.disableRotation();
+      map.current = m;
 
-      map.fitBounds(
-        L.latLngBounds(AREA_SHAPES.flatMap((shape) => shape.ring)),
-        { padding: [2, 2] },
-      );
-      remove = () => map.remove();
-      setReady(true);
+      m.on("load", () => {
+        // The compact credit starts open; keep it to its ⓘ button.
+        el.querySelector(".maplibregl-compact-show")?.classList.remove(
+          "maplibregl-compact-show",
+        );
+        for (const layer of m.getStyle().layers) {
+          if (layer.type === "symbol") {
+            m.setLayoutProperty(layer.id, "visibility", "none");
+          }
+        }
+
+        const selected: ExpressionSpecification = [
+          "boolean",
+          ["feature-state", "selected"],
+          false,
+        ];
+        m.addSource("zones", {
+          type: "geojson",
+          data: polygons(
+            AREA_SHAPES.map((s) => ({ ring: s.ring, id: s.area })),
+          ),
+          promoteId: "id",
+        });
+        m.addLayer({
+          id: "zones-fill",
+          type: "fill",
+          source: "zones",
+          paint: {
+            "fill-color": INK,
+            "fill-opacity": ["case", selected, 0.85, 0.05],
+          },
+        });
+        m.addLayer({
+          id: "zones-line",
+          type: "line",
+          source: "zones",
+          paint: {
+            "line-color": INK,
+            "line-width": 1,
+            "line-opacity": ["case", selected, 1, 0.35],
+          },
+        });
+        m.addSource("campuses", {
+          type: "geojson",
+          data: polygons(CAMPUSES.map((c) => ({ ring: c.ring, id: c.label }))),
+        });
+        m.addLayer({
+          id: "campuses-fill",
+          type: "fill",
+          source: "campuses",
+          paint: { "fill-color": CAMPUS_FILL, "fill-opacity": 0.35 },
+        });
+        m.addLayer({
+          id: "campuses-line",
+          type: "line",
+          source: "campuses",
+          paint: { "line-color": CAMPUS_LINE, "line-width": 1 },
+        });
+
+        for (const shape of AREA_SHAPES) {
+          const tag = label(shape.label, "map-label");
+          labels.current.set(shape.area, tag);
+          new lib.Marker({ element: tag })
+            .setLngLat(center(shape.ring))
+            .addTo(m);
+        }
+        for (const campus of CAMPUSES) {
+          new lib.Marker({
+            element: label(campus.label, "map-label map-label-campus"),
+          })
+            .setLngLat(center(campus.ring))
+            .addTo(m);
+        }
+
+        m.on("click", "zones-fill", (e) => {
+          const area = e.features?.[0]?.properties?.id as Area | undefined;
+          if (area) toggle.current(area);
+        });
+        m.on("mouseenter", "zones-fill", () => {
+          m.getCanvas().style.cursor = "pointer";
+        });
+        m.on("mouseleave", "zones-fill", () => {
+          m.getCanvas().style.cursor = "";
+        });
+        setReady(true);
+      });
     });
     return () => {
       cancelled = true;
-      remove?.();
-      zones.current.clear();
+      map.current?.remove();
+      map.current = null;
+      labels.current.clear();
     };
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    for (const [area, zone] of zones.current) {
-      const on = value?.includes(area) ?? false;
-      zone.setStyle({
-        fillColor: INK,
-        fillOpacity: on ? 0.85 : 0.05,
-        opacity: on ? 1 : 0.35,
-      });
-      zone.getTooltip()?.getElement()?.classList.toggle("map-label-on", on);
+    const m = map.current;
+    if (!ready || !m) return;
+    for (const shape of AREA_SHAPES) {
+      const on = value?.includes(shape.area) ?? false;
+      m.setFeatureState({ source: "zones", id: shape.area }, { selected: on });
+      labels.current.get(shape.area)?.classList.toggle("map-label-on", on);
     }
   }, [ready, value]);
 

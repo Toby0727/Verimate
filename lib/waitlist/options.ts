@@ -2,6 +2,13 @@
 // supabase/migrations/20261103070000_waitlist_responses.sql.
 import type { Choice } from "@/components/shell/choice-chips";
 
+export const GENDERS = [
+  { value: "woman", label: "Woman" },
+  { value: "man", label: "Man" },
+  { value: "non-binary", label: "Non-binary" },
+  { value: "prefer-not", label: "Prefer not to say" },
+] as const satisfies Choice<string>[];
+
 export const YEARS = [
   { value: "freshman", label: "Freshman" },
   { value: "sophomore", label: "Sophomore" },
@@ -44,6 +51,15 @@ export const TERMS = [
   { value: "spring-2028", label: "Spring 2028" },
 ] as const satisfies Choice<string>[];
 
+// Typical sublet months for each term, shown next to the term so students
+// know how long they'd be away or need a place.
+export const TERM_MONTHS: Record<Term, { months: string; count: number }> = {
+  "spring-2027": { months: "Jan–May", count: 5 },
+  "summer-2027": { months: "Jun–Aug", count: 3 },
+  "fall-2027": { months: "Aug–Dec", count: 5 },
+  "spring-2028": { months: "Jan–May", count: 5 },
+};
+
 export const DRINKING = [
   { value: "never", label: "Never" },
   { value: "socially", label: "Socially" },
@@ -62,7 +78,20 @@ export const CANNABIS = [
   { value: "often", label: "Often" },
 ] as const satisfies Choice<string>[];
 
+export const GREEK_LIFE = [
+  { value: "member", label: "In a fraternity or sorority" },
+  { value: "rushing", label: "Planning to rush" },
+  { value: "no", label: "No" },
+] as const satisfies Choice<string>[];
+
+export const PETS = [
+  { value: "have-pet", label: "I have a pet" },
+  { value: "okay", label: "Fine with pets" },
+  { value: "no-pets", label: "No pets, please" },
+] as const satisfies Choice<string>[];
+
 type ValueOf<T extends readonly { value: string }[]> = T[number]["value"];
+export type Gender = ValueOf<typeof GENDERS>;
 export type Year = ValueOf<typeof YEARS>;
 export type Budget = ValueOf<typeof BUDGETS>;
 export type Area = ValueOf<typeof AREAS>;
@@ -71,6 +100,8 @@ export type Term = ValueOf<typeof TERMS>;
 export type Drinking = ValueOf<typeof DRINKING>;
 export type Smoking = ValueOf<typeof SMOKING>;
 export type Cannabis = ValueOf<typeof CANNABIS>;
+export type GreekLife = ValueOf<typeof GREEK_LIFE>;
+export type Pets = ValueOf<typeof PETS>;
 
 // Public contact for privacy requests and raffle questions.
 export const CONTACT_EMAIL = "hpang05@syr.edu";

@@ -25,8 +25,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // 只跳过构建产物、标签页图标和 public/ 下的示例图片；不按扩展名跳过，
+    // 只跳过构建产物、标签页图标、public/ 下的示例图片和 vendor 脚本；不按扩展名跳过，
     // 否则 /roommates/a.png 这类路径会绕过上面的 demo 拦截
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|sample/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|sample/|vendor/).*)",
   ],
 };

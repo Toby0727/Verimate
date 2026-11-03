@@ -9,9 +9,11 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' blob: data: ${supabase} https://tile.openstreetmap.org`,
+  `img-src 'self' blob: data: ${supabase}`,
   "font-src 'self'",
-  `connect-src 'self' ${supabase}${isDev ? " ws:" : ""}`,
+  // OpenFreeMap serves the survey map's style, tiles, sprites and fonts.
+  `connect-src 'self' ${supabase} https://tiles.openfreemap.org${isDev ? " ws:" : ""}`,
+  "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

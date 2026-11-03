@@ -6,6 +6,7 @@ import {
   isStepDone,
   raffleEntries,
   stepsLeft,
+  toggle,
   toggleArea,
   type WaitlistAnswers,
 } from "./waitlist";
@@ -13,9 +14,10 @@ import {
 const COMPLETE: WaitlistAnswers = {
   name: "Alex Kim",
   photoPath: null,
+  gender: "woman",
   year: "junior",
   major: "Information Management",
-  budget: "800-1000",
+  budget: ["800-1000"],
   areas: ["university-hill"],
   studyAbroad: "no",
   subletOutTerms: [],
@@ -24,6 +26,8 @@ const COMPLETE: WaitlistAnswers = {
   drinking: "socially",
   smoking: "no",
   cannabis: "never",
+  greekLife: "no",
+  pets: "okay",
 };
 
 describe("stepsLeft", () => {
@@ -48,6 +52,24 @@ describe("isStepDone", () => {
   it("needs a non-blank name", () => {
     expect(isStepDone("about", { ...COMPLETE, name: " " })).toBe(false);
     expect(isStepDone("about", { ...COMPLETE, name: null })).toBe(false);
+  });
+
+  it("needs a gender", () => {
+    expect(isStepDone("about", { ...COMPLETE, gender: null })).toBe(false);
+  });
+
+  it("needs at least one budget", () => {
+    expect(isStepDone("budget", { ...COMPLETE, budget: [] })).toBe(false);
+    expect(
+      isStepDone("budget", { ...COMPLETE, budget: ["600-800", "800-1000"] }),
+    ).toBe(true);
+  });
+
+  it("needs Greek life and pets on the lifestyle step", () => {
+    expect(isStepDone("lifestyle", { ...COMPLETE, greekLife: null })).toBe(
+      false,
+    );
+    expect(isStepDone("lifestyle", { ...COMPLETE, pets: null })).toBe(false);
   });
 
   it("doesn't need a photo", () => {
@@ -96,5 +118,12 @@ describe("raffleEntries", () => {
   it("gives one entry for finishing and one more for a photo", () => {
     expect(raffleEntries(COMPLETE)).toBe(1);
     expect(raffleEntries({ ...COMPLETE, photoPath: "u/photo" })).toBe(2);
+  });
+});
+
+describe("toggle", () => {
+  it("adds a missing value and removes a present one", () => {
+    expect(toggle(null, "a")).toEqual(["a"]);
+    expect(toggle(["a", "b"], "a")).toEqual(["b"]);
   });
 });

@@ -5,6 +5,9 @@ import type {
   Budget,
   Cannabis,
   Drinking,
+  Gender,
+  GreekLife,
+  Pets,
   Smoking,
   StudyAbroad,
   Term,
@@ -15,9 +18,10 @@ export type WaitlistAnswers = {
   name: string | null;
   // Storage path of the optional photo; a photo earns a bonus raffle entry.
   photoPath: string | null;
+  gender: Gender | null;
   year: Year | null;
   major: string | null;
-  budget: Budget | null;
+  budget: Budget[] | null;
   areas: Area[] | null;
   studyAbroad: StudyAbroad | null;
   // Empty array means "not needed"; null means not answered yet.
@@ -27,11 +31,14 @@ export type WaitlistAnswers = {
   drinking: Drinking | null;
   smoking: Smoking | null;
   cannabis: Cannabis | null;
+  greekLife: GreekLife | null;
+  pets: Pets | null;
 };
 
 export const EMPTY_ANSWERS: WaitlistAnswers = {
   name: null,
   photoPath: null,
+  gender: null,
   year: null,
   major: null,
   budget: null,
@@ -43,6 +50,8 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   drinking: null,
   smoking: null,
   cannabis: null,
+  greekLife: null,
+  pets: null,
 };
 
 export const WAITLIST_STEPS = [
@@ -66,11 +75,12 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
     case "about":
       return (
         filled(a.name, NAME_MAX_LENGTH) &&
+        a.gender !== null &&
         a.year !== null &&
         filled(a.major, MAJOR_MAX_LENGTH)
       );
     case "budget":
-      return a.budget !== null;
+      return a.budget !== null && a.budget.length > 0;
     case "areas":
       return a.areas !== null && a.areas.length > 0;
     case "abroad":
@@ -82,7 +92,13 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
         a.roommateTerms !== null
       );
     case "lifestyle":
-      return a.drinking !== null && a.smoking !== null && a.cannabis !== null;
+      return (
+        a.drinking !== null &&
+        a.smoking !== null &&
+        a.cannabis !== null &&
+        a.greekLife !== null &&
+        a.pets !== null
+      );
   }
 }
 
@@ -111,4 +127,12 @@ export function toggleArea(areas: Area[] | null, area: Area): Area[] {
   if (current.includes(area)) return current.filter((a) => a !== area);
   if (area === "not-sure") return ["not-sure"];
   return [...current.filter((a) => a !== "not-sure"), area];
+}
+
+// Adds the value to the list, or removes it if it's already there.
+export function toggle<T>(list: T[] | null, value: T): T[] {
+  const current = list ?? [];
+  return current.includes(value)
+    ? current.filter((v) => v !== value)
+    : [...current, value];
 }

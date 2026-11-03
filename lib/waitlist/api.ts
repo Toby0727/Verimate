@@ -23,6 +23,7 @@ export type WaitlistSession =
 type Row = {
   name: string | null;
   photo_path: string | null;
+  gender: WaitlistAnswers["gender"];
   year: WaitlistAnswers["year"];
   major: string | null;
   budget: WaitlistAnswers["budget"];
@@ -34,11 +35,13 @@ type Row = {
   drinking: WaitlistAnswers["drinking"];
   smoking: WaitlistAnswers["smoking"];
   cannabis: WaitlistAnswers["cannabis"];
+  greek_life: WaitlistAnswers["greekLife"];
+  pets: WaitlistAnswers["pets"];
   completed_at: string | null;
 };
 
 const COLUMNS =
-  "name, photo_path, year, major, budget, areas, study_abroad, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, completed_at";
+  "name, photo_path, gender, year, major, budget, areas, study_abroad, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
 
 // Imported lazily so pages still render when the Supabase env vars are missing.
 async function supabase() {
@@ -91,6 +94,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       // Google's name is the starting point until the student saves their own.
       name: row?.name ?? googleName(user.user_metadata),
       photoPath: row?.photo_path ?? null,
+      gender: row?.gender ?? null,
       year: row?.year ?? null,
       major: row?.major ?? null,
       budget: row?.budget ?? null,
@@ -102,6 +106,8 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       drinking: row?.drinking ?? null,
       smoking: row?.smoking ?? null,
       cannabis: row?.cannabis ?? null,
+      greekLife: row?.greek_life ?? null,
+      pets: row?.pets ?? null,
     },
     completedAt: row?.completed_at ?? null,
   };
@@ -196,6 +202,7 @@ export async function saveWaitlist(
         school: session.school,
         name: answers.name?.trim() || null,
         photo_path: answers.photoPath,
+        gender: answers.gender,
         year: answers.year,
         major: answers.major?.trim() || null,
         budget: answers.budget,
@@ -207,6 +214,8 @@ export async function saveWaitlist(
         drinking: answers.drinking,
         smoking: answers.smoking,
         cannabis: answers.cannabis,
+        greek_life: answers.greekLife,
+        pets: answers.pets,
       },
       { onConflict: "user_id" },
     )

@@ -1,6 +1,15 @@
 "use client";
 
-import { Check, Gift, Loader2 } from "lucide-react";
+import {
+  Cannabis,
+  Check,
+  Cigarette,
+  Gift,
+  Landmark,
+  Loader2,
+  PawPrint,
+  Wine,
+} from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +28,7 @@ import {
   NAME_MAX_LENGTH,
   raffleEntries,
   stepsLeft,
+  toggle,
   toggleArea,
   WAITLIST_STEPS,
   type WaitlistAnswers,
@@ -34,17 +44,19 @@ import {
   BUDGETS,
   CANNABIS,
   DRINKING,
+  GENDERS,
+  GREEK_LIFE,
+  PETS,
   RAFFLE,
   SMOKING,
   STUDY_ABROAD,
-  TERMS,
-  type Term,
   YEARS,
 } from "@/lib/waitlist/options";
 import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
 import { PhotoPicker } from "./photo-picker";
+import { IconQuestion, TermList, TimingGrid } from "./step-parts";
 
 type SignedIn = Extract<WaitlistSession, { status: "signed-in" }>;
 type View =
@@ -386,36 +398,6 @@ function Question({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function TermRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: Term[] | null;
-  onChange: (terms: Term[]) => void;
-}) {
-  return (
-    <Question label={label}>
-      <MultiChips
-        label={label}
-        options={TERMS}
-        value={value}
-        onToggle={(term) => {
-          const current = value ?? [];
-          onChange(
-            current.includes(term)
-              ? current.filter((t) => t !== term)
-              : [...current, term],
-          );
-        }}
-        noneLabel="Not needed"
-        onNone={() => onChange([])}
-      />
-    </Question>
-  );
-}
-
 function StepFields({
   step,
   session,
@@ -439,6 +421,14 @@ function StepFields({
               maxLength={NAME_MAX_LENGTH}
               value={answers.name ?? ""}
               onChange={(e) => set({ name: e.target.value || null })}
+            />
+          </Question>
+          <Question label="Gender">
+            <ChoiceChips
+              label="Gender"
+              options={[...GENDERS]}
+              value={answers.gender}
+              onChange={(gender) => set({ gender })}
             />
           </Question>
           <PhotoPicker
@@ -467,12 +457,14 @@ function StepFields({
       );
     case "budget":
       return (
-        <Question label="Per person, per month">
-          <ChoiceChips
+        <Question label="Per person, per month. Pick all that work.">
+          <MultiChips
             label="Budget"
-            options={[...BUDGETS]}
+            options={BUDGETS}
             value={answers.budget}
-            onChange={(budget) => set({ budget })}
+            onToggle={(budget) =>
+              set({ budget: toggle(answers.budget, budget) })
+            }
           />
         </Question>
       );
@@ -495,9 +487,9 @@ function StepFields({
     case "abroad":
       return (
         <Question label="If so, which term? You may need to sublet your place.">
-          <ChoiceChips
+          <TermList
             label="Study abroad"
-            options={[...STUDY_ABROAD]}
+            options={STUDY_ABROAD}
             value={answers.studyAbroad}
             onChange={(studyAbroad) => set({ studyAbroad })}
           />
@@ -505,51 +497,69 @@ function StepFields({
       );
     case "timing":
       return (
-        <>
-          <TermRow
-            label="Sublet my place out"
-            value={answers.subletOutTerms}
-            onChange={(subletOutTerms) => set({ subletOutTerms })}
-          />
-          <TermRow
-            label="Find a sublet"
-            value={answers.subletInTerms}
-            onChange={(subletInTerms) => set({ subletInTerms })}
-          />
-          <TermRow
-            label="Find roommates (move-in term)"
-            value={answers.roommateTerms}
-            onChange={(roommateTerms) => set({ roommateTerms })}
-          />
-        </>
+        <TimingGrid
+          columns={[
+            {
+              label: "Sublet my place",
+              value: answers.subletOutTerms,
+              onChange: (subletOutTerms) => set({ subletOutTerms }),
+            },
+            {
+              label: "Find a sublet",
+              value: answers.subletInTerms,
+              onChange: (subletInTerms) => set({ subletInTerms }),
+            },
+            {
+              label: "Find roommates",
+              value: answers.roommateTerms,
+              onChange: (roommateTerms) => set({ roommateTerms }),
+            },
+          ]}
+        />
       );
     case "lifestyle":
       return (
         <>
-          <Question label="Drinking">
+          <IconQuestion icon={Wine} label="Drinking">
             <ChoiceChips
               label="Drinking"
               options={[...DRINKING]}
               value={answers.drinking}
               onChange={(drinking) => set({ drinking })}
             />
-          </Question>
-          <Question label="Smoking or vaping">
+          </IconQuestion>
+          <IconQuestion icon={Cigarette} label="Smoking or vaping">
             <ChoiceChips
               label="Smoking or vaping"
               options={[...SMOKING]}
               value={answers.smoking}
               onChange={(smoking) => set({ smoking })}
             />
-          </Question>
-          <Question label="Weed">
+          </IconQuestion>
+          <IconQuestion icon={Cannabis} label="Weed">
             <ChoiceChips
               label="Weed"
               options={[...CANNABIS]}
               value={answers.cannabis}
               onChange={(cannabis) => set({ cannabis })}
             />
-          </Question>
+          </IconQuestion>
+          <IconQuestion icon={Landmark} label="Greek life">
+            <ChoiceChips
+              label="Greek life"
+              options={[...GREEK_LIFE]}
+              value={answers.greekLife}
+              onChange={(greekLife) => set({ greekLife })}
+            />
+          </IconQuestion>
+          <IconQuestion icon={PawPrint} label="Pets">
+            <ChoiceChips
+              label="Pets"
+              options={[...PETS]}
+              value={answers.pets}
+              onChange={(pets) => set({ pets })}
+            />
+          </IconQuestion>
         </>
       );
   }
