@@ -36,6 +36,7 @@ verimate.org 首页 `/` 是真实的等候名单问卷，不是 demo：学生用
 - demo 默认隐藏：`proxy.ts` 把 `/`、`/raffle-rules`、`/privacy`、`/auth/callback` 以外的路径都跳回首页；本地或路演要看 demo 时在 `.env` 设 `DEMO_ENABLED=true`，demo 首页在 `/demo`。`DemoBanner` 在问卷页面不显示。
 
 - `docs/product-requirements.md`：产品需求定稿（2026-10-27 访谈），写规格前先读
+- `docs/journal.md`：开发日志（做了什么、线上状态、待办），每次开发结束在最上面追加一段；换设备继续时先读它
 - `specs/`：spec-kit 生成的功能规格，每个功能一个编号目录（当前：`001-clickable-flow-demo`，全流程可点通的示例 demo）
 - `app/`：App Router 页面与布局
 - `components/ui/`：shadcn/ui 组件（通过 CLI 添加，可直接修改）
