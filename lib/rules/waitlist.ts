@@ -24,6 +24,8 @@ export type WaitlistAnswers = {
   name: string | null;
   // Storage path of the optional photo; a photo earns a bonus raffle entry.
   photoPath: string | null;
+  // Code of the friend who invited them (optional).
+  referredBy: string | null;
   gender: Gender | null;
   year: Year | null;
   major: string | null;
@@ -48,6 +50,7 @@ export type WaitlistAnswers = {
 export const EMPTY_ANSWERS: WaitlistAnswers = {
   name: null,
   photoPath: null,
+  referredBy: null,
   gender: null,
   year: null,
   major: null,
@@ -86,6 +89,7 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
     case "about":
       return (
         filled(a.name, NAME_MAX_LENGTH) &&
+        (a.referredBy === null || isReferralCode(a.referredBy)) &&
         a.gender !== null &&
         a.year !== null &&
         filled(a.major, MAJOR_MAX_LENGTH)
@@ -180,6 +184,29 @@ export function isComplete(a: WaitlistAnswers): boolean {
 export function raffleEntries(a: WaitlistAnswers): number {
   if (!isComplete(a)) return 0;
   return a.photoPath ? 2 : 1;
+}
+
+export const REFERRAL_CODE_LENGTH = 6;
+// Each friend who finishes the survey with your code adds this share of
+// your entries to your chances.
+export const REFERRAL_BOOST = 0.1;
+
+// What a student types or pastes becomes a clean code: capitals and digits
+// only, at most six characters.
+export function normalizeReferralCode(input: string): string {
+  return input
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, REFERRAL_CODE_LENGTH);
+}
+
+export function isReferralCode(code: string): boolean {
+  return new RegExp(`^[A-Z0-9]{${REFERRAL_CODE_LENGTH}}$`).test(code);
+}
+
+// Chance weight in the drawing: entries, raised 10% per friend who joined.
+export function raffleWeight(entries: number, referrals: number): number {
+  return Math.round(entries * (1 + REFERRAL_BOOST * referrals) * 100) / 100;
 }
 
 // Where to resume: the first unanswered step, or null when all are done.

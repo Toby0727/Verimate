@@ -6,7 +6,9 @@ import {
   firstOpenStep,
   isComplete,
   isStepDone,
+  normalizeReferralCode,
   raffleEntries,
+  raffleWeight,
   setAbroadPlace,
   stepsLeft,
   toggle,
@@ -18,6 +20,7 @@ import {
 const COMPLETE: WaitlistAnswers = {
   name: "Alex Kim",
   photoPath: null,
+  referredBy: null,
   gender: "woman",
   year: "junior",
   major: "Information Management",
@@ -194,5 +197,24 @@ describe("study abroad plans", () => {
       "spring-2028:seoul",
     ]);
     expect(decodeAbroadPlans(encodeAbroadPlans(plans))).toEqual(plans);
+  });
+});
+
+describe("referrals", () => {
+  it("cleans up a typed or pasted code", () => {
+    expect(normalizeReferralCode(" 3f9-a2c9z ")).toBe("3F9A2C");
+  });
+
+  it("blocks step 1 only while a code is half typed", () => {
+    expect(isStepDone("about", { ...COMPLETE, referredBy: "3F9" })).toBe(false);
+    expect(isStepDone("about", { ...COMPLETE, referredBy: "3F9A2C" })).toBe(
+      true,
+    );
+  });
+
+  it("raises the chance 10% per friend", () => {
+    expect(raffleWeight(1, 0)).toBe(1);
+    expect(raffleWeight(1, 3)).toBe(1.3);
+    expect(raffleWeight(2, 1)).toBe(2.2);
   });
 });

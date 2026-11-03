@@ -23,9 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   firstOpenStep,
+  isReferralCode,
   isStepDone,
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
+  normalizeReferralCode,
+  REFERRAL_BOOST,
   raffleEntries,
   setAbroadPlace,
   stepsLeft,
@@ -38,7 +41,11 @@ import {
 } from "@/lib/rules/waitlist";
 import { cn } from "@/lib/utils";
 import {
+  InvalidReferralCode,
+  loadReferralCount,
   loadWaitlist,
+  rememberedReferral,
+  rememberReferral,
   saveWaitlist,
   type WaitlistSession,
 } from "@/lib/waitlist/api";
@@ -60,6 +67,7 @@ import { MultiChips } from "./multi-chips";
 import { PhotoPicker } from "./photo-picker";
 import { ProfileCard } from "./profile-card";
 import { Confetti, GiftCard, RafflePill } from "./raffle-hype";
+import { ReferralCard, referralLink } from "./referral-card";
 import { AbroadPlanList, IconQuestion, TimingGrid } from "./step-parts";
 
 type SignedIn = Extract<WaitlistSession, { status: "signed-in" }>;
@@ -89,6 +97,10 @@ export function WaitlistPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const ref = normalizeReferralCode(
+      new URLSearchParams(window.location.search).get("ref") ?? "",
+    );
+    if (isReferralCode(ref)) rememberReferral(ref);
     if (new URLSearchParams(window.location.search).has("signin")) {
       toast.error("Google sign-in didn't finish. Please try again.");
       window.history.replaceState(null, "", WAITLIST_PATH);
@@ -180,19 +192,21 @@ function Landing() {
       <GiftCard />
       <section className="flex flex-col gap-3 rounded-2xl bg-card p-5">
         <h1 className="font-semibold text-[26px] leading-tight tracking-tight">
-          Roommates and sublets, only with verified SU & ESF students.
+          The most complete sublet + roommate matching, built for off-campus
+          living.
         </h1>
         <p className="text-[15px] text-muted-foreground">
-          Verimate is launching soon. Join the waitlist with 6 quick questions
-          (about a minute) and you're entered to win a {RAFFLE.prize}.
+          Only verified SU & ESF students. Join the waitlist now to get{" "}
+          <b className="font-semibold text-foreground">your first month free</b>{" "}
+          when Verimate launches, plus a chance to win a {RAFFLE.prize}.
         </p>
       </section>
 
       <ol className="flex flex-col gap-2 rounded-2xl bg-card p-5 text-[15px]">
         {[
           "Sign in with your school Google account",
-          "Answer 6 quick questions",
-          "You're on the waitlist and in the raffle",
+          "Answer 6 quick questions (about a minute)",
+          "Get 1 month free + enter the raffle",
         ].map((text, i) => (
           <li key={text} className="flex items-center gap-3">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-muted font-semibold text-[12px]">
@@ -278,7 +292,13 @@ function Survey({
   onStep: (step: WaitlistStep, session: SignedIn) => void;
   onDone: (session: SignedIn) => void;
 }) {
-  const [answers, setAnswers] = useState<WaitlistAnswers>(session.answers);
+  const [answers, setAnswers] = useState<WaitlistAnswers>(() => {
+    // A friend's code from their invite link fills in step 1.
+    const ref = rememberedReferral();
+    return !session.answers.referredBy && !session.completedAt && ref
+      ? { ...session.answers, referredBy: ref }
+      : session.answers;
+  });
   const [saving, setSaving] = useState(false);
   const index = WAITLIST_STEPS.indexOf(step);
   const isLast = index === WAITLIST_STEPS.length - 1;
@@ -288,8 +308,11 @@ function Survey({
   async function next() {
     setSaving(true);
     try {
-      const { completedAt } = await saveWaitlist(session, answers);
-      const saved = { ...session, answers, completedAt };
+      const { completedAt, referralCode } = await saveWaitlist(
+        session,
+        answers,
+      );
+      const saved = { ...session, answers, completedAt, referralCode };
       const open = firstOpenStep(answers);
       if (isLast) {
         if (open) onStep(open, saved);
@@ -302,7 +325,11 @@ function Survey({
       }
     } catch (error) {
       console.error(error);
-      toast.error("Couldn't save your answers. Try again.");
+      toast.error(
+        error instanceof InvalidReferralCode
+          ? "That referral code doesn't work. Check it, or leave it empty."
+          : "Couldn't save your answers. Try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -464,6 +491,25 @@ function StepFields({
               onChange={(e) => set({ major: e.target.value || null })}
             />
           </Question>
+          <Question label="Referral code (optional)">
+            <Input
+              aria-label="Referral code"
+              placeholder="From a friend, e.g. 3F9A2C"
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              className="font-mono tracking-[0.15em] uppercase"
+              value={answers.referredBy ?? ""}
+              onChange={(e) =>
+                set({
+                  referredBy: normalizeReferralCode(e.target.value) || null,
+                })
+              }
+            />
+            <span className="text-[12px] text-muted-foreground">
+              Your friend gets a 10% better chance to win when you finish.
+            </span>
+          </Question>
         </>
       );
     case "budget":
@@ -589,8 +635,23 @@ function StepFields({
 }
 
 function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
+  const [friends, setFriends] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    loadReferralCount()
+      .then((n) => {
+        if (!cancelled) setFriends(n);
+      })
+      .catch((error) => console.error(error));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function share() {
-    const url = window.location.origin;
+    const url = session.referralCode
+      ? referralLink(session.referralCode)
+      : window.location.origin;
     const text = `Join the Verimate waitlist and get a chance to win a ${RAFFLE.prize}.`;
     try {
       if (navigator.share) {
@@ -608,7 +669,10 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
     <>
       <div className="relative">
         <Confetti />
-        <GiftCard entries={raffleEntries(session.answers)} />
+        <GiftCard
+          entries={raffleEntries(session.answers)}
+          boost={Math.round(friends * REFERRAL_BOOST * 100)}
+        />
       </div>
       <section className="flex flex-col gap-4 rounded-2xl bg-card p-5">
         <ProfileCard answers={session.answers} school={session.school} />
@@ -627,14 +691,16 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
               ? "2 entries (one bonus for your photo)"
               : "1 entry"}
             . Entries close {RAFFLE.endsLabel}, and we'll email the result to
-            your school email. We'll also let you know when Verimate launches.
+            your school email. Your first month of Verimate is free when we
+            launch.
           </p>
         </div>
       </section>
+      <ReferralCard code={session.referralCode} friends={friends} />
 
       <div className="flex flex-col gap-2">
         <Button size="lg" onClick={share}>
-          Share with friends
+          Share my invite link
         </Button>
         <Button size="lg" variant="outline" onClick={onEdit}>
           Edit my answers

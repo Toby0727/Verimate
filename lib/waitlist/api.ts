@@ -21,11 +21,15 @@ export type WaitlistSession =
       school: School;
       answers: WaitlistAnswers;
       completedAt: string | null;
+      // Their own code to share; made by the database on first save.
+      referralCode: string | null;
     };
 
 type Row = {
   name: string | null;
   photo_path: string | null;
+  referred_by: string | null;
+  referral_code: string | null;
   gender: WaitlistAnswers["gender"];
   year: WaitlistAnswers["year"];
   major: string | null;
@@ -45,7 +49,7 @@ type Row = {
 };
 
 const COLUMNS =
-  "name, photo_path, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
+  "name, photo_path, referred_by, referral_code, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
 
 // Imported lazily so pages still render when the Supabase env vars are missing.
 async function supabase() {
@@ -78,6 +82,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       school: "SU",
       answers: EMPTY_ANSWERS,
       completedAt: null,
+      referralCode: null,
     };
   }
   const client = await supabase();
@@ -105,6 +110,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       // Google's name is the starting point until the student saves their own.
       name: row?.name ?? googleName(user.user_metadata),
       photoPath: row?.photo_path ?? null,
+      referredBy: row?.referred_by ?? null,
       gender: row?.gender ?? null,
       year: row?.year ?? null,
       major: row?.major ?? null,
@@ -122,6 +128,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       pets: row?.pets ?? null,
     },
     completedAt: row?.completed_at ?? null,
+    referralCode: row?.referral_code ?? null,
   };
 }
 
@@ -180,6 +187,36 @@ export async function uploadWaitlistPhoto(
   return path;
 }
 
+// The referral code they typed isn't anyone's (or is their own).
+export class InvalidReferralCode extends Error {}
+
+// How many friends finished the survey with this student's code.
+export async function loadReferralCount(): Promise<number> {
+  if (isPreview()) return 2;
+  const client = await supabase();
+  const { data, error } = await client.rpc("my_referral_count");
+  if (error) throw error;
+  return (data as number | null) ?? 0;
+}
+
+// A ?ref= code from a friend's link, kept across the Google sign-in
+// redirect. Browser storage can be unavailable, so failures are ignored.
+const REF_KEY = "verimate-ref";
+
+export function rememberReferral(code: string) {
+  try {
+    localStorage.setItem(REF_KEY, code);
+  } catch {}
+}
+
+export function rememberedReferral(): string | null {
+  try {
+    return localStorage.getItem(REF_KEY);
+  } catch {
+    return null;
+  }
+}
+
 // Short-lived link for showing the student their own saved photo.
 export async function waitlistPhotoUrl(path: string): Promise<string | null> {
   if (isPreview()) return null;
@@ -196,12 +233,13 @@ export async function waitlistPhotoUrl(path: string): Promise<string | null> {
 export async function saveWaitlist(
   session: Extract<WaitlistSession, { status: "signed-in" }>,
   answers: WaitlistAnswers,
-): Promise<{ completedAt: string | null }> {
+): Promise<{ completedAt: string | null; referralCode: string | null }> {
   if (isPreview()) {
     return {
       completedAt: isComplete(answers)
         ? (session.completedAt ?? new Date().toISOString())
         : null,
+      referralCode: "PRE123",
     };
   }
   const client = await supabase();
@@ -214,6 +252,7 @@ export async function saveWaitlist(
         school: session.school,
         name: answers.name?.trim() || null,
         photo_path: answers.photoPath,
+        referred_by: answers.referredBy,
         gender: answers.gender,
         year: answers.year,
         major: answers.major?.trim() || null,
@@ -238,8 +277,13 @@ export async function saveWaitlist(
       },
       { onConflict: "user_id" },
     )
-    .select("completed_at")
-    .single<{ completed_at: string | null }>();
-  if (error) throw error;
-  return { completedAt: data.completed_at };
+    .select("completed_at, referral_code")
+    .single<{ completed_at: string | null; referral_code: string | null }>();
+  if (error) {
+    if (error.message.includes("invalid referral code")) {
+      throw new InvalidReferralCode();
+    }
+    throw error;
+  }
+  return { completedAt: data.completed_at, referralCode: data.referral_code };
 }

@@ -5,39 +5,90 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { RAFFLE } from "@/lib/waitlist/options";
 
-function timeLeft(now: number): { days: number; hours: number } | null {
-  const ms = new Date(RAFFLE.endsAt).getTime() - now;
-  if (ms <= 0) return null;
-  const hours = Math.floor(ms / 3_600_000);
-  return { days: Math.floor(hours / 24), hours: hours % 24 };
+type TimeLeft = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+function timeLeft(now: number): TimeLeft | null {
+  const total = Math.floor((new Date(RAFFLE.endsAt).getTime() - now) / 1000);
+  if (total <= 0) return null;
+  return {
+    days: Math.floor(total / 86_400),
+    hours: Math.floor(total / 3_600) % 24,
+    minutes: Math.floor(total / 60) % 60,
+    seconds: total % 60,
+  };
 }
 
-// Ticks once a minute; null until mounted so server and client agree.
+// Ticks every second; undefined until mounted so server and client agree.
 function useTimeLeft() {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 60_000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
   return now === null ? undefined : timeLeft(now);
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
+function Unit({ value, label }: { value: string; label: string }) {
+  return (
+    <span className="flex flex-col items-center">
+      <span className="min-w-[2ch] rounded-md bg-black/25 px-1.5 py-0.5 text-center font-semibold text-[18px] tabular-nums leading-tight">
+        {value}
+      </span>
+      <span className="mt-0.5 text-[10px] uppercase tracking-wider opacity-75">
+        {label}
+      </span>
+    </span>
+  );
+}
+
+// Days, hours, minutes and seconds until entries close.
 function Countdown() {
   const left = useTimeLeft();
-  if (left === undefined) return <span className="opacity-0">…</span>;
-  if (left === null) return <span>Entries closed</span>;
+  if (left === undefined) return <div className="h-[42px]" />;
+  if (left === null) return <span className="text-[13px]">Entries closed</span>;
   return (
-    <span>
-      <b className="font-semibold tabular-nums">{left.days}</b>d{" "}
-      <b className="font-semibold tabular-nums">{left.hours}</b>h left to enter
+    <div
+      role="timer"
+      aria-label={`${left.days} days ${left.hours} hours left to enter`}
+      className="flex items-start gap-1.5"
+    >
+      <Unit value={String(left.days)} label="days" />
+      <Colon />
+      <Unit value={pad(left.hours)} label="hrs" />
+      <Colon />
+      <Unit value={pad(left.minutes)} label="min" />
+      <Colon />
+      <Unit value={pad(left.seconds)} label="sec" />
+    </div>
+  );
+}
+
+function Colon() {
+  return (
+    <span aria-hidden className="pt-0.5 font-semibold text-[18px] opacity-70">
+      :
     </span>
   );
 }
 
 // The prize, drawn as a crimson gift card with a ribbon, a sweeping shine
 // and a shake every few seconds.
-export function GiftCard({ entries }: { entries?: number }) {
+export function GiftCard({
+  entries,
+  boost = 0,
+}: {
+  entries?: number;
+  // Extra chance from referrals, in percent.
+  boost?: number;
+}) {
   return (
     <div className="hype-pop">
       <div className="hype-wiggle-soft">
@@ -69,15 +120,21 @@ export function GiftCard({ entries }: { entries?: number }) {
               gift card
             </span>
           </div>
-          <div className="relative mt-4 flex items-center justify-between gap-2 text-[13px]">
-            <span className="rounded-full bg-black/20 px-2.5 py-1">
-              <Countdown />
-            </span>
+          <div className="relative mt-4 flex items-end justify-between gap-2">
+            <Countdown />
             {entries ? (
-              <span className="opacity-90">
-                You have {entries} {entries === 1 ? "entry" : "entries"}
+              <span className="text-right text-[13px] leading-tight opacity-90">
+                {entries} {entries === 1 ? "entry" : "entries"}
+                {boost > 0 && (
+                  <>
+                    <br />
+                    <b>+{boost}% from friends</b>
+                  </>
+                )}
               </span>
-            ) : null}
+            ) : (
+              <span className="pb-4 text-[12px] opacity-80">left to enter</span>
+            )}
           </div>
         </div>
       </div>

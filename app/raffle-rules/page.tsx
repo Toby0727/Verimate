@@ -46,6 +46,14 @@ export default function RaffleRulesPage() {
             aren't of you don't earn the bonus entry. A photo is optional and
             not needed to enter.
           </Rule>
+          <Rule title="Referral bonus">
+            After you finish, you get a referral code. Each other eligible
+            student who signs in with their own school Google account, enters
+            your code and finishes every question raises your chance by 10% of
+            your entries (for example, 3 friends make 1 entry count as 1.3).
+            Your own code and codes from your other accounts don't count, and
+            each student can use only one code.
+          </Rule>
           <Rule title="Entry period">
             Entries close at 11:59 PM Eastern on {RAFFLE.endsLabel}.
           </Rule>
