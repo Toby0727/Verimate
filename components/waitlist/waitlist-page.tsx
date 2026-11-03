@@ -186,45 +186,75 @@ function GoogleButton({ label }: { label: string }) {
   );
 }
 
+const PERKS: { title: string; body: string }[] = [
+  {
+    title: "Your first month free",
+    body: "Everyone on the waitlist gets a month of Verimate on us at launch.",
+  },
+  {
+    title: `A shot at a ${RAFFLE.prize}`,
+    body: `Drawn from everyone who finishes the survey. Entries close ${RAFFLE.endsLabel}.`,
+  },
+  {
+    title: "Better odds, your way",
+    body: "Add a real photo for a bonus entry, and get +10% for every friend who joins with your code.",
+  },
+];
+
+// The signed-out homepage: an editorial hero, the prize, and what joining
+// gets you, separated by rules rather than stacked cards.
 function Landing() {
   return (
-    <>
-      <GiftCard />
-      <section className="flex flex-col gap-3 rounded-2xl bg-card p-5">
-        <h1 className="font-semibold text-[26px] leading-tight tracking-tight">
-          The most complete sublet + roommate matching, built for off-campus
-          living.
+    <div className="flex flex-col gap-8 pt-2">
+      <section className="flex flex-col gap-5">
+        <span className="font-semibold text-[11px] text-verified uppercase tracking-[0.2em]">
+          SU & ESF · Launching soon
+        </span>
+        <h1 className="font-semibold text-[36px] leading-[1.05] tracking-[-0.03em]">
+          Building the most complete{" "}
+          <span className="text-verified">sublet + roommate</span> matching for
+          off-campus living.
         </h1>
-        <p className="text-[15px] text-muted-foreground">
-          Only verified SU & ESF students. Join the waitlist now to get{" "}
-          <b className="font-semibold text-foreground">your first month free</b>{" "}
-          when Verimate launches, plus a chance to win a {RAFFLE.prize}.
+        <p className="max-w-[34ch] text-[16px] text-muted-foreground leading-relaxed">
+          Only verified SU & ESF students. Join the waitlist in about a minute.
         </p>
+        <div className="flex flex-col gap-2">
+          <GoogleButton label="Continue with school Google" />
+          <p className="text-[12px] text-muted-foreground">
+            Use your @syr.edu or @esf.edu account. We only use it to confirm
+            you're a student and to contact you.
+          </p>
+        </div>
       </section>
 
-      <ol className="flex flex-col gap-2 rounded-2xl bg-card p-5 text-[15px]">
-        {[
-          "Sign in with your school Google account",
-          "Answer 6 quick questions (about a minute)",
-          "Get 1 month free + enter the raffle",
-        ].map((text, i) => (
-          <li key={text} className="flex items-center gap-3">
-            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-muted font-semibold text-[12px]">
-              {i + 1}
-            </span>
-            {text}
-          </li>
-        ))}
-      </ol>
+      <GiftCard />
 
-      <div className="flex flex-col gap-2">
-        <GoogleButton label="Continue with school Google" />
-        <p className="text-center text-[12px] text-muted-foreground">
-          Use your @syr.edu or @esf.edu account. We only use it to confirm
-          you're a student and to contact you.
-        </p>
-      </div>
-    </>
+      <section className="flex flex-col">
+        <h2 className="pb-3 font-semibold text-[11px] text-muted-foreground uppercase tracking-[0.2em]">
+          What you get for joining
+        </h2>
+        <ol className="flex flex-col border-border border-t">
+          {PERKS.map((perk, i) => (
+            <li
+              key={perk.title}
+              className="grid grid-cols-[2.25rem_1fr] gap-x-3 border-border border-b py-4"
+            >
+              <span className="font-semibold text-[15px] text-verified tabular-nums leading-6">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="flex flex-col gap-1">
+                <span className="font-semibold text-[16px] leading-tight">
+                  {perk.title}
+                </span>
+                <span className="text-[14px] text-muted-foreground leading-snug">
+                  {perk.body}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </div>
   );
 }
 

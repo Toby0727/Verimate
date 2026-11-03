@@ -92,15 +92,19 @@ export function GiftCard({
   return (
     <div className="hype-pop">
       <div className="hype-wiggle-soft">
-        <div className="hype-shine relative overflow-hidden rounded-2xl bg-verified-fill p-5 text-white shadow-[0_12px_30px_-12px_rgb(184_40_58/0.7)]">
-          {/* Ribbon */}
+        <div className="hype-shine relative overflow-hidden rounded-[20px] bg-verified-fill p-5 text-white shadow-[0_18px_40px_-24px_rgb(120_20_32/0.9)] ring-1 ring-white/15 ring-inset">
+          {/* Fine ribbon lines and an inner frame, like a printed card. */}
           <span
             aria-hidden
-            className="absolute inset-y-0 right-14 w-5 bg-white/15"
+            className="absolute inset-y-0 right-[3.25rem] w-px bg-white/30"
           />
           <span
             aria-hidden
-            className="absolute inset-x-0 top-[42%] h-5 bg-white/15"
+            className="absolute inset-x-0 top-[44%] h-px bg-white/30"
+          />
+          <span
+            aria-hidden
+            className="absolute inset-2 rounded-[14px] border border-white/10"
           />
           <div className="relative flex items-start justify-between">
             <span className="font-semibold text-[11px] tracking-[0.14em] uppercase opacity-90">
@@ -111,7 +115,7 @@ export function GiftCard({
             </span>
           </div>
           <div className="relative mt-3 flex items-end gap-2">
-            <span className="font-bold text-[64px] leading-none tracking-tight">
+            <span className="font-bold text-[64px] leading-none tracking-[-0.03em]">
               $50
             </span>
             <span className="pb-2 font-medium text-[15px] leading-tight">
@@ -121,7 +125,12 @@ export function GiftCard({
             </span>
           </div>
           <div className="relative mt-4 flex items-end justify-between gap-2">
-            <Countdown />
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] uppercase tracking-[0.14em] opacity-80">
+                Entries close in
+              </span>
+              <Countdown />
+            </div>
             {entries ? (
               <span className="text-right text-[13px] leading-tight opacity-90">
                 {entries} {entries === 1 ? "entry" : "entries"}
@@ -132,9 +141,7 @@ export function GiftCard({
                   </>
                 )}
               </span>
-            ) : (
-              <span className="pb-4 text-[12px] opacity-80">left to enter</span>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
