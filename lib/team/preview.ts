@@ -1,0 +1,128 @@
+// 示例数据，替换为真实功能时删除
+// Sample accounts for /team?preview in `npm run dev` only. Not real students.
+import type { TeamRow } from "@/lib/rules/team";
+
+const BLANK: Omit<TeamRow, "user_id" | "email" | "account_created_at"> = {
+  google_name: null,
+  last_sign_in_at: null,
+  school: null,
+  has_response: false,
+  name: null,
+  gender: null,
+  year: null,
+  major: null,
+  budget: null,
+  areas: null,
+  study_abroad: null,
+  study_abroad_plans: null,
+  sublet_out_terms: null,
+  sublet_in_terms: null,
+  roommate_terms: null,
+  drinking: null,
+  smoking: null,
+  cannabis: null,
+  greek_life: null,
+  pets: null,
+  photo_path: null,
+  photo_uploaded: false,
+  referral_code: null,
+  referred_by: null,
+  referral_count: 0,
+  started_at: null,
+  updated_at: null,
+  completed_at: null,
+};
+
+export function previewRows(now: Date): TeamRow[] {
+  const ago = (hours: number) =>
+    new Date(now.getTime() - hours * 3_600_000).toISOString();
+  const finished = (
+    id: string,
+    email: string,
+    name: string,
+    hours: number,
+    extra: Partial<TeamRow>,
+  ): TeamRow => ({
+    ...BLANK,
+    user_id: id,
+    email,
+    google_name: name,
+    account_created_at: ago(hours),
+    last_sign_in_at: ago(hours - 0.1),
+    school: "SU",
+    has_response: true,
+    name,
+    gender: "prefer-not",
+    year: "junior",
+    major: "Sample major",
+    budget: ["800-1000", "1000-1200"],
+    areas: ["university-hill", "euclid"],
+    study_abroad: "no",
+    sublet_out_terms: [],
+    sublet_in_terms: ["summer-2027"],
+    roommate_terms: ["fall-2027"],
+    drinking: "socially",
+    smoking: "no",
+    cannabis: "never",
+    greek_life: "no",
+    pets: "okay",
+    referral_code: `SMPL0${id.slice(-1)}`,
+    started_at: ago(hours - 0.05),
+    updated_at: ago(hours - 0.2),
+    completed_at: ago(hours - 0.2),
+    ...extra,
+  });
+
+  return [
+    {
+      ...BLANK,
+      user_id: "p7",
+      email: "sample.personal@gmail.com",
+      google_name: "Sample Personal",
+      account_created_at: ago(0.4),
+      last_sign_in_at: ago(0.4),
+    },
+    {
+      ...BLANK,
+      user_id: "p6",
+      email: "sample.six@g.syr.edu",
+      google_name: "Sample Six",
+      account_created_at: ago(2),
+      last_sign_in_at: ago(2),
+      school: "SU",
+      has_response: true,
+      name: "Sample Six",
+      gender: "man",
+      year: "sophomore",
+      major: "Sample major",
+      budget: ["600-800"],
+      referred_by: "SMPL01",
+      started_at: ago(1.95),
+      updated_at: ago(1.9),
+    },
+    finished("p5", "sample.five@g.syr.edu", "Sample Five", 5, {
+      referred_by: "SMPL01",
+      year: "senior",
+      study_abroad: "fall-2027",
+      study_abroad_plans: ["fall-2027:london"],
+      sublet_out_terms: ["fall-2027"],
+    }),
+    finished("p4", "sample.four@g.syr.edu", "Sample Four", 26, {
+      photo_uploaded: true,
+      photo_path: "p4/photo.jpg",
+      referred_by: "SMPL01",
+      greek_life: "member",
+    }),
+    finished("p3", "sample.three@gmail.com", "Sample Three", 30, {
+      school: null,
+      pets: "have-pet",
+    }),
+    finished("p1", "sample.one@g.syr.edu", "Sample One", 50, {
+      photo_uploaded: true,
+      photo_path: "p1/photo.jpg",
+      // Sample Four and Five finished with this code on school accounts.
+      referral_count: 2,
+      year: "grad-1",
+    }),
+  ];
+}

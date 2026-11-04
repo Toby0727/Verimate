@@ -7,6 +7,21 @@
 
 ---
 
+## 2026-11-04 凌晨：团队后台 /team
+
+### 做了什么
+- 新增团队后台 `https://www.verimate.org/team`（校园网下用 `https://verimate.vercel.app/team`）：用 Google 登录，只有团队名单里的账号能看到数据（目前只有你一个人）。
+- 能看到：总账号数、答完进入抽奖的人数、答到一半的人数、只登录没答的人数、学校 / 个人账号、照片数、被邀请人数；最近 14 天每天新增柱状图；最近动态（谁登录、谁开始答、谁答完）；每个人的名单，点开看全部答案、照片、邀请码、谁邀请的、抽奖权重和中奖概率。每分钟自动刷新。
+- 权限在数据库里判断（`public.team_waitlist()` + `private.team_admins` 名单），网页本身不是安全边界。没有用 secret key。
+- 本地用示例数据测过电脑和手机布局；单元测试、类型检查、lint、生产构建都通过。
+
+### 你需要做 / 决定的
+- [ ] 在 Supabase SQL Editor 跑 `supabase/migrations/20261104030000_team_dashboard.sql`。没跑之前 `/team` 只显示"One setup step left"，不影响问卷。
+- [ ] 跑完后用 hpang05@syr.edu 登录 `/team`，确认能看到真实名单。
+- [ ] 要加队友时告诉 Claude 他们的 Google 邮箱。
+
+---
+
 ## 2026-11-03 夜：学校网打不开 verimate.org，换用 vercel.app 二维码
 
 ### 发生了什么
