@@ -26,7 +26,7 @@ How every Verimate graphic is made: the brand rules they share, what each one co
   - "+ one month free account"
   - "Ends Nov 30"
 - **Sign-in line:** "Sign in with your **@g.syr.edu** account for a 5% better chance to win." (`@g.syr.edu` bold)
-- **Link:** https://verimate.org (QR codes point here)
+- **Link:** https://verimateapp.com (QR codes point here; main domain since 2026-11-04, because SU's campus network blocks verimate.org)
 
 ## The graphics
 
@@ -35,15 +35,15 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 | `docs/brand/flyer/verimate-flyer.png` / `.pdf` | US Letter portrait, 2550 × 3300 at 300 dpi | Printed flyer with a QR code | `flyer.py` |
 | `docs/brand/flyer/verimate-poster.png` / `.pdf` | 17 × 11 in landscape, 5100 × 3300 at 300 dpi | Poster / last slide of a class deck, with a QR code | `poster_render.py` |
 | `docs/brand/flyer/verimate-poster.pptx` | 17 × 11 in, one slide | The poster image filling the slide (an image on purpose, so Figtree shows on computers without it) | `poster_image.js` |
-| `docs/brand/flyer/verimate-flyer-vercel.*`, `verimate-poster-vercel.*` | Same as above | Same flyer and poster, but the QR code and URL line use **verimate.vercel.app**, because SU's campus network blocks verimate.org (since 2026-11-03). Use these on campus until SU unblocks the domain | same scripts, with the URL arguments below |
-| `docs/brand/flyer/verimate-ig-story.png` | 1080 × 1920 | Instagram story, **no QR code**; add a Link sticker to verimate.org over the URL | `story.py` |
+| `docs/brand/flyer/verimate-flyer-vercel.*`, `verimate-poster-vercel.*` | Same as above | Same flyer and poster, but the QR code and URL line use **verimate.vercel.app**, because SU's campus network blocks verimate.org (since 2026-11-03). Kept as a backup in case SU's network ever blocks verimateapp.com too | same scripts, with the URL arguments below |
+| `docs/brand/flyer/verimate-ig-story.png` | 1080 × 1920 | Instagram story, **no QR code**; add a Link sticker to verimateapp.com over the URL | `story.py` |
 | `docs/brand/final/verimate-logo.*`, `verimate-mark.*` | SVG + transparent PNG (2048 wide / 1024 square) | Logo and app icon | from `docs/brand/logo-options/` (08a Bold V) |
 
 ### Layouts
 
-- **Flyer (portrait):** logo top left → slogan in three lines → QR code centred on a white rounded tile with "Scan to join the waitlist" and "verimate.org" under it → red prize card full width → sign-in line centred at the bottom.
-- **Poster (landscape):** left column is logo, three-line slogan, then the red prize card. Right column is the QR tile, "Scan to join the waitlist", "verimate.org", then the two-line sign-in note.
-- **Instagram story:** logo → four-line slogan → red prize card (two-line sign-up label) → "Join the waitlist at **verimate.org**" → sign-in line. All text stays between y ≈ 250 and y ≈ 1670 so Instagram's top bar and reply box don't cover it.
+- **Flyer (portrait):** logo top left → slogan in three lines → QR code centred on a white rounded tile with "Scan to join the waitlist" and "verimateapp.com" under it → red prize card full width → sign-in line centred at the bottom.
+- **Poster (landscape):** left column is logo, three-line slogan, then the red prize card. Right column is the QR tile, "Scan to join the waitlist", "verimateapp.com", then the two-line sign-in note.
+- **Instagram story:** logo → four-line slogan → red prize card (two-line sign-up label) → "Join the waitlist at **verimateapp.com**" → sign-in line. All text stays between y ≈ 250 and y ≈ 1670 so Instagram's top bar and reply box don't cover it.
 
 ## Rebuild
 
@@ -51,7 +51,7 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 # In any scratch folder
 npm init -y && npm install --save-exact qrcode@1.5.4 jsqr@1.4.0 pptxgenjs@4.0.1
 REPO=~/Desktop/verimate/Verimate; SCRIPTS=$REPO/docs/brand/flyer/scripts; FONT=$SCRIPTS/figtree-latin.ttf
-node $SCRIPTS/assets.cjs $REPO .                 # qr.png (verimate.org) + logo.png
+node $SCRIPTS/assets.cjs $REPO .                 # qr.png (verimateapp.com) + logo.png
 python3 -I $SCRIPTS/flyer.py . $FONT $REPO/docs/brand/flyer/verimate-flyer
 python3 -I $SCRIPTS/poster_render.py . $FONT $REPO/docs/brand/final/verimate-logo.png $REPO/docs/brand/flyer/verimate-poster
 NODE_PATH=./node_modules node $SCRIPTS/poster_image.js $REPO/docs/brand/flyer/verimate-poster.png $REPO/docs/brand/flyer/verimate-poster.pptx
@@ -69,10 +69,10 @@ Needs Python 3 with Pillow, and Node. `sharp` comes from the repo's own `node_mo
 
 ### Checks before sharing a new version
 
-1. **QR code:** `scan.cjs` must print the intended link (`https://verimate.org`, or `https://verimate.vercel.app/` for the -vercel versions) at full size and at 300 px wide.
+1. **QR code:** `scan.cjs` must print the intended link (`https://verimateapp.com`, or `https://verimate.vercel.app/` for the -vercel versions) at full size and at 300 px wide.
 2. **Font:** open the PNG and confirm it's Figtree, not a fallback.
 3. **Story safe zone:** `story.py` prints "bottom of content"; keep it under ~1670.
-4. **Copy:** dates, prize and percentages must match the official rules at https://www.verimate.org/raffle-rules.
+4. **Copy:** dates, prize and percentages must match the official rules at https://verimateapp.com/raffle-rules.
 
 ## If you use an image model instead
 

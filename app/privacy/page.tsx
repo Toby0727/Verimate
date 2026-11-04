@@ -31,7 +31,7 @@ export default function PrivacyPage() {
           <Section title="Who we are">
             Verimate is a student project in Syracuse, New York, building a
             roommate and sublet app for Syracuse University and SUNY ESF
-            students. Right now verimate.org runs our waitlist and gift card
+            students. Right now verimateapp.com runs our waitlist and gift card
             raffle. Questions or requests: <Email />.
           </Section>
           <Section title="What we collect">

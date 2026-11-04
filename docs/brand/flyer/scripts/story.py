@@ -89,7 +89,7 @@ text_top(cx + 52, cy + ch - 56, "Ends Nov 30", font(28, 500), PINK)
 # Call to action
 y = cy + ch + 44
 text_top(M, y, "Join the waitlist at", font(44, 500), MUTED)
-text_top(M, y + 64, "verimate.org", font(76, 800), INK)
+text_top(M, y + 64, "verimateapp.com", font(76, 800), INK)
 
 # Sign-in policy
 pf, pb = font(30, 500), font(30, 750)

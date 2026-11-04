@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 D = sys.argv[1]  # working dir with qr.png, logo.png
 FONT = sys.argv[2]
 OUT = sys.argv[3]
-URL = sys.argv[4] if len(sys.argv) > 4 else "verimate.org"  # text under the QR code
+URL = sys.argv[4] if len(sys.argv) > 4 else "verimateapp.com"  # text under the QR code
 
 W, H = 2550, 3300  # US letter at 300 dpi
 M = 180

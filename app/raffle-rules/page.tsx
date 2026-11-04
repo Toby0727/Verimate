@@ -38,7 +38,7 @@ export default function RaffleRulesPage() {
             members can't win. Void where prohibited.
           </Rule>
           <Rule title="How to enter">
-            Sign in at verimate.org with a Google account and answer every
+            Sign in at verimateapp.com with a Google account and answer every
             waitlist question. That's one entry; editing your answers doesn't
             add entries. Use one account per person.
           </Rule>

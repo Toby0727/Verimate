@@ -7,6 +7,26 @@
 
 ---
 
+## 2026-11-04：主域名换成 verimateapp.com
+
+### 为什么
+- SU 校园网拦截 verimate.org（学校 DNS 说域名不存在）。新买的 `verimateapp.com` 在校园网下实测能打开，所以所有地方都换成它。
+
+### 做了什么（代码）
+- 隐私政策和抽奖规则里的域名改成 verimateapp.com。邀请链接本来就用当前域名，不用改。
+- 宣传单、横版海报（PNG / PDF / PPTX）、Instagram story 全部重新生成，二维码指向 `https://verimateapp.com`，三个尺寸扫码测过。`-vercel` 版本留作备用（万一学校以后也拦新域名）。
+- 生成脚本的默认网址改成 verimateapp.com。
+
+### 你需要做的（按顺序，顺序错了会登录失败）
+- [ ] Supabase → Authentication → URL Configuration：Redirect URLs **加上** `https://verimateapp.com/**` 和 `https://www.verimateapp.com/**`（旧的先别删），保存。
+- [ ] 同一页把 Site URL 改成 `https://verimateapp.com`，保存。
+- [ ] Vercel → Domains：`verimateapp.com` 设为主域名（连到 Production）；`www.verimateapp.com`、`verimate.org`、`www.verimate.org` 都改成 308 跳到 `verimateapp.com`。
+- [ ] 校园网下用手机试一遍：打开 verimateapp.com → Google 登录 → 回到问卷；再打开 `/team` 看能不能登录。
+- [ ] 已经贴出去的旧宣传单（verimate.org）在校园网下打不开，换成新的。
+- [ ] 给 ITS 的邮件不急了；之后想让 verimate.org 也能在校园网打开再发。
+
+---
+
 ## 2026-11-04：团队后台加"删除账号"
 
 ### 做了什么
