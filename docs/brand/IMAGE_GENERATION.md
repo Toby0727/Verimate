@@ -35,6 +35,7 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 | `docs/brand/flyer/verimate-flyer.png` / `.pdf` | US Letter portrait, 2550 × 3300 at 300 dpi | Printed flyer with a QR code | `flyer.py` |
 | `docs/brand/flyer/verimate-poster.png` / `.pdf` | 17 × 11 in landscape, 5100 × 3300 at 300 dpi | Poster / last slide of a class deck, with a QR code | `poster_render.py` |
 | `docs/brand/flyer/verimate-poster.pptx` | 17 × 11 in, one slide | The poster image filling the slide (an image on purpose, so Figtree shows on computers without it) | `poster_image.js` |
+| `docs/brand/flyer/verimate-flyer-vercel.*`, `verimate-poster-vercel.*` | Same as above | Same flyer and poster, but the QR code and URL line use **verimate.vercel.app**, because SU's campus network blocks verimate.org (since 2026-11-03). Use these on campus until SU unblocks the domain | same scripts, with the URL arguments below |
 | `docs/brand/flyer/verimate-ig-story.png` | 1080 × 1920 | Instagram story, **no QR code**; add a Link sticker to verimate.org over the URL | `story.py` |
 | `docs/brand/final/verimate-logo.*`, `verimate-mark.*` | SVG + transparent PNG (2048 wide / 1024 square) | Logo and app icon | from `docs/brand/logo-options/` (08a Bold V) |
 
@@ -56,13 +57,19 @@ python3 -I $SCRIPTS/poster_render.py . $FONT $REPO/docs/brand/final/verimate-log
 NODE_PATH=./node_modules node $SCRIPTS/poster_image.js $REPO/docs/brand/flyer/verimate-poster.png $REPO/docs/brand/flyer/verimate-poster.pptx
 python3 -I $SCRIPTS/story.py . $FONT $REPO/docs/brand/flyer/verimate-ig-story
 node $SCRIPTS/scan.cjs $REPO $REPO/docs/brand/flyer/verimate-flyer.png   # QR self-test
+
+# The -vercel versions: pass the QR link to assets.cjs and the URL line as the last argument
+node $SCRIPTS/assets.cjs $REPO . https://verimate.vercel.app/
+python3 -I $SCRIPTS/flyer.py . $FONT $REPO/docs/brand/flyer/verimate-flyer-vercel verimate.vercel.app
+python3 -I $SCRIPTS/poster_render.py . $FONT $REPO/docs/brand/final/verimate-logo.png $REPO/docs/brand/flyer/verimate-poster-vercel verimate.vercel.app
+NODE_PATH=./node_modules node $SCRIPTS/poster_image.js $REPO/docs/brand/flyer/verimate-poster-vercel.png $REPO/docs/brand/flyer/verimate-poster-vercel.pptx verimate.vercel.app
 ```
 
 Needs Python 3 with Pillow, and Node. `sharp` comes from the repo's own `node_modules` (run `npm install` in the repo first).
 
 ### Checks before sharing a new version
 
-1. **QR code:** `scan.cjs` must print `https://verimate.org` at full size and at 300 px wide.
+1. **QR code:** `scan.cjs` must print the intended link (`https://verimate.org`, or `https://verimate.vercel.app/` for the -vercel versions) at full size and at 300 px wide.
 2. **Font:** open the PNG and confirm it's Figtree, not a fallback.
 3. **Story safe zone:** `story.py` prints "bottom of content"; keep it under ~1670.
 4. **Copy:** dates, prize and percentages must match the official rules at https://www.verimate.org/raffle-rules.

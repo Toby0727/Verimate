@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 D = sys.argv[1]  # working dir with qr.png, logo.png
 FONT = sys.argv[2]
 OUT = sys.argv[3]
+URL = sys.argv[4] if len(sys.argv) > 4 else "verimate.org"  # text under the QR code
 
 W, H = 2550, 3300  # US letter at 300 dpi
 M = 180
@@ -60,7 +61,7 @@ label = "Scan to join the waitlist"
 lf = font(56, 650)
 lwid = d.textlength(label, font=lf)
 d.text(((W - lwid) / 2, ty + tile + 40), label, font=lf, fill=INK)
-url = "verimate.org"
+url = URL
 uf = font(46, 500)
 uwid = d.textlength(url, font=uf)
 d.text(((W - uwid) / 2, ty + tile + 112), url, font=uf, fill=MUTED)

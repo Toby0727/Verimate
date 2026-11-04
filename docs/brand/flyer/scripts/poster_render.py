@@ -2,6 +2,7 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 
 D, FONT, LOGO, OUT = sys.argv[1:5]
+URL = sys.argv[5] if len(sys.argv) > 5 else "verimate.org"  # text under the QR code
 DPI = 300
 W, H = 17 * DPI, 11 * DPI
 BG = (244, 244, 245)
@@ -105,7 +106,7 @@ def centered(y, parts):
 
 
 centered(ty + tile + px(0.35), [("Scan to join the waitlist", font(30, 700), INK)])
-centered(ty + tile + px(0.98), [("verimate.org", font(22, 500), MUTED)])
+centered(ty + tile + px(0.98), [(URL, font(22, 500), MUTED)])
 pf, pb = font(16, 500), font(16, 750)
 centered(ty + tile + px(1.75), [("Sign in with your ", pf, MUTED), ("@g.syr.edu", pb, INK),
                                 (" account", pf, MUTED)])

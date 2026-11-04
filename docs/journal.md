@@ -7,6 +7,24 @@
 
 ---
 
+## 2026-11-03 夜：学校网打不开 verimate.org，换用 vercel.app 二维码
+
+### 发生了什么
+- 在 SU 校园网（Wi-Fi / 有线）下打不开 verimate.org，用手机流量可以。**网站本身没问题**：公共 DNS（8.8.8.8、1.1.1.1）都能解析到 Vercel，直接连 Vercel 返回 200。
+- 问题出在学校的 DNS（`ns3.syr.edu`）：它对 `verimate.org` 和 `www.verimate.org` 回答"域名不存在"，而且这个回答是学校自己的服务器（`ns1.syr.edu`）签发的，不是 .org 注册局，说明是学校故意拦截。推测原因是域名刚注册（11 月初），被当成新域名过滤了（没有得到 ITS 确认）。
+- 影响：在校园网下扫宣传单 / 海报二维码的学生都会打不开。`https://verimate.vercel.app` 在校园网下能正常打开。
+
+### 做了什么
+- 新做了一套宣传单和海报，二维码和下面那行网址都改成 `verimate.vercel.app`：`docs/brand/flyer/verimate-flyer-vercel.*`、`verimate-poster-vercel.*`。原来的 `verimate.org` 版本不动，学校放行后换回去用。三个尺寸（原图 / 600px / 300px）都扫码测过。
+- 生成脚本（`assets.cjs`、`flyer.py`、`poster_render.py`、`poster_image.js`）改成可以传网址参数，不传时默认还是 `verimate.org`。命令见 `docs/brand/IMAGE_GENERATION.md`。
+
+### 你需要做 / 决定的
+- [ ] 给 SU ITS（help@syr.edu）发邮件，申请放行 `verimate.org` 和 `www.verimate.org`（草稿已写好，由你自己发）。
+- [ ] 已经贴出去的旧宣传单在校园网下打不开，考虑换成 -vercel 版本。
+- [ ] 学校放行后，确认校园网能打开，再换回 `verimate.org` 版本。
+
+---
+
 ## 2026-11-03 晚：Instagram story、安全审查 #2
 
 ### 做了什么
