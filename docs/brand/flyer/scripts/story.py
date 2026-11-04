@@ -12,7 +12,8 @@ M = 90
 BG = (244, 244, 245)
 INK = (17, 17, 17)
 MUTED = (110, 110, 118)
-RED = (184, 40, 58)
+BRAND = (248, 103, 46)  # Persimmon #F8672E
+RUST = (191, 67, 6)  # #BF4306
 WHITE = (255, 255, 255)
 PINK = (250, 225, 229)
 
@@ -42,8 +43,8 @@ img.paste(logo, (M, 240), logo)
 # Slogan, four lines sized to the width
 LINES = [
     [("Building the most", INK)],
-    [("complete ", INK), ("sublet +", RED)],
-    [("roommate", RED), (" matching", INK)],
+    [("complete ", INK), ("sublet +", BRAND)],
+    [("roommate", BRAND), (" matching", INK)],
     [("for off-campus living.", INK)],
 ]
 size = 108
@@ -62,29 +63,29 @@ for line in LINES:
 
 # Gift card
 cx, cy, cw, ch = M, y + 44, W - 2 * M, 560
-d.rounded_rectangle((cx, cy, cx + cw, cy + ch), radius=40, fill=RED)
-lc = (214, 120, 131)
+d.rounded_rectangle((cx, cy, cx + cw, cy + ch), radius=40, fill=BRAND)
+lc = (222, 84, 26)
 d.line((cx + cw - 130, cy, cx + cw - 130, cy + ch), fill=lc, width=3)
 d.line((cx, cy + 168, cx + cw, cy + 168), fill=lc, width=3)
 d.rounded_rectangle((cx + 16, cy + 16, cx + cw - 16, cy + ch - 16), radius=28,
-                    outline=(200, 82, 96), width=2)
+                    outline=(232, 92, 36), width=2)
 lf = font(36, 700)
-text_top(cx + 52, cy + 46, "Sign up to find your sublease / roomie", lf, WHITE)
-text_top(cx + 52, cy + 96, "and win a", lf, PINK)
+text_top(cx + 52, cy + 46, "Sign up to find your sublease / roomie", lf, INK)
+text_top(cx + 52, cy + 96, "and win a", lf, INK)
 nf, df = font(200, 800), font(100, 500)
 top = cy + 200
 _, n_t, _, n_b = d.textbbox((0, 0), "50", font=nf)
-dw = text_top(cx + 52, top + 6, "$", df, WHITE)
+dw = text_top(cx + 52, top + 6, "$", df, INK)
 nx = cx + 52 + dw + 6
-nw = text_top(nx, top, "50", nf, WHITE)
+nw = text_top(nx, top, "50", nf, INK)
 gf = font(50, 650)
 _, g_t, _, g_b = d.textbbox((0, 0), "Amazon", font=gf)
 gh = g_b - g_t
 gx = nx + nw + 34
-text_top(gx, top + (n_b - n_t) - 2 * gh - 18, "Amazon", gf, WHITE)
-text_top(gx, top + (n_b - n_t) - gh, "gift card", gf, WHITE)
-text_top(cx + 52, cy + ch - 120, "+ one month free account", font(46, 700), WHITE)
-text_top(cx + 52, cy + ch - 56, "Ends Nov 30", font(28, 500), PINK)
+text_top(gx, top + (n_b - n_t) - 2 * gh - 18, "Amazon", gf, INK)
+text_top(gx, top + (n_b - n_t) - gh, "gift card", gf, INK)
+text_top(cx + 52, cy + ch - 120, "+ one month free account", font(46, 700), INK)
+text_top(cx + 52, cy + ch - 56, "Ends Nov 30", font(28, 500), INK)
 
 # Call to action
 y = cy + ch + 44

@@ -65,11 +65,13 @@
   --primary-foreground: #ffffff;
   --primary-deep: #000000;
   --primary-tint: #e6e6ea;
-  /* The one brand color, Crimson (2026-11-03, replaces green): verified
-     badges, progress, the raffle pill. Text shade is darker for contrast. */
-  --verified: #a1202f;
-  --verified-tint: #fbeaec;
-  --verified-fill: #b8283a;
+  /* The one brand color, Persimmon (2026-11-04, replaces crimson): fills
+     use #f8672e (logo, verified check, toggles, gift card); text uses the
+     rust #bf4306 so it stays readable on white; the tint backs tags and
+     badges. White text on #f8672e is only 3:1, so text on orange is ink. */
+  --verified: #bf4306;
+  --verified-tint: #fde9df;
+  --verified-fill: #f8672e;
   --faint: #c4c4c8;
   --secondary: #e6e6ea;
   --secondary-foreground: #111111;
@@ -290,9 +292,9 @@
 @keyframes hype-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(184 40 58 / 0.35);
+    box-shadow: 0 0 0 0 rgb(248 103 46 / 0.35);
   }
   50% {
-    box-shadow: 0 0 0 6px rgb(184 40 58 / 0);
+    box-shadow: 0 0 0 6px rgb(248 103 46 / 0);
   }
 }

@@ -39,10 +39,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
 function Unit({ value, label }: { value: string; label: string }) {
   return (
     <span className="flex flex-col items-center">
-      <span className="min-w-[2ch] rounded-md bg-black/25 px-1.5 py-0.5 text-center font-semibold text-[18px] tabular-nums leading-tight">
+      <span className="min-w-[2ch] rounded-md bg-white/90 px-1.5 py-0.5 text-center font-semibold text-[18px] tabular-nums leading-tight">
         {value}
       </span>
-      <span className="mt-0.5 text-[10px] uppercase tracking-wider opacity-75">
+      <span className="mt-0.5 text-[10px] uppercase tracking-wider">
         {label}
       </span>
     </span>
@@ -79,7 +79,7 @@ function Colon() {
   );
 }
 
-// The prize, drawn as a crimson gift card with a ribbon, a sweeping shine
+// The prize, drawn as an orange gift card with a ribbon, a sweeping shine
 // and a shake every few seconds.
 export function GiftCard({
   entries,
@@ -92,22 +92,22 @@ export function GiftCard({
   return (
     <div className="hype-pop">
       <div className="hype-wiggle-soft">
-        <div className="hype-shine relative overflow-hidden rounded-[20px] bg-verified-fill p-5 text-white shadow-[0_18px_40px_-24px_rgb(120_20_32/0.9)] ring-1 ring-white/15 ring-inset">
+        <div className="hype-shine relative overflow-hidden rounded-[20px] bg-verified-fill p-5 text-foreground shadow-[0_18px_40px_-24px_rgb(191_67_6/0.8)] ring-1 ring-black/5 ring-inset">
           {/* Fine ribbon lines and an inner frame, like a printed card. */}
           <span
             aria-hidden
-            className="absolute inset-y-0 right-[3.25rem] w-px bg-white/30"
+            className="absolute inset-y-0 right-[3.25rem] w-px bg-black/15"
           />
           <span
             aria-hidden
-            className="absolute inset-x-0 top-[44%] h-px bg-white/30"
+            className="absolute inset-x-0 top-[44%] h-px bg-black/15"
           />
           <span
             aria-hidden
-            className="absolute inset-2 rounded-[14px] border border-white/10"
+            className="absolute inset-2 rounded-[14px] border border-black/10"
           />
           <div className="relative flex items-start justify-between">
-            <span className="font-semibold text-[11px] tracking-[0.14em] uppercase opacity-90">
+            <span className="font-semibold text-[11px] tracking-[0.14em] uppercase">
               Waitlist raffle
             </span>
             <span className="hype-wiggle grid size-10 place-items-center rounded-full bg-white text-verified-fill">
@@ -126,13 +126,13 @@ export function GiftCard({
           </div>
           <div className="relative mt-4 flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1">
-              <span className="text-[11px] uppercase tracking-[0.14em] opacity-80">
+              <span className="text-[11px] uppercase tracking-[0.14em]">
                 Entries close in
               </span>
               <Countdown />
             </div>
             {entries ? (
-              <span className="text-right text-[13px] leading-tight opacity-90">
+              <span className="text-right text-[13px] leading-tight">
                 {entries} {entries === 1 ? "entry" : "entries"}
                 {boost > 0 && (
                   <>
@@ -164,7 +164,7 @@ export function RafflePill({ className }: { className?: string }) {
   );
 }
 
-const CONFETTI_COLORS = ["#b8283a", "#111111", "#f3b5bd", "#e46a7a"];
+const CONFETTI_COLORS = ["#f8672e", "#111111", "#fde9df", "#bf4306"];
 
 // A one-time burst of confetti over the "You're entered!" card.
 export function Confetti() {

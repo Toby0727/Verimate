@@ -8,8 +8,8 @@ import { AREA_SHAPES, CAMPUSES } from "@/lib/waitlist/map-shapes";
 import type { Area } from "@/lib/waitlist/options";
 
 const INK = "#111111";
-const CAMPUS_FILL = "#b8283a"; // --verified-fill
-const CAMPUS_LINE = "#a1202f"; // --verified
+const CAMPUS_FILL = "#f8672e"; // --verified-fill
+const CAMPUS_LINE = "#bf4306"; // --verified
 
 // OpenFreeMap's light style: free, no API key, OpenStreetMap data. Its text
 // layers are hidden so only our area names show.

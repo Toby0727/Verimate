@@ -11,7 +11,8 @@ M = 180
 BG = (244, 244, 245)
 INK = (17, 17, 17)
 MUTED = (110, 110, 118)
-RED = (184, 40, 58)
+BRAND = (248, 103, 46)  # Persimmon #F8672E
+RUST = (191, 67, 6)  # #BF4306
 WHITE = (255, 255, 255)
 
 
@@ -30,12 +31,12 @@ lw = 600
 logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
 img.paste(logo, (M, 200), logo)
 
-# Slogan on three set lines, "sublet + roommate" in red.
+# Slogan on three set lines, "sublet + roommate" in orange.
 hf = font(160, 700)
 space = d.textlength(" ", font=hf)
 LINES = [
     [("Building", INK), ("the", INK), ("most", INK), ("complete", INK)],
-    [("sublet", RED), ("+", RED), ("roommate", RED), ("matching", INK)],
+    [("sublet", BRAND), ("+", BRAND), ("roommate", BRAND), ("matching", INK)],
     [("for", INK), ("off-campus", INK), ("living.", INK)],
 ]
 lines = [[(w, c, d.textlength(w, font=hf)) for w, c in line] for line in LINES]
@@ -69,14 +70,14 @@ d.text(((W - uwid) / 2, ty + tile + 112), url, font=uf, fill=MUTED)
 # $50 gift card
 cy0 = ty + tile + 260
 cy1 = cy0 + 540
-d.rounded_rectangle((M, cy0, W - M, cy1), radius=56, fill=RED)
+d.rounded_rectangle((M, cy0, W - M, cy1), radius=56, fill=BRAND)
 # fine ribbon lines and an inner frame, like the site's card
-d.line((W - M - 230, cy0, W - M - 230, cy1), fill=(214, 120, 131), width=4)
-d.line((M, cy0 + 128, W - M, cy0 + 128), fill=(214, 120, 131), width=4)
+d.line((W - M - 230, cy0, W - M - 230, cy1), fill=(222, 84, 26), width=4)
+d.line((M, cy0 + 128, W - M, cy0 + 128), fill=(222, 84, 26), width=4)
 d.rounded_rectangle((M + 24, cy0 + 24, W - M - 24, cy1 - 24), radius=40,
-                    outline=(200, 82, 96), width=3)
+                    outline=(232, 92, 36), width=3)
 kf = font(40, 650)
-d.text((M + 80, cy0 + 58), "S I G N   U P   T O   W I N", font=kf, fill=(250, 225, 229))
+d.text((M + 80, cy0 + 58), "S I G N   U P   T O   W I N", font=kf, fill=INK)
 bf = font(250, 800)
 # Measure the glyphs so "$50" sits between the label and the footer line.
 top = cy0 + 150
@@ -84,21 +85,21 @@ top = cy0 + 150
 df = font(150, 500)
 dx0, dy0, dx1, dy1 = d.textbbox((0, 0), "$", font=df)
 bx0, by0, bx1, by1 = d.textbbox((0, 0), "50", font=bf)
-d.text((M + 80 - dx0, top - 6 - dy0), "$", font=df, fill=WHITE)
+d.text((M + 80 - dx0, top - 6 - dy0), "$", font=df, fill=INK)
 nx = M + 80 + (dx1 - dx0) + 12
-d.text((nx - bx0, top - by0), "50", font=bf, fill=WHITE)
+d.text((nx - bx0, top - by0), "50", font=bf, fill=INK)
 gf = font(76, 600)
 gx = nx + (bx1 - bx0) + 40
 _, gy0, _, gy1 = d.textbbox((0, 0), "Amazon", font=gf)
 baseline = top + (by1 - by0)
-d.text((gx, baseline - 2 * (gy1 - gy0) - 28 - gy0), "Amazon", font=gf, fill=WHITE)
-d.text((gx, baseline - (gy1 - gy0) - gy0), "gift card", font=gf, fill=WHITE)
+d.text((gx, baseline - 2 * (gy1 - gy0) - 28 - gy0), "Amazon", font=gf, fill=INK)
+d.text((gx, baseline - (gy1 - gy0) - gy0), "gift card", font=gf, fill=INK)
 ef = font(66, 700)
-d.text((M + 80, cy1 - 128), "+ one month free account", font=ef, fill=WHITE)
+d.text((M + 80, cy1 - 128), "+ one month free account", font=ef, fill=INK)
 nf = font(40, 500)
 note = "Ends Nov 30"
 d.text((W - M - 230 - 40 - d.textlength(note, font=nf), cy1 - 108), note, font=nf,
-       fill=(250, 225, 229))
+       fill=INK)
 
 # Sign-in policy, one line
 py = cy1 + 70

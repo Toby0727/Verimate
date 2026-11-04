@@ -7,19 +7,19 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 | Thing | Value |
 |---|---|
 | Font | **Figtree**, the site's font. Never substitute it. The TTF is `docs/brand/flyer/scripts/figtree-latin.ttf` (SIL Open Font License, weights 300–900) |
-| Brand red (Crimson) | `#B8283A` for fills and the card; `#A1202F` for red text on light backgrounds |
+| Brand (Persimmon, since 2026-11-04) | `#F8672E` for fills, the card and the big orange headline words; `#BF4306` (rust) for small orange text on light backgrounds; `#FDE9DF` light tint for tags |
 | Ink | `#111111` for headlines and bold text |
 | Muted text | `#6E6E76` |
 | Background | `#F4F4F5` (light grey); cards and QR tiles are white `#FFFFFF` |
-| Pink on red | `#FAE1E5` for small text on the red card |
-| Logo | `docs/brand/final/verimate-logo.svg` / `.png` (Bold V in a crimson tile + "Verimate" wordmark). The square mark alone is `verimate-mark.*` |
-| Buttons | Black pills; red is only an accent |
-| Style | Editorial and plain: big headline, lots of space, one red card. No gradients, no stock icons, no illustrations, no "AI look" |
+| Text on orange | Always ink `#111111`. White on `#F8672E` is only 3:1, too faint for small text |
+| Logo | `docs/brand/final/verimate-logo.svg` / `.png` (two-stroke orange check mark, no tile, + black "Verimate" wordmark). The mark alone is `verimate-mark.*` |
+| Buttons | Black pills; orange is only an accent |
+| Style | Editorial and plain: big headline, lots of space, one orange card. No gradients, no stock icons, no illustrations, no "AI look" |
 
 ### Copy blocks
 
-- **Slogan:** "Building the most complete **sublet + roommate** matching for off-campus living." ("sublet + roommate" in red)
-- **Prize card** (red, rounded, thin ribbon lines and an inner frame like a printed gift card):
+- **Slogan:** "Building the most complete **sublet + roommate** matching for off-campus living." ("sublet + roommate" in orange)
+- **Prize card** (orange `#F8672E`, black text, rounded, thin ribbon lines and an inner frame like a printed gift card):
   - Label: "SIGN UP TO WIN" (flyer, poster) or "Sign up to find your sublease / roomie and win a" (Instagram story)
   - "$50" big, with the "$" smaller, lighter and top-aligned like a price tag
   - "Amazon gift card"
@@ -37,7 +37,7 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 | `docs/brand/flyer/verimate-poster.pptx` | 17 × 11 in, one slide | The poster image filling the slide (an image on purpose, so Figtree shows on computers without it) | `poster_image.js` |
 | `docs/brand/flyer/verimate-flyer-vercel.*`, `verimate-poster-vercel.*` | Same as above | Same flyer and poster, but the QR code and URL line use **verimate.vercel.app**, because SU's campus network blocks verimate.org (since 2026-11-03). Kept as a backup in case SU's network ever blocks verimateapp.com too | same scripts, with the URL arguments below |
 | `docs/brand/flyer/verimate-ig-story.png` | 1080 × 1920 | Instagram story, **no QR code**; add a Link sticker to verimateapp.com over the URL | `story.py` |
-| `docs/brand/final/verimate-logo.*`, `verimate-mark.*` | SVG + transparent PNG (2048 wide / 1024 square) | Logo and app icon | from `docs/brand/logo-options/` (08a Bold V) |
+| `docs/brand/final/verimate-logo.*`, `verimate-mark.*` | SVG + transparent PNG (2048 wide / 1024 square) | Logo and app icon | traced from the 2026-11-04 logo image; older options in `docs/brand/logo-options/` |
 
 ### Layouts
 
@@ -78,4 +78,4 @@ Needs Python 3 with Pillow, and Node. `sharp` comes from the repo's own `node_mo
 
 Give it this brief, and still add the QR code and the exact text yourself afterwards. Models garble small text and QR codes.
 
-> Minimal editorial poster on a light grey (#F4F4F5) background. Top left: the provided Verimate logo (crimson rounded square with a white bold V, then "Verimate" in black). Large bold geometric sans-serif headline (Figtree) in near-black #111111: "Building the most complete sublet + roommate matching for off-campus living", with "sublet + roommate" in crimson #B8283A. Below, one crimson rounded card styled like a printed gift card, with thin light ribbon lines and a faint inner border: small label "SIGN UP TO WIN", a large white "$50" with a smaller lighter "$", "Amazon gift card", and "+ one month free account". Lots of white space, no gradients, no icons, no illustrations, no people, flat and clean.
+> Minimal editorial poster on a light grey (#F4F4F5) background. Top left: the provided Verimate logo (an orange #F8672E two-stroke check mark, then "Verimate" in black). Large bold geometric sans-serif headline (Figtree) in near-black #111111: "Building the most complete sublet + roommate matching for off-campus living", with "sublet + roommate" in orange #F8672E. Below, one orange #F8672E rounded card styled like a printed gift card, with thin light ribbon lines and a faint inner border: small label "SIGN UP TO WIN", a large black "$50" with a smaller lighter "$", "Amazon gift card", and "+ one month free account". Lots of white space, no gradients, no icons, no illustrations, no people, flat and clean.

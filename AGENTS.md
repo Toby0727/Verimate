@@ -101,8 +101,8 @@ npx supabase db query --linked --project-ref <ref> "<sql>" # 直接对远程数�
 - 每处示例内容都要能看出是示例（`SampleBadge`、`showSampleNotice()`、顶部示例横幅）；邮件、付款、上传、验证码都不会真实发生（Google 登录是真实的，见上方 Supabase 一节）。手机号 / 邮箱登录按钮暂时从登录卡片隐藏（2026-11-03 决定）：短信要付费且需 A2P 10DLC 注册；邮箱登录需先接自定义 SMTP（如 Resend），Supabase 自带邮件服务只发给项目成员。
 - 页面文件只输出静态外壳；动态路由不在顶层 `await params`，而是在 `<Suspense>` 里 `params.then(({ id }) => <X id={id} />)` 交给客户端组件。
 - `AccessGate` / `BanGate` 只是演示用的前端拦截，不构成安全边界；接入真实功能时必须用服务端鉴权和 RLS。
-- 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心红色验证勾和开关（`verified-fill`，2026-11-03 起由绿色改为 Crimson `#b8283a`，文字用更深的 `#a1202f`；token 名仍叫 `verified-*`；按钮和选中状态保持黑色，2026-11-03 确认）、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。
-- Logo（2026-11-03 定稿）：08a Bold V，Crimson 方块里一个白色粗体对称 V，旁边是 Figtree Bold 转成轮廓的 "Verimate"。页面里用 `components/brand/logo.tsx`（内联 SVG），浏览器标签图标是 `app/icon.svg`（`proxy.ts` matcher 已放行）。全部候选方案、竞品调研和预览页在 `docs/brand/logo-options/`（`index.html`）。
+- 视觉风格（颜色、字体等 token，在 `app/globals.css`）由产品负责人决定。当前按 2026-10-27 认可的样稿实现：浅灰底、无描边白卡（`rounded-xl bg-card`）、黑色胶囊按钮、实心橙色验证勾和开关（`verified-fill`）。品牌色 2026-11-04 起是 Persimmon 色板（取代 Crimson）：填充 `#f8672e`（logo、验证勾、开关、礼品卡、地图校区），文字用深一级的锈色 `#bf4306`（白底 5.2:1），浅色 `#fde9df` 做标签 / 徽章底（浅色是照截图估的，可换成准确值）；token 名仍叫 `verified-*`。白字放在 `#f8672e` 上只有 3:1，所以**橙色上的字一律用黑色**（礼品卡、倒计时用白色小块 + 黑字）。按钮和选中状态保持黑色、次要数字用 `text-faint`，唯一的彩色是 AI 匹配卡渐变（`.match-glow`）。不加别的品牌色。
+- Logo（2026-11-04 定稿，取代 08a Bold V）：两笔圆润的橙色对勾（`#f8672e`，不带底块），旁边是 Figtree Bold 转成轮廓的黑色 "Verimate"。对勾是从用户给的图描出来的矢量（`docs/brand/final/verimate-mark.svg`）。页面里用 `components/brand/logo.tsx`（内联 SVG），浏览器标签图标是 `app/icon.svg`（`proxy.ts` matcher 已放行）。全部候选方案、竞品调研和预览页在 `docs/brand/logo-options/`（`index.html`）。
 - 尺寸按真实 390pt 手机：正文约 15px，标签页大标题 26px，页边距 16px。
 
 ## 注意事项
