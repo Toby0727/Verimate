@@ -75,3 +75,41 @@ export async function teamPhotoUrls(
   }
   return urls;
 }
+
+// Why a delete was refused, in words the team can act on.
+export class DeleteRefused extends Error {}
+
+// Deletes a student's account and everything in it. The photo goes first
+// through the Storage API (Supabase won't delete a user who owns files),
+// then public.team_delete_account() records the deletion and removes the
+// account, which cascades to their survey row.
+export async function deleteTeamAccount(userId: string): Promise<void> {
+  if (previewMode() !== null) return;
+  const client = await supabase();
+
+  // Every student's photo lives at this one path; removing a missing file
+  // is not an error.
+  const { error: photoError } = await client.storage
+    .from("waitlist-photos")
+    .remove([`${userId}/photo.jpg`]);
+  if (photoError) throw photoError;
+
+  const { error } = await client.rpc("team_delete_account", {
+    target: userId,
+  });
+  if (!error) return;
+  // PGRST202 = the SQL for this feature hasn't been run yet.
+  if (error.code === "PGRST202")
+    throw new DeleteRefused(
+      "Run 20261104040000_team_delete_account.sql in Supabase first.",
+    );
+  if (error.hint === "team account")
+    throw new DeleteRefused("Team accounts can't be deleted here.");
+  if (error.code === "P0002")
+    throw new DeleteRefused("That account was already deleted.");
+  if (error.code === "55000")
+    throw new DeleteRefused(
+      "This account still has a file in storage. Remove it in Supabase → Storage, then try again.",
+    );
+  throw error;
+}

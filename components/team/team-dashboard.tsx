@@ -9,20 +9,31 @@ import {
   PenLine,
   RefreshCw,
   Search,
+  Trash2,
 } from "lucide-react";
 import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useState,
 } from "react";
+import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
 import {
   signInWithGoogle,
   signOutOfGoogle,
 } from "@/components/onboarding/google-sign-in";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   type Activity,
@@ -44,7 +55,13 @@ import {
   winChance,
 } from "@/lib/rules/team";
 import { WAITLIST_STEPS } from "@/lib/rules/waitlist";
-import { loadTeam, type TeamSession, teamPhotoUrls } from "@/lib/team/api";
+import {
+  DeleteRefused,
+  deleteTeamAccount,
+  loadTeam,
+  type TeamSession,
+  teamPhotoUrls,
+} from "@/lib/team/api";
 import { cn } from "@/lib/utils";
 import {
   ABROAD_PLACE_LABELS,
@@ -142,33 +159,56 @@ export function TeamDashboard() {
           </Centered>
         ) : view.status === "error" ? (
           <Notice title="Couldn't load the dashboard">
-            Check your connection and try again.
+            <p>Check your connection and try again.</p>
             <Button className="mt-3" onClick={refresh}>
               Try again
             </Button>
           </Notice>
         ) : view.status === "signed-out" ? (
           <Notice title="Verimate team dashboard">
-            Sign in with your team Google account to see who has joined the
-            waitlist.
+            <p>
+              Sign in with your team Google account to see who has joined the
+              waitlist.
+            </p>
             <SignInButton label="Sign in with Google" />
           </Notice>
         ) : view.status === "forbidden" ? (
           <Notice title="This account doesn't have access">
-            You're signed in as <strong>{view.email}</strong>, which isn't on
-            the team list.
+            <p>
+              You're signed in as{" "}
+              <strong className="break-all text-foreground">
+                {view.email}
+              </strong>
+              , which isn't on the team list.
+            </p>
             <SignInButton label="Use a different Google account" signOutFirst />
           </Notice>
         ) : view.status === "not-set-up" ? (
           <Notice title="One setup step left">
-            The dashboard's database function isn't installed yet. Run{" "}
-            <code className="rounded bg-muted px-1 text-[13px]">
-              supabase/migrations/20261104030000_team_dashboard.sql
-            </code>{" "}
-            in Supabase → SQL Editor, then refresh.
+            <p>
+              The dashboard's database function isn't installed yet. Run{" "}
+              <code className="rounded bg-muted px-1 text-[13px]">
+                supabase/migrations/20261104030000_team_dashboard.sql
+              </code>{" "}
+              in Supabase → SQL Editor, then refresh.
+            </p>
           </Notice>
         ) : (
-          <Dashboard rows={view.rows} loadedAt={view.loadedAt} />
+          <Dashboard
+            rows={view.rows}
+            loadedAt={view.loadedAt}
+            myEmail={view.email}
+            onDeleted={(userId) =>
+              setView((current) =>
+                current.status === "ready"
+                  ? {
+                      ...current,
+                      rows: current.rows.filter((r) => r.user_id !== userId),
+                    }
+                  : current,
+              )
+            }
+          />
         )}
       </main>
     </div>
@@ -230,7 +270,17 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "signed-in", label: "Signed in only" },
 ];
 
-function Dashboard({ rows, loadedAt }: { rows: TeamRow[]; loadedAt: Date }) {
+function Dashboard({
+  rows,
+  loadedAt,
+  myEmail,
+  onDeleted,
+}: {
+  rows: TeamRow[];
+  loadedAt: Date;
+  myEmail: string;
+  onDeleted: (userId: string) => void;
+}) {
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
@@ -377,6 +427,11 @@ function Dashboard({ rows, loadedAt }: { rows: TeamRow[]; loadedAt: Date }) {
                   setOpen(open === row.user_id ? null : row.user_id)
                 }
                 now={loadedAt}
+                canDelete={row.email !== myEmail}
+                onDeleted={() => {
+                  setOpen(null);
+                  onDeleted(row.user_id);
+                }}
               />
             ))}
           </ul>
@@ -542,6 +597,8 @@ function PersonRow({
   open,
   onToggle,
   now,
+  canDelete,
+  onDeleted,
 }: {
   row: TeamRow;
   rows: TeamRow[];
@@ -549,6 +606,8 @@ function PersonRow({
   open: boolean;
   onToggle: () => void;
   now: Date;
+  canDelete: boolean;
+  onDeleted: () => void;
 }) {
   const status = signupStatus(row);
   const name = displayName(row);
@@ -605,7 +664,12 @@ function PersonRow({
       <div className="pb-2 md:hidden">
         <StatusPill row={row} status={status} />
       </div>
-      {open && <PersonDetails row={row} rows={rows} photo={photo} />}
+      {open && (
+        <>
+          <PersonDetails row={row} rows={rows} photo={photo} />
+          {canDelete && <DeleteAccount row={row} onDeleted={onDeleted} />}
+        </>
+      )}
     </li>
   );
 }
@@ -728,6 +792,102 @@ function PersonDetails({
         <Field term="Started" value={formatTime(row.started_at)} />
         <Field term="Finished" value={formatTime(row.completed_at)} />
       </dl>
+    </div>
+  );
+}
+
+// Deleting is permanent, so the team types the student's email to confirm.
+function DeleteAccount({
+  row,
+  onDeleted,
+}: {
+  row: TeamRow;
+  onDeleted: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const name = displayName(row);
+  const confirmed = typed.trim().toLowerCase() === row.email;
+  const inputId = useId();
+
+  return (
+    <div className="mb-3 flex justify-end">
+      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+        <Trash2 />
+        Delete account
+      </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (deleting) return;
+          setOpen(next);
+          if (!next) setTyped("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {name}'s account?</DialogTitle>
+            <DialogDescription>
+              This permanently removes their sign-in account, every survey
+              answer, their photo, their referral code and their raffle entry.
+              It can't be undone. If they sign in again later, they start over
+              as a new account.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-1.5 text-[13px]">
+            <label htmlFor={inputId} className="text-muted-foreground">
+              Type <strong className="text-foreground">{row.email}</strong> to
+              confirm
+            </label>
+            <Input
+              id={inputId}
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              disabled={deleting}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              disabled={deleting}
+              onClick={() => {
+                setOpen(false);
+                setTyped("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!confirmed || deleting}
+              onClick={async () => {
+                setDeleting(true);
+                try {
+                  await deleteTeamAccount(row.user_id);
+                  toast.success(`Deleted ${name}'s account.`);
+                  setOpen(false);
+                  onDeleted();
+                } catch (error) {
+                  console.error(error);
+                  toast.error(
+                    error instanceof DeleteRefused
+                      ? error.message
+                      : "Couldn't delete the account. Nothing was removed from the survey; try again.",
+                  );
+                } finally {
+                  setDeleting(false);
+                }
+              }}
+            >
+              {deleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+              Delete forever
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
