@@ -60,7 +60,7 @@ verimateapp.com 首页 `/` 是真实的等候名单问卷，不是 demo：学生
 - Biome（格式化 + lint，替代 ESLint/Prettier）
 - Vitest：只测 `lib/rules/` 下的纯函数（`node` 环境，用 Vite 原生的 `resolve.tsconfigPaths` 解析 `@/`），页面交互靠浏览器冒烟测试
 - Vercel 部署（Toby 的 Hobby 团队）：Framework Preset 为 Next.js；`vercel.json` 中的 `"framework": "nextjs"` 与之一致，作为兜底保留（会覆盖后台设置，防止后台被误改导致构建去找 `public` 目录而失败）。PR 预览部署已关闭 Vercel Authentication，非团队成员也能打开
-- 域名（2026-11-04 起）：主域名 `verimateapp.com`（在 Vercel 买的，DNS 在 Vercel）；`www.verimateapp.com`、`verimate.org`、`www.verimate.org` 都 308 跳到它，`verimate.vercel.app` 仍可直接访问。换主域名的原因：SU 校园网的 DNS 拦截了 verimate.org（把它当成新注册域名），而 verimateapp.com 在校园网下能打开（2026-11-04 实测）。换域名时要同步：Vercel Domains、Supabase Authentication → URL Configuration（Site URL 和 Redirect URLs）、`app/privacy` 和 `app/raffle-rules` 里的域名文字、宣传物料（`docs/brand/IMAGE_GENERATION.md`）。Google Cloud 的 OAuth 回调走 Supabase 域名，不受影响。
+- 域名（2026-11-04 起）：主域名 `www.verimateapp.com`（在 Vercel 买的，DNS 在 Vercel；物料上印不带 www 的 `verimateapp.com`，它 308 跳到 www）；`verimate.org`、`www.verimate.org` 也 308 跳到 `www.verimateapp.com`，`verimate.vercel.app` 仍可直接访问。换主域名的原因：SU 校园网的 DNS 拦截了 verimate.org（把它当成新注册域名），而 verimateapp.com 在校园网下能打开（2026-11-04 实测）。换域名时要同步：Vercel Domains、Supabase Authentication → URL Configuration（Site URL 和 Redirect URLs）、`app/privacy` 和 `app/raffle-rules` 里的域名文字、宣传物料（`docs/brand/IMAGE_GENERATION.md`）。Google Cloud 的 OAuth 回调走 Supabase 域名，不受影响。
 - husky + lint-staged：提交前对暂存文件执行 `biome check --write`（格式化 + 安全修复），再全量 `tsc` 类型检查
 - npm
 

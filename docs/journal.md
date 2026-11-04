@@ -19,8 +19,8 @@
 
 ### 你需要做的（按顺序，顺序错了会登录失败）
 - [ ] Supabase → Authentication → URL Configuration：Redirect URLs **加上** `https://verimateapp.com/**` 和 `https://www.verimateapp.com/**`（旧的先别删），保存。
-- [ ] 同一页把 Site URL 改成 `https://verimateapp.com`，保存。
-- [ ] Vercel → Domains：`verimateapp.com` 设为主域名（连到 Production）；`www.verimateapp.com`、`verimate.org`、`www.verimate.org` 都改成 308 跳到 `verimateapp.com`。
+- [ ] 同一页把 Site URL 改成 `https://www.verimateapp.com`，保存。
+- [ ] Vercel → Domains：`www.verimateapp.com` 是主域名（已连好，`verimateapp.com` 已经跳到它）；把 `verimate.org` 和 `www.verimate.org` 改成 308 跳到 `www.verimateapp.com`。
 - [ ] 校园网下用手机试一遍：打开 verimateapp.com → Google 登录 → 回到问卷；再打开 `/team` 看能不能登录。
 - [ ] 已经贴出去的旧宣传单（verimate.org）在校园网下打不开，换成新的。
 - [ ] 给 ITS 的邮件不急了；之后想让 verimate.org 也能在校园网打开再发。
