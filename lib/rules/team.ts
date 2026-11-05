@@ -32,6 +32,11 @@ export type TeamRow = {
   cannabis: WaitlistAnswers["cannabis"];
   greek_life: WaitlistAnswers["greekLife"];
   pets: WaitlistAnswers["pets"];
+  sleep: WaitlistAnswers["sleep"];
+  cleanliness: WaitlistAnswers["cleanliness"];
+  guests: WaitlistAnswers["guests"];
+  // The ?src= tag of the poster or story they came in on, if any.
+  source: string | null;
   photo_path: string | null;
   photo_uploaded: boolean;
   referral_code: string | null;
@@ -66,6 +71,9 @@ export function answersOf(row: TeamRow): WaitlistAnswers {
     cannabis: row.cannabis,
     greekLife: row.greek_life,
     pets: row.pets,
+    sleep: row.sleep,
+    cleanliness: row.cleanliness,
+    guests: row.guests,
   };
 }
 
@@ -238,4 +246,26 @@ export function matchesSearch(row: TeamRow, query: string): boolean {
   return [row.name, row.google_name, row.email, row.major, row.referral_code]
     .filter((v): v is string => Boolean(v))
     .some((v) => v.toLowerCase().includes(q));
+}
+
+export type SourceCount = {
+  source: string;
+  accounts: number;
+  finished: number;
+};
+
+// Sign-ups per ?src= tag, most first; accounts without a tag (or that
+// never saved a step) count as "direct".
+export function sourceBreakdown(rows: TeamRow[]): SourceCount[] {
+  const counts = new Map<string, SourceCount>();
+  for (const row of rows) {
+    const source = row.source ?? "direct";
+    const entry = counts.get(source) ?? { source, accounts: 0, finished: 0 };
+    entry.accounts++;
+    if (row.completed_at) entry.finished++;
+    counts.set(source, entry);
+  }
+  return [...counts.values()].sort(
+    (a, b) => b.accounts - a.accounts || a.source.localeCompare(b.source),
+  );
 }

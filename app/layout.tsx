@@ -22,8 +22,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Absolute base for the share image (app/opengraph-image.png) and links.
+  metadataBase: new URL("https://www.verimateapp.com"),
   title: "Verimate",
-  description: "Verified roommate finding for SU & ESF students",
+  description: "Sublets + roommates for SU & ESF students.",
+  openGraph: {
+    siteName: "Verimate",
+    type: "website",
+    title: "Verimate · Find a roommate. Win a $50 gift card.",
+    description:
+      "Sublets + roommates for SU & ESF students. Join the waitlist in about a minute.",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

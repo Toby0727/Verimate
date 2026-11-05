@@ -140,6 +140,26 @@ export const PETS = [
   { value: "no-pets", label: "No pets, please" },
 ] as const satisfies Choice<string>[];
 
+// Living-together habits (2026-11-04): the posters promise matching on
+// these (night owls, clean freaks), so the survey asks them.
+export const SLEEP = [
+  { value: "early", label: "Early bird" },
+  { value: "flexible", label: "In between" },
+  { value: "late", label: "Night owl" },
+] as const satisfies Choice<string>[];
+
+export const CLEANLINESS = [
+  { value: "spotless", label: "Very tidy" },
+  { value: "tidy", label: "Tidy enough" },
+  { value: "relaxed", label: "Pretty relaxed" },
+] as const satisfies Choice<string>[];
+
+export const GUESTS = [
+  { value: "rarely", label: "Rarely" },
+  { value: "sometimes", label: "Sometimes" },
+  { value: "often", label: "Often" },
+] as const satisfies Choice<string>[];
+
 type ValueOf<T extends readonly { value: string }[]> = T[number]["value"];
 export type Gender = ValueOf<typeof GENDERS>;
 export type Year = ValueOf<typeof YEARS>;
@@ -155,6 +175,9 @@ export type Smoking = ValueOf<typeof SMOKING>;
 export type Cannabis = ValueOf<typeof CANNABIS>;
 export type GreekLife = ValueOf<typeof GREEK_LIFE>;
 export type Pets = ValueOf<typeof PETS>;
+export type Sleep = ValueOf<typeof SLEEP>;
+export type Cleanliness = ValueOf<typeof CLEANLINESS>;
+export type Guests = ValueOf<typeof GUESTS>;
 
 // Public contact for privacy requests and raffle questions.
 export const CONTACT_EMAIL = "hpang05@syr.edu";

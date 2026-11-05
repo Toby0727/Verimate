@@ -46,7 +46,9 @@ import {
   recentActivity,
   referrerOf,
   type SignupStatus,
+  type SourceCount,
   signupStatus,
+  sourceBreakdown,
   stepsDone,
   type TeamRow,
   teamRaffleEntries,
@@ -68,10 +70,13 @@ import {
   AREAS,
   BUDGETS,
   CANNABIS,
+  CLEANLINESS,
   DRINKING,
   GENDERS,
   GREEK_LIFE,
+  GUESTS,
   PETS,
+  SLEEP,
   SMOKING,
   STUDY_ABROAD,
   TERMS,
@@ -295,6 +300,7 @@ function Dashboard({
     [rows, loadedAt],
   );
   const activity = useMemo(() => recentActivity(rows, 12), [rows]);
+  const sources = useMemo(() => sourceBreakdown(rows), [rows]);
   const counts = useMemo(() => {
     const c: Record<Filter, number> = {
       all: rows.length,
@@ -359,12 +365,24 @@ function Dashboard({
       </section>
 
       <section className="grid items-start gap-3 lg:grid-cols-[1fr_340px]">
-        <div className="rounded-xl bg-card p-4">
-          <h2 className="font-semibold text-[15px]">New accounts per day</h2>
-          <p className="text-[12px] text-faint">
-            Last {CHART_DAYS} days, Eastern time. Hover a bar for finishers.
-          </p>
-          <DailyChart days={days} />
+        <div className="flex flex-col gap-3">
+          <div className="rounded-xl bg-card p-4">
+            <h2 className="font-semibold text-[15px]">New accounts per day</h2>
+            <p className="text-[12px] text-faint">
+              Last {CHART_DAYS} days, Eastern time. Hover a bar for finishers.
+            </p>
+            <DailyChart days={days} />
+          </div>
+          <div className="rounded-xl bg-card p-4">
+            <h2 className="font-semibold text-[15px]">
+              Where sign-ups came from
+            </h2>
+            <p className="text-[12px] text-faint">
+              The ?src= tag on the poster QR code or story link they first came
+              in on. "direct" means no tag.
+            </p>
+            <SourceBars sources={sources} />
+          </div>
         </div>
         <div className="rounded-xl bg-card p-4">
           <h2 className="font-semibold text-[15px]">Recent activity</h2>
@@ -542,6 +560,40 @@ function DailyChart({ days }: { days: DayCount[] }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// Sign-ups per source tag, as labeled bars (one series, so no legend).
+function SourceBars({ sources }: { sources: SourceCount[] }) {
+  if (!sources.length)
+    return (
+      <p className="mt-3 text-[14px] text-muted-foreground">No sign-ups yet.</p>
+    );
+  const max = Math.max(...sources.map((s) => s.accounts));
+  return (
+    <ul className="mt-3 flex flex-col gap-2">
+      {sources.map((s) => (
+        <li
+          key={s.source}
+          className="grid grid-cols-[minmax(0,9rem)_1fr_auto] items-center gap-3 text-[13px]"
+        >
+          <span className="truncate font-medium" title={s.source}>
+            {s.source}
+          </span>
+          <span className="h-3 rounded-r-[4px] bg-muted">
+            <span
+              className="block h-full rounded-r-[4px] bg-foreground/75"
+              style={{ width: `${(s.accounts / max) * 100}%` }}
+            />
+          </span>
+          <span className="text-right text-muted-foreground tabular-nums">
+            <span className="font-semibold text-foreground">{s.accounts}</span>
+            {" · "}
+            {s.finished} finished
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -761,6 +813,9 @@ function PersonDetails({
         <Field term="Cannabis" value={label(CANNABIS, a.cannabis)} />
         <Field term="Greek life" value={label(GREEK_LIFE, a.greekLife)} />
         <Field term="Pets" value={label(PETS, a.pets)} />
+        <Field term="Sleep" value={label(SLEEP, a.sleep)} />
+        <Field term="Tidiness" value={label(CLEANLINESS, a.cleanliness)} />
+        <Field term="Guests" value={label(GUESTS, a.guests)} />
         <Field
           term="Raffle"
           value={
@@ -787,6 +842,7 @@ function PersonDetails({
               : null
           }
         />
+        <Field term="Came from" value={row.source ?? "direct"} />
         <Field term="Account" value={formatTime(row.account_created_at)} />
         <Field term="Last sign-in" value={formatTime(row.last_sign_in_at)} />
         <Field term="Started" value={formatTime(row.started_at)} />

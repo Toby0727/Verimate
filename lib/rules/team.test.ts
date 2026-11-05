@@ -7,6 +7,7 @@ import {
   recentActivity,
   referrerOf,
   signupStatus,
+  sourceBreakdown,
   stepsDone,
   type TeamRow,
   teamRaffleEntries,
@@ -41,6 +42,10 @@ const EMPTY: TeamRow = {
   cannabis: null,
   greek_life: null,
   pets: null,
+  sleep: null,
+  cleanliness: null,
+  guests: null,
+  source: null,
   photo_path: null,
   photo_uploaded: false,
   referral_code: null,
@@ -72,6 +77,10 @@ const FINISHED: TeamRow = {
   cannabis: "never",
   greek_life: "no",
   pets: "okay",
+  sleep: "late",
+  cleanliness: "tidy",
+  guests: "sometimes",
+  source: "ig-story",
   photo_path: "u1/photo.jpg",
   photo_uploaded: true,
   referral_code: "ABC123",
@@ -219,5 +228,16 @@ describe("helpers", () => {
     expect(matchesSearch(FINISHED, "abc1")).toBe(true);
     expect(matchesSearch(FINISHED, "finance")).toBe(false);
     expect(matchesSearch(FINISHED, "  ")).toBe(true);
+  });
+});
+
+describe("sourceBreakdown", () => {
+  it("counts sign-ups and finishers per source, direct for no tag", () => {
+    const poster = { ...STARTED, user_id: "u5", source: "slocum-gym-rat" };
+    expect(sourceBreakdown([FINISHED, STARTED, EMPTY, poster])).toEqual([
+      { source: "direct", accounts: 2, finished: 0 },
+      { source: "ig-story", accounts: 1, finished: 1 },
+      { source: "slocum-gym-rat", accounts: 1, finished: 0 },
+    ]);
   });
 });

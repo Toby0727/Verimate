@@ -45,11 +45,14 @@ type Row = {
   cannabis: WaitlistAnswers["cannabis"];
   greek_life: WaitlistAnswers["greekLife"];
   pets: WaitlistAnswers["pets"];
+  sleep: WaitlistAnswers["sleep"];
+  cleanliness: WaitlistAnswers["cleanliness"];
+  guests: WaitlistAnswers["guests"];
   completed_at: string | null;
 };
 
 const COLUMNS =
-  "name, photo_path, referred_by, referral_code, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, completed_at";
+  "name, photo_path, referred_by, referral_code, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, sleep, cleanliness, guests, completed_at";
 
 // Imported lazily so pages still render when the Supabase env vars are missing.
 async function supabase() {
@@ -127,6 +130,9 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       cannabis: row?.cannabis ?? null,
       greekLife: row?.greek_life ?? null,
       pets: row?.pets ?? null,
+      sleep: row?.sleep ?? null,
+      cleanliness: row?.cleanliness ?? null,
+      guests: row?.guests ?? null,
     },
     completedAt: row?.completed_at ?? null,
     referralCode: row?.referral_code ?? null,
@@ -224,6 +230,25 @@ export function rememberedReferral(): string | null {
   }
 }
 
+// A ?src= tag from the poster or story link they came in on, kept across
+// the Google sign-in redirect. The first tag wins, so a later visit from
+// another poster doesn't overwrite where they actually found us.
+const SRC_KEY = "verimate-src";
+
+export function rememberSource(source: string) {
+  try {
+    if (!localStorage.getItem(SRC_KEY)) localStorage.setItem(SRC_KEY, source);
+  } catch {}
+}
+
+export function rememberedSource(): string | null {
+  try {
+    return localStorage.getItem(SRC_KEY);
+  } catch {
+    return null;
+  }
+}
+
 // Short-lived link for showing the student their own saved photo.
 export async function waitlistPhotoUrl(path: string): Promise<string | null> {
   if (isPreview()) return null;
@@ -281,6 +306,12 @@ export async function saveWaitlist(
         cannabis: answers.cannabis,
         greek_life: answers.greekLife,
         pets: answers.pets,
+        sleep: answers.sleep,
+        cleanliness: answers.cleanliness,
+        guests: answers.guests,
+        // Where they came from (?src= on a poster or story link). The
+        // database keeps the first value and ignores later ones.
+        source: rememberedSource(),
       },
       { onConflict: "user_id" },
     )

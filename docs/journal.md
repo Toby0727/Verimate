@@ -7,6 +7,29 @@
 
 ---
 
+## 2026-11-05 凌晨：网站前端，按现在的流量来源改（未上线）
+
+### 为什么
+- 现在的报名主要从 Instagram 故事的链接进来，但 Instagram 自带浏览器里 Google 不让登录（Error 403: disallowed_useragent），点进来的人很可能直接卡住。
+- 海报打的是作息、爱干净这些匹配点，问卷里却没有这几题；也不知道哪张海报带来了人。
+
+### 做了什么（都在本地，**没推到线上，没提交**）
+- 应用内浏览器提示：Instagram / TikTok / Snapchat 等里打开首页时，Google 按钮换成"Open in Safari / Chrome to sign in"提示卡，带复制链接；Android 可以一键在 Chrome 打开。
+- 分享预览图：在 iMessage、Instagram 私信、Facebook 里发 verimateapp.com 会显示 logo、"Find a roommate. Win a $50 gift card." 和礼品卡。
+- 来源追踪：链接加 `?src=xxx` 就能记下这个人是从哪来的，团队后台多了"Where sign-ups came from"。
+- 问卷第 6 步加了作息、整洁度、访客三题；隐私政策同步写明。
+- 测试：单元测试 114 个全过（新增浏览器识别 8 个、来源和新题 4 个、来源统计 1 个），lint、类型检查、生产构建都过；浏览器里用手机尺寸走过 iPhone / Android 提示卡、问卷第 6 步、团队后台来源卡片。
+
+### 你需要做的（顺序很重要）
+- [ ] 看一下改动，没问题就让 Claude 提交。
+- [ ] 在 Supabase SQL Editor 跑 `supabase/migrations/20261105000000_waitlist_habits_and_source.sql`（**先跑 SQL 再推代码**，否则保存问卷会因为新列不存在而失败）。会提示 destructive，是因为要 drop 再重建 `team_waitlist()`，不动学生数据。
+- [ ] 然后让 Claude 推到 `main`。
+- [ ] Instagram 故事的 Link sticker 改成 `https://verimateapp.com/?src=ig-story`；以后每个故事 / 海报用不同的 src（比如 `ig-story-florence`），后台就能比较效果。
+- [ ] 想按海报统计的话，让 Claude 给每张海报换成带 src 的二维码（例如 `?src=slocum-gym-rat`）。
+- [ ] 真机在 Instagram 里打开一次链接，确认看到提示卡、复制链接后在 Safari 能登录。
+
+---
+
 ## 2026-11-04 晚：新 logo 和 Persimmon 色板
 
 ### 做了什么

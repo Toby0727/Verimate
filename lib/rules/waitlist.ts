@@ -5,10 +5,13 @@ import type {
   Area,
   Budget,
   Cannabis,
+  Cleanliness,
   Drinking,
   Gender,
   GreekLife,
+  Guests,
   Pets,
+  Sleep,
   Smoking,
   StudyAbroad,
   Term,
@@ -45,6 +48,10 @@ export type WaitlistAnswers = {
   cannabis: Cannabis | null;
   greekLife: GreekLife | null;
   pets: Pets | null;
+  // Living-together habits (2026-11-04).
+  sleep: Sleep | null;
+  cleanliness: Cleanliness | null;
+  guests: Guests | null;
 };
 
 export const EMPTY_ANSWERS: WaitlistAnswers = {
@@ -66,6 +73,9 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   cannabis: null,
   greekLife: null,
   pets: null,
+  sleep: null,
+  cleanliness: null,
+  guests: null,
 };
 
 export const WAITLIST_STEPS = [
@@ -118,7 +128,10 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
         a.smoking !== null &&
         a.cannabis !== null &&
         a.greekLife !== null &&
-        a.pets !== null
+        a.pets !== null &&
+        a.sleep !== null &&
+        a.cleanliness !== null &&
+        a.guests !== null
       );
   }
 }
@@ -246,4 +259,21 @@ export function toggle<T>(list: T[] | null, value: T): T[] {
   return current.includes(value)
     ? current.filter((v) => v !== value)
     : [...current, value];
+}
+
+// Where a sign-up came from: the ?src= tag on a poster QR code or story
+// link (e.g. "ig-story", "slocum-gym-rat"). Lowercase letters, digits and
+// dashes, at most 40 characters; anything else is dropped. Null if empty.
+export const SOURCE_MAX_LENGTH = 40;
+
+export function normalizeSource(input: string | null): string | null {
+  if (!input) return null;
+  const clean = input
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, SOURCE_MAX_LENGTH)
+    .replace(/-$/, "");
+  return clean || null;
 }

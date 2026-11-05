@@ -7,6 +7,7 @@ import {
   isComplete,
   isStepDone,
   normalizeReferralCode,
+  normalizeSource,
   raffleEntries,
   raffleWeight,
   setAbroadPlace,
@@ -36,6 +37,9 @@ const COMPLETE: WaitlistAnswers = {
   cannabis: "never",
   greekLife: "no",
   pets: "okay",
+  sleep: "late",
+  cleanliness: "tidy",
+  guests: "sometimes",
 };
 
 describe("stepsLeft", () => {
@@ -217,5 +221,36 @@ describe("referrals", () => {
     expect(raffleWeight(1, true, 0)).toBe(1.05);
     expect(raffleWeight(1, false, 3)).toBe(1.3);
     expect(raffleWeight(2, true, 2)).toBe(2.5);
+  });
+});
+
+describe("living-together habits", () => {
+  it("are required to finish the lifestyle step", () => {
+    expect(isStepDone("lifestyle", COMPLETE)).toBe(true);
+    expect(isStepDone("lifestyle", { ...COMPLETE, sleep: null })).toBe(false);
+    expect(isStepDone("lifestyle", { ...COMPLETE, cleanliness: null })).toBe(
+      false,
+    );
+    expect(isStepDone("lifestyle", { ...COMPLETE, guests: null })).toBe(false);
+  });
+});
+
+describe("normalizeSource", () => {
+  it("keeps clean tags", () => {
+    expect(normalizeSource("ig-story")).toBe("ig-story");
+    expect(normalizeSource("slocum-gym-rat")).toBe("slocum-gym-rat");
+  });
+
+  it("lowercases and replaces anything else with dashes", () => {
+    expect(normalizeSource("IG Story!")).toBe("ig-story");
+    expect(normalizeSource("  slocum__2F  ")).toBe("slocum-2f");
+  });
+
+  it("caps the length and drops empty tags", () => {
+    expect(normalizeSource("a".repeat(60))).toHaveLength(40);
+    expect(normalizeSource(`${"a".repeat(39)}-b`)).toBe("a".repeat(39));
+    expect(normalizeSource("!!!")).toBeNull();
+    expect(normalizeSource("")).toBeNull();
+    expect(normalizeSource(null)).toBeNull();
   });
 });

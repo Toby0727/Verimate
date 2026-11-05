@@ -38,7 +38,8 @@ export default function PrivacyPage() {
             <List
               items={[
                 "From Google when you sign in: your name, email address, Google account ID and the profile picture link Google shares. We never see your Google password.",
-                "Your survey answers: name, gender, year, major, rent budget, areas you'd live in, study abroad plans, when you need a sublet or roommate, your drinking, smoking and cannabis answers, Greek life, and pets.",
+                "Your survey answers: name, gender, year, major, rent budget, areas you'd live in, study abroad plans, when you need a sublet or roommate, your drinking, smoking and cannabis answers, Greek life, pets, sleep schedule, how tidy you are, and how often you have guests over.",
+                "Which poster or link you first came in on, if the link had a tag (for example, an Instagram story). We use it only to see which posters work.",
                 "Your referral code, and the code of the friend who invited you, if any. We use them only to count referral bonuses; friends don't see each other's answers. A photo of you, only if you choose to upload one. Your browser shrinks it and removes its hidden data, such as the location it was taken, before it's sent.",
                 "Basic technical data: a sign-in cookie that keeps you signed in, and the IP address and browser details our hosting providers log when you visit.",
               ]}

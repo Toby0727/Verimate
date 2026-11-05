@@ -10,6 +10,8 @@ const WAITLIST_PATHS = new Set([
   "/auth/callback",
   // Team dashboard; the database decides who sees data.
   "/team",
+  // Share preview image that iMessage / Instagram / Facebook fetch.
+  "/opengraph-image.png",
 ]);
 
 export async function proxy(request: NextRequest) {

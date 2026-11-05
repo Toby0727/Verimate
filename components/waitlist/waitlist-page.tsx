@@ -7,7 +7,10 @@ import {
   Gift,
   Landmark,
   Loader2,
+  Moon,
   PawPrint,
+  Sparkles,
+  Users,
   Wine,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +31,7 @@ import {
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
   normalizeReferralCode,
+  normalizeSource,
   raffleBoost,
   raffleEntries,
   setAbroadPlace,
@@ -47,6 +51,7 @@ import {
   loadWaitlist,
   rememberedReferral,
   rememberReferral,
+  rememberSource,
   saveWaitlist,
   type WaitlistSession,
 } from "@/lib/waitlist/api";
@@ -54,17 +59,21 @@ import {
   AREAS,
   BUDGETS,
   CANNABIS,
+  CLEANLINESS,
   DRINKING,
   GENDERS,
   GREEK_LIFE,
+  GUESTS,
   PETS,
   RAFFLE,
+  SLEEP,
   SMOKING,
   YEARS,
 } from "@/lib/waitlist/options";
 import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { MultiChips } from "./multi-chips";
+import { OpenInBrowser, useInAppBrowser } from "./open-in-browser";
 import { PhotoPicker } from "./photo-picker";
 import { ProfileCard } from "./profile-card";
 import { Confetti, GiftCard, RafflePill } from "./raffle-hype";
@@ -98,6 +107,10 @@ export function WaitlistPage() {
       new URLSearchParams(window.location.search).get("ref") ?? "",
     );
     if (isReferralCode(ref)) rememberReferral(ref);
+    const src = normalizeSource(
+      new URLSearchParams(window.location.search).get("src"),
+    );
+    if (src) rememberSource(src);
     if (new URLSearchParams(window.location.search).has("signin")) {
       toast.error("Google sign-in didn't finish. Please try again.");
       window.history.replaceState(null, "", WAITLIST_PATH);
@@ -199,6 +212,8 @@ const PERKS: { title: string; body: string }[] = [
 // The signed-out homepage: an editorial hero, the prize, and what joining
 // gets you, separated by rules rather than stacked cards.
 function Landing() {
+  const inApp = useInAppBrowser();
+  const [tryAnyway, setTryAnyway] = useState(false);
   return (
     <div className="flex flex-col gap-8 pt-2">
       <section className="flex flex-col gap-5">
@@ -214,7 +229,14 @@ function Landing() {
           For SU & ESF students. Join the waitlist in about a minute.
         </p>
         <div className="flex flex-col gap-2">
-          <GoogleButton label="Continue with Google" />
+          {inApp && !tryAnyway ? (
+            <OpenInBrowser
+              browser={inApp}
+              onTryAnyway={() => setTryAnyway(true)}
+            />
+          ) : (
+            <GoogleButton label="Continue with Google" />
+          )}
           <p className="text-[12px] text-muted-foreground">
             Use your <b className="font-semibold text-foreground">@g.syr.edu</b>{" "}
             account (SU and ESF students both have one) to get verified and a{" "}
@@ -691,6 +713,30 @@ function StepFields({
               options={[...PETS]}
               value={answers.pets}
               onChange={(pets) => set({ pets })}
+            />
+          </IconQuestion>
+          <IconQuestion icon={Moon} label="Sleep schedule">
+            <ChoiceChips
+              label="Sleep schedule"
+              options={[...SLEEP]}
+              value={answers.sleep}
+              onChange={(sleep) => set({ sleep })}
+            />
+          </IconQuestion>
+          <IconQuestion icon={Sparkles} label="How tidy are you?">
+            <ChoiceChips
+              label="How tidy are you?"
+              options={[...CLEANLINESS]}
+              value={answers.cleanliness}
+              onChange={(cleanliness) => set({ cleanliness })}
+            />
+          </IconQuestion>
+          <IconQuestion icon={Users} label="Guests over">
+            <ChoiceChips
+              label="Guests over"
+              options={[...GUESTS]}
+              value={answers.guests}
+              onChange={(guests) => set({ guests })}
             />
           </IconQuestion>
         </>
