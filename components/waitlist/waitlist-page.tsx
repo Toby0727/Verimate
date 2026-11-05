@@ -30,6 +30,7 @@ import {
   isStepDone,
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
+  needsCurrentHome,
   normalizeReferralCode,
   normalizeSource,
   raffleBoost,
@@ -72,6 +73,8 @@ import {
 } from "@/lib/waitlist/options";
 import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
+import { CurrentHome } from "./current-home";
+import { HobbyPicker } from "./hobby-picker";
 import { MultiChips } from "./multi-chips";
 import { OpenInBrowser, useInAppBrowser } from "./open-in-browser";
 import { PhotoPicker } from "./photo-picker";
@@ -342,6 +345,7 @@ const STEP_TITLES: Record<WaitlistStep, string> = {
   abroad: "Planning to study abroad?",
   timing: "When do you need housing help?",
   lifestyle: "Quick lifestyle check",
+  hobbies: "What are you into?",
 };
 
 function Survey({
@@ -650,27 +654,35 @@ function StepFields({
       );
     case "timing":
       return (
-        <TimingGrid
-          away={answers.studyAbroadPlans}
-          columns={[
-            {
-              label: "Sublet my place",
-              value: answers.subletOutTerms,
-              initial: answers.studyAbroadPlans?.map((plan) => plan.term),
-              onChange: (subletOutTerms) => set({ subletOutTerms }),
-            },
-            {
-              label: "Find a sublet",
-              value: answers.subletInTerms,
-              onChange: (subletInTerms) => set({ subletInTerms }),
-            },
-            {
-              label: "Find roommates",
-              value: answers.roommateTerms,
-              onChange: (roommateTerms) => set({ roommateTerms }),
-            },
-          ]}
-        />
+        <>
+          <TimingGrid
+            away={answers.studyAbroadPlans}
+            columns={[
+              {
+                label: "Sublet my place",
+                value: answers.subletOutTerms,
+                initial: answers.studyAbroadPlans?.map((plan) => plan.term),
+                onChange: (subletOutTerms) => set({ subletOutTerms }),
+              },
+              {
+                label: "Find a sublet",
+                value: answers.subletInTerms,
+                onChange: (subletInTerms) => set({ subletInTerms }),
+              },
+              {
+                label: "Find roommates",
+                value: answers.roommateTerms,
+                onChange: (roommateTerms) => set({ roommateTerms }),
+              },
+            ]}
+          />
+          {needsCurrentHome(answers) ? (
+            <CurrentHome
+              value={answers.currentHome}
+              onChange={(currentHome) => set({ currentHome })}
+            />
+          ) : null}
+        </>
       );
     case "lifestyle":
       return (
@@ -740,6 +752,17 @@ function StepFields({
             />
           </IconQuestion>
         </>
+      );
+    case "hobbies":
+      return (
+        <Question label="Tap everything you're into, or add your own. We'll use it to match you with roommates.">
+          <HobbyPicker
+            hobbies={answers.hobbies}
+            custom={answers.customHobbies}
+            onHobbies={(hobbies) => set({ hobbies })}
+            onCustom={(customHobbies) => set({ customHobbies })}
+          />
+        </Question>
       );
   }
 }

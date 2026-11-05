@@ -75,6 +75,7 @@ import {
   GENDERS,
   GREEK_LIFE,
   GUESTS,
+  HOBBIES,
   PETS,
   SLEEP,
   SMOKING,
@@ -804,6 +805,7 @@ function PersonDetails({
         <Field term="Areas" value={labels(AREAS, a.areas)} />
         <Field term="Study abroad" value={abroad} />
         <Field term="Sublet out" value={terms(a.subletOutTerms)} />
+        <Field term="Lives at" value={a.currentHome} />
         <Field term="Sublet in" value={terms(a.subletInTerms)} />
         <Field term="Roommate" value={terms(a.roommateTerms)} />
       </dl>
@@ -816,6 +818,17 @@ function PersonDetails({
         <Field term="Sleep" value={label(SLEEP, a.sleep)} />
         <Field term="Tidiness" value={label(CLEANLINESS, a.cleanliness)} />
         <Field term="Guests" value={label(GUESTS, a.guests)} />
+        <Field
+          term="Hobbies"
+          value={
+            [
+              ...(a.hobbies ?? []).map(
+                (h) => HOBBIES.find((x) => x.value === h)?.label ?? h,
+              ),
+              ...(a.customHobbies ?? []).map((h) => h.label),
+            ].join(", ") || null
+          }
+        />
         <Field
           term="Raffle"
           value={

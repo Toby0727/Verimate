@@ -6,10 +6,12 @@ import type {
   Budget,
   Cannabis,
   Cleanliness,
+  CustomHobbyIcon,
   Drinking,
   Gender,
   GreekLife,
   Guests,
+  Hobby,
   Pets,
   Sleep,
   Smoking,
@@ -17,11 +19,20 @@ import type {
   Term,
   Year,
 } from "@/lib/waitlist/options";
-import { TERMS } from "@/lib/waitlist/options";
+import {
+  CUSTOM_HOBBY_ICONS,
+  HOBBIES,
+  HOBBY_CUSTOM_MAX,
+  HOBBY_LABEL_MAX,
+  TERMS,
+} from "@/lib/waitlist/options";
 
 const TERM_ORDER: Term[] = TERMS.map((term) => term.value);
 
 export type AbroadPlan = { term: Term; place: AbroadPlace | null };
+
+// A hobby the student added themselves, with the icon they picked.
+export type CustomHobby = { icon: CustomHobbyIcon; label: string };
 
 export type WaitlistAnswers = {
   name: string | null;
@@ -41,6 +52,9 @@ export type WaitlistAnswers = {
   studyAbroadPlans: AbroadPlan[] | null;
   // Empty array means "not needed"; null means not answered yet.
   subletOutTerms: Term[] | null;
+  // Where they live now: a building from APARTMENTS or what they typed.
+  // Asked only when they want to sublet their place out (2026-11-05).
+  currentHome: string | null;
   subletInTerms: Term[] | null;
   roommateTerms: Term[] | null;
   drinking: Drinking | null;
@@ -52,6 +66,9 @@ export type WaitlistAnswers = {
   sleep: Sleep | null;
   cleanliness: Cleanliness | null;
   guests: Guests | null;
+  // Hobbies page (2026-11-05): picked from HOBBIES, plus their own.
+  hobbies: Hobby[] | null;
+  customHobbies: CustomHobby[] | null;
 };
 
 export const EMPTY_ANSWERS: WaitlistAnswers = {
@@ -66,6 +83,7 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   studyAbroad: null,
   studyAbroadPlans: null,
   subletOutTerms: null,
+  currentHome: null,
   subletInTerms: null,
   roommateTerms: null,
   drinking: null,
@@ -76,6 +94,8 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   sleep: null,
   cleanliness: null,
   guests: null,
+  hobbies: null,
+  customHobbies: null,
 };
 
 export const WAITLIST_STEPS = [
@@ -85,11 +105,17 @@ export const WAITLIST_STEPS = [
   "abroad",
   "timing",
   "lifestyle",
+  "hobbies",
 ] as const;
 export type WaitlistStep = (typeof WAITLIST_STEPS)[number];
 
 export const NAME_MAX_LENGTH = 80;
 export const MAJOR_MAX_LENGTH = 80;
+export const HOME_MAX_LENGTH = 120;
+
+// Text a spreadsheet would run as a formula when the team exports the data
+// (the database refuses it too, as it does for names and majors).
+export const looksLikeFormula = (text: string) => /^\s*[=+@-]/.test(text);
 
 const filled = (text: string | null, max: number) =>
   text !== null && text.trim().length > 0 && text.trim().length <= max;
@@ -120,7 +146,8 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
       return (
         a.subletOutTerms !== null &&
         a.subletInTerms !== null &&
-        a.roommateTerms !== null
+        a.roommateTerms !== null &&
+        (!needsCurrentHome(a) || isHomeFilled(a.currentHome))
       );
     case "lifestyle":
       return (
@@ -133,7 +160,91 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
         a.cleanliness !== null &&
         a.guests !== null
       );
+    case "hobbies":
+      return hobbyCount(a) > 0;
   }
+}
+
+// "Where do you live now?" shows once they tick any "Sublet my place" term.
+export function needsCurrentHome(a: WaitlistAnswers): boolean {
+  return (a.subletOutTerms?.length ?? 0) > 0;
+}
+
+function isHomeFilled(home: string | null): boolean {
+  return filled(home, HOME_MAX_LENGTH) && !looksLikeFormula(home ?? "");
+}
+
+// What gets saved: their home only while they're subletting out, trimmed.
+export function homeToSave(a: WaitlistAnswers): string | null {
+  if (!needsCurrentHome(a)) return null;
+  const home = a.currentHome?.trim();
+  return home && isHomeFilled(home) ? home : null;
+}
+
+export function hobbyCount(a: WaitlistAnswers): number {
+  return (a.hobbies?.length ?? 0) + (a.customHobbies?.length ?? 0);
+}
+
+export type CustomHobbyRefusal =
+  | "empty"
+  | "too-long"
+  | "formula"
+  | "taken"
+  | "full";
+
+// Adds a hobby of their own: trimmed, single-spaced, at most
+// HOBBY_LABEL_MAX characters, not one they already have (or one of the
+// listed hobbies), and at most HOBBY_CUSTOM_MAX of them.
+export function addCustomHobby(
+  list: CustomHobby[] | null,
+  icon: CustomHobbyIcon,
+  input: string,
+):
+  | { ok: true; list: CustomHobby[] }
+  | { ok: false; reason: CustomHobbyRefusal } {
+  const current = list ?? [];
+  const label = input.replace(/\s+/g, " ").trim();
+  if (!label) return { ok: false, reason: "empty" };
+  if (label.length > HOBBY_LABEL_MAX) return { ok: false, reason: "too-long" };
+  if (looksLikeFormula(label)) return { ok: false, reason: "formula" };
+  const key = label.toLowerCase();
+  const taken =
+    current.some((hobby) => hobby.label.toLowerCase() === key) ||
+    HOBBIES.some((hobby) => hobby.label.toLowerCase() === key);
+  if (taken) return { ok: false, reason: "taken" };
+  if (current.length >= HOBBY_CUSTOM_MAX) return { ok: false, reason: "full" };
+  return { ok: true, list: [...current, { icon, label }] };
+}
+
+export function removeCustomHobby(
+  list: CustomHobby[] | null,
+  label: string,
+): CustomHobby[] {
+  return (list ?? []).filter((hobby) => hobby.label !== label);
+}
+
+// Stored as "icon:label" (e.g. "tent:Camping") so the database can check
+// each one. The label may itself contain ":".
+export function encodeCustomHobbies(
+  list: CustomHobby[] | null,
+): string[] | null {
+  if (!list) return null;
+  return list.map((hobby) => `${hobby.icon}:${hobby.label}`);
+}
+
+export function decodeCustomHobbies(
+  stored: string[] | null,
+): CustomHobby[] | null {
+  if (!stored) return null;
+  const icons: readonly string[] = CUSTOM_HOBBY_ICONS;
+  return stored.flatMap((item) => {
+    if (typeof item !== "string") return [];
+    const at = item.indexOf(":");
+    const icon = item.slice(0, at);
+    const label = item.slice(at + 1);
+    if (at < 1 || !label || !icons.includes(icon)) return [];
+    return [{ icon: icon as CustomHobbyIcon, label }];
+  });
 }
 
 // True for an actual term away, as opposed to "No plans" or "Not sure yet".

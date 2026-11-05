@@ -7,6 +7,19 @@
 
 ---
 
+## 2026-11-05 中午：问卷加爱好页和"现在住哪"（紧急上线）
+
+### 做了什么
+- 问卷第 7 步（最后一步）"What are you into?"：29 个爱好，每个一个图标，点一下选中（橙色底 + 勾）；"Add your own"可以自己选图标、写名字，最多加 5 个。
+- 第 5 步勾了"Sublet my place"的学期时，下面多一题"Where do you live now?"：可以自己写，也可以边打字边点已有公寓（51 栋，来自房源调研表）。
+- 数据库迁移 v7（`supabase/migrations/20261105120000_waitlist_hobbies_and_home.sql`）：`hobbies`、`custom_hobbies`、`current_home` 三列和格式检查，`team_waitlist()` 多返回这三列。在本地临时 Postgres 里测过 16 种对 / 错的写入，全部按预期接受或拒绝。
+- 团队后台显示爱好和现住址；隐私政策写明会收集这两项。
+- 测试：单元测试 144 个全过，lint、类型检查、生产构建都过；手机尺寸走完整个问卷（含现住址建议和自定义爱好）。
+
+### 你需要做的（顺序很重要）
+- [ ] 在 Supabase SQL Editor 粘贴运行 v6 + v7（本地 `D:\projects\Roomie\WIP\11-5\run-in-supabase-v6-v7.sql` 是两段合在一起的，v6 重跑没关系）。
+- [ ] 跑完告诉 Claude，再推到 `main`（这次推送也会带上海报和 v6 的两个提交）。
+
 ## 2026-11-05 凌晨：网站前端，按现在的流量来源改（未上线）
 
 ### 为什么

@@ -2,6 +2,7 @@
 // Pure functions; rows come from public.team_waitlist().
 import {
   decodeAbroadPlans,
+  decodeCustomHobbies,
   raffleWeight,
   stepsLeft,
   WAITLIST_STEPS,
@@ -25,6 +26,7 @@ export type TeamRow = {
   study_abroad: WaitlistAnswers["studyAbroad"];
   study_abroad_plans: string[] | null;
   sublet_out_terms: WaitlistAnswers["subletOutTerms"];
+  current_home: string | null;
   sublet_in_terms: WaitlistAnswers["subletInTerms"];
   roommate_terms: WaitlistAnswers["roommateTerms"];
   drinking: WaitlistAnswers["drinking"];
@@ -35,6 +37,8 @@ export type TeamRow = {
   sleep: WaitlistAnswers["sleep"];
   cleanliness: WaitlistAnswers["cleanliness"];
   guests: WaitlistAnswers["guests"];
+  hobbies: WaitlistAnswers["hobbies"];
+  custom_hobbies: string[] | null;
   // The ?src= tag of the poster or story they came in on, if any.
   source: string | null;
   photo_path: string | null;
@@ -64,6 +68,7 @@ export function answersOf(row: TeamRow): WaitlistAnswers {
     studyAbroad: row.study_abroad,
     studyAbroadPlans: decodeAbroadPlans(row.study_abroad_plans),
     subletOutTerms: row.sublet_out_terms,
+    currentHome: row.current_home,
     subletInTerms: row.sublet_in_terms,
     roommateTerms: row.roommate_terms,
     drinking: row.drinking,
@@ -74,6 +79,8 @@ export function answersOf(row: TeamRow): WaitlistAnswers {
     sleep: row.sleep,
     cleanliness: row.cleanliness,
     guests: row.guests,
+    hobbies: row.hobbies,
+    customHobbies: decodeCustomHobbies(row.custom_hobbies),
   };
 }
 

@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  addCustomHobby,
   decodeAbroadPlans,
+  decodeCustomHobbies,
   EMPTY_ANSWERS,
   encodeAbroadPlans,
+  encodeCustomHobbies,
   firstOpenStep,
+  homeToSave,
   isComplete,
   isStepDone,
   normalizeReferralCode,
   normalizeSource,
   raffleEntries,
   raffleWeight,
+  removeCustomHobby,
   setAbroadPlace,
   stepsLeft,
   toggle,
@@ -30,6 +35,7 @@ const COMPLETE: WaitlistAnswers = {
   studyAbroad: "no",
   studyAbroadPlans: null,
   subletOutTerms: [],
+  currentHome: null,
   subletInTerms: ["summer-2027"],
   roommateTerms: ["fall-2027"],
   drinking: "socially",
@@ -40,11 +46,13 @@ const COMPLETE: WaitlistAnswers = {
   sleep: "late",
   cleanliness: "tidy",
   guests: "sometimes",
+  hobbies: ["gym"],
+  customHobbies: null,
 };
 
 describe("stepsLeft", () => {
   it("counts every step for a new student", () => {
-    expect(stepsLeft(EMPTY_ANSWERS)).toBe(6);
+    expect(stepsLeft(EMPTY_ANSWERS)).toBe(7);
     expect(firstOpenStep(EMPTY_ANSWERS)).toBe("about");
   });
 
@@ -252,5 +260,113 @@ describe("normalizeSource", () => {
     expect(normalizeSource("!!!")).toBeNull();
     expect(normalizeSource("")).toBeNull();
     expect(normalizeSource(null)).toBeNull();
+  });
+});
+
+describe("where they live now", () => {
+  const subletting: WaitlistAnswers = {
+    ...COMPLETE,
+    subletOutTerms: ["spring-2027"],
+  };
+
+  it("is asked only when they sublet their place out", () => {
+    expect(isStepDone("timing", COMPLETE)).toBe(true);
+    expect(isStepDone("timing", subletting)).toBe(false);
+    expect(isStepDone("timing", { ...subletting, currentHome: "  " })).toBe(
+      false,
+    );
+    expect(isStepDone("timing", { ...subletting, currentHome: "Theory" })).toBe(
+      true,
+    );
+  });
+
+  it("refuses text a spreadsheet would run as a formula", () => {
+    expect(
+      isStepDone("timing", { ...subletting, currentHome: "=HYPERLINK()" }),
+    ).toBe(false);
+  });
+
+  it("is saved trimmed, and dropped once they stop subletting out", () => {
+    expect(homeToSave({ ...subletting, currentHome: " 614 Euclid " })).toBe(
+      "614 Euclid",
+    );
+    expect(homeToSave({ ...COMPLETE, currentHome: "Theory" })).toBeNull();
+  });
+});
+
+describe("hobbies", () => {
+  it("need at least one, listed or their own", () => {
+    expect(isStepDone("hobbies", { ...COMPLETE, hobbies: [] })).toBe(false);
+    expect(
+      isStepDone("hobbies", {
+        ...COMPLETE,
+        hobbies: [],
+        customHobbies: [{ icon: "tent", label: "Camping" }],
+      }),
+    ).toBe(true);
+  });
+
+  it("adds a hobby of their own, cleaned up", () => {
+    const result = addCustomHobby(null, "tent", "  Winter   camping ");
+    expect(result).toEqual({
+      ok: true,
+      list: [{ icon: "tent", label: "Winter camping" }],
+    });
+  });
+
+  it("refuses empty, long, formula-like and repeated hobbies", () => {
+    const one = [{ icon: "star" as const, label: "Camping" }];
+    expect(addCustomHobby(null, "star", "   ")).toEqual({
+      ok: false,
+      reason: "empty",
+    });
+    expect(addCustomHobby(null, "star", "x".repeat(31))).toEqual({
+      ok: false,
+      reason: "too-long",
+    });
+    expect(addCustomHobby(null, "star", "=cmd")).toEqual({
+      ok: false,
+      reason: "formula",
+    });
+    expect(addCustomHobby(one, "zap", "camping")).toEqual({
+      ok: false,
+      reason: "taken",
+    });
+    // Same as a listed hobby: they should tap that one instead.
+    expect(addCustomHobby(null, "zap", "gym")).toEqual({
+      ok: false,
+      reason: "taken",
+    });
+  });
+
+  it("allows five of their own", () => {
+    let list = null as Parameters<typeof addCustomHobby>[0];
+    for (const label of ["a1", "a2", "a3", "a4", "a5"]) {
+      const result = addCustomHobby(list, "star", label);
+      if (!result.ok) throw new Error(result.reason);
+      list = result.list;
+    }
+    expect(addCustomHobby(list, "star", "a6")).toEqual({
+      ok: false,
+      reason: "full",
+    });
+    expect(removeCustomHobby(list, "a3")).toHaveLength(4);
+  });
+
+  it("round-trip through storage and skip anything malformed", () => {
+    const list = [
+      { icon: "tent" as const, label: "Camping" },
+      { icon: "music" as const, label: "K-pop: dance covers" },
+    ];
+    const stored = encodeCustomHobbies(list);
+    expect(stored).toEqual(["tent:Camping", "music:K-pop: dance covers"]);
+    expect(decodeCustomHobbies(stored)).toEqual(list);
+    expect(
+      decodeCustomHobbies(["nope:Thing", "noicon", ":x", "star:"]),
+    ).toEqual([]);
+  });
+
+  it("are the last step before the raffle", () => {
+    expect(firstOpenStep({ ...COMPLETE, hobbies: null })).toBe("hobbies");
   });
 });

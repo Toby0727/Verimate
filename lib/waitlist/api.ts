@@ -4,8 +4,11 @@ import type { School } from "@/lib/rules/types";
 import { schoolOfGoogleAccount } from "@/lib/rules/verification";
 import {
   decodeAbroadPlans,
+  decodeCustomHobbies,
   EMPTY_ANSWERS,
   encodeAbroadPlans,
+  encodeCustomHobbies,
+  homeToSave,
   isAwayTerm,
   isComplete,
   type WaitlistAnswers,
@@ -38,6 +41,7 @@ type Row = {
   study_abroad: WaitlistAnswers["studyAbroad"];
   study_abroad_plans: string[] | null;
   sublet_out_terms: WaitlistAnswers["subletOutTerms"];
+  current_home: string | null;
   sublet_in_terms: WaitlistAnswers["subletInTerms"];
   roommate_terms: WaitlistAnswers["roommateTerms"];
   drinking: WaitlistAnswers["drinking"];
@@ -48,11 +52,13 @@ type Row = {
   sleep: WaitlistAnswers["sleep"];
   cleanliness: WaitlistAnswers["cleanliness"];
   guests: WaitlistAnswers["guests"];
+  hobbies: WaitlistAnswers["hobbies"];
+  custom_hobbies: string[] | null;
   completed_at: string | null;
 };
 
 const COLUMNS =
-  "name, photo_path, referred_by, referral_code, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, sleep, cleanliness, guests, completed_at";
+  "name, photo_path, referred_by, referral_code, gender, year, major, budget, areas, study_abroad, study_abroad_plans, sublet_out_terms, current_home, sublet_in_terms, roommate_terms, drinking, smoking, cannabis, greek_life, pets, sleep, cleanliness, guests, hobbies, custom_hobbies, completed_at";
 
 // Imported lazily so pages still render when the Supabase env vars are missing.
 async function supabase() {
@@ -123,6 +129,7 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       studyAbroad: row?.study_abroad ?? null,
       studyAbroadPlans: decodeAbroadPlans(row?.study_abroad_plans ?? null),
       subletOutTerms: row?.sublet_out_terms ?? null,
+      currentHome: row?.current_home ?? null,
       subletInTerms: row?.sublet_in_terms ?? null,
       roommateTerms: row?.roommate_terms ?? null,
       drinking: row?.drinking ?? null,
@@ -133,6 +140,8 @@ export async function loadWaitlist(): Promise<WaitlistSession> {
       sleep: row?.sleep ?? null,
       cleanliness: row?.cleanliness ?? null,
       guests: row?.guests ?? null,
+      hobbies: row?.hobbies ?? null,
+      customHobbies: decodeCustomHobbies(row?.custom_hobbies ?? null),
     },
     completedAt: row?.completed_at ?? null,
     referralCode: row?.referral_code ?? null,
@@ -299,6 +308,8 @@ export async function saveWaitlist(
             ? encodeAbroadPlans(answers.studyAbroadPlans)
             : null,
         sublet_out_terms: answers.subletOutTerms,
+        // Where they live now, only while they're subletting their place.
+        current_home: homeToSave(answers),
         sublet_in_terms: answers.subletInTerms,
         roommate_terms: answers.roommateTerms,
         drinking: answers.drinking,
@@ -309,6 +320,8 @@ export async function saveWaitlist(
         sleep: answers.sleep,
         cleanliness: answers.cleanliness,
         guests: answers.guests,
+        hobbies: answers.hobbies,
+        custom_hobbies: encodeCustomHobbies(answers.customHobbies),
         // Where they came from (?src= on a poster or story link). The
         // database keeps the first value and ignores later ones.
         source: rememberedSource(),

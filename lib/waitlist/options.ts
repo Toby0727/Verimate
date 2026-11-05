@@ -160,6 +160,62 @@ export const GUESTS = [
   { value: "often", label: "Often" },
 ] as const satisfies Choice<string>[];
 
+// Hobbies (2026-11-05, migration v7): a page of tappable icons, plus up to
+// HOBBY_CUSTOM_MAX of their own, each with an icon from CUSTOM_HOBBY_ICONS.
+// Values must match the hobbies / custom_hobbies checks in
+// supabase/migrations/20261105120000_waitlist_hobbies_and_home.sql. The
+// icon drawn for each lives in components/waitlist/hobby-icons.ts.
+export const HOBBIES = [
+  { value: "gym", label: "Gym" },
+  { value: "running", label: "Running" },
+  { value: "sports", label: "Playing sports" },
+  { value: "cuse-games", label: "Cuse games" },
+  { value: "hiking", label: "Hiking & outdoors" },
+  { value: "cycling", label: "Cycling" },
+  { value: "yoga", label: "Yoga" },
+  { value: "skiing", label: "Skiing" },
+  { value: "swimming", label: "Swimming" },
+  { value: "music", label: "Music" },
+  { value: "instrument", label: "Playing an instrument" },
+  { value: "singing", label: "Singing" },
+  { value: "dancing", label: "Dancing" },
+  { value: "gaming", label: "Gaming" },
+  { value: "movies", label: "Movies & TV" },
+  { value: "reading", label: "Reading" },
+  { value: "writing", label: "Writing" },
+  { value: "art", label: "Art & drawing" },
+  { value: "photography", label: "Photography" },
+  { value: "cooking", label: "Cooking & baking" },
+  { value: "coffee", label: "Coffee shops" },
+  { value: "travel", label: "Travel" },
+  { value: "going-out", label: "Going out" },
+  { value: "coding", label: "Coding & tech" },
+  { value: "fashion", label: "Fashion" },
+  { value: "volunteering", label: "Volunteering" },
+  { value: "board-games", label: "Board games" },
+  { value: "plants", label: "Plants" },
+  { value: "theater", label: "Theater" },
+] as const satisfies Choice<string>[];
+
+// Icons a student can pick for a hobby they add themselves.
+export const CUSTOM_HOBBY_ICONS = [
+  "star",
+  "heart",
+  "sparkles",
+  "music",
+  "camera",
+  "brush",
+  "leaf",
+  "tent",
+  "rocket",
+  "puzzle",
+  "zap",
+  "smile",
+] as const;
+
+export const HOBBY_CUSTOM_MAX = 5;
+export const HOBBY_LABEL_MAX = 30;
+
 type ValueOf<T extends readonly { value: string }[]> = T[number]["value"];
 export type Gender = ValueOf<typeof GENDERS>;
 export type Year = ValueOf<typeof YEARS>;
@@ -178,6 +234,8 @@ export type Pets = ValueOf<typeof PETS>;
 export type Sleep = ValueOf<typeof SLEEP>;
 export type Cleanliness = ValueOf<typeof CLEANLINESS>;
 export type Guests = ValueOf<typeof GUESTS>;
+export type Hobby = ValueOf<typeof HOBBIES>;
+export type CustomHobbyIcon = (typeof CUSTOM_HOBBY_ICONS)[number];
 
 // Public contact for privacy requests and raffle questions.
 export const CONTACT_EMAIL = "hpang05@syr.edu";
