@@ -39,6 +39,12 @@ How every Verimate graphic is made: the brand rules they share, what each one co
 | `docs/brand/flyer/verimate-ig-story.png` | 1080 × 1920 | Instagram story, **no QR code**; add a Link sticker to verimateapp.com over the URL | `story.py` |
 | `docs/brand/final/verimate-logo.*`, `verimate-mark.*` | SVG + transparent PNG (2048 wide / 1024 square) | Logo and app icon | traced from the 2026-11-04 logo image; older options in `docs/brand/logo-options/` |
 
+| `docs/brand/flyer/campaign/verimate-poster-{11x17,22x17}-{qr,noqr}.png` / `.pdf` | 11 × 17 in portrait and 22 × 17 in landscape, 300 dpi | Campaign posters with the headline "Enter the most complete **sublet + roommate** matching system and win a $50 gift card.", with or without the QR code (no-QR shows verimateapp.com big) | `poster_sizes.py` (any size; headline is an argument) |
+
+| `docs/brand/flyer/series/verimate-series-<n>-<slug>-qr.svg` / `.png` / `.pdf` and `verimate-series-board-qr.svg` | 11 × 17 in portrait, 300 dpi | The "personal ad" series for Slocum Hall: Gym rat, Night owl, Clean freak, Girl with cat, Lo-fi, "How does signing up and getting $50 sound?", Florence. The no-QR version is an Instagram story set instead (`verimate-story-<n>-<slug>-noqr.png` / `.svg`, 1080 x 1920, board `verimate-story-board-noqr.svg`): content stays between y 250 and 1650, and a dashed space marks where to drop the Instagram link sticker, with a "Click here" arrow pointing at it. Each has a kicker pill ("Find a roommate. Win $50."), the tagline "Building Syracuse's most complete sublet + roommate platform", the QR code and a generic $50 gift card drawn in our palette (no Amazon logo; the fine print says Amazon is not a sponsor). The SVGs are vector and open in Illustrator with live text (install Figtree first); the board puts all seven on one canvas, each in a named group | `series_vector.py` (copy is in its `POSTERS` list) + `logo_variants.cjs` |
+
+| `docs/brand/flyer/series/verimate-all-posters.ai` (same file as `.pdf`) | 62.5 × 92.8 in canvas | Every poster in one Illustrator file: the seven 11 × 17 QR posters on top, the seven 1080 × 1920 pt stories below. Vector throughout (no images), fonts embedded as Figtree-Medium / -SemiBold / -Bold / -ExtraBold so text stays editable once Figtree is installed | `ai_board.py` builds an HTML page from the SVGs with the static fonts in `scripts/fonts-static/`; print it with headless Edge/Chrome `--print-to-pdf`, then copy to `.ai` |
+
 ### Layouts
 
 - **Flyer (portrait):** logo top left → slogan in three lines → QR code centred on a white rounded tile with "Scan to join the waitlist" and "verimateapp.com" under it → red prize card full width → sign-in line centred at the bottom.
@@ -56,6 +62,8 @@ python3 -I $SCRIPTS/flyer.py . $FONT $REPO/docs/brand/flyer/verimate-flyer
 python3 -I $SCRIPTS/poster_render.py . $FONT $REPO/docs/brand/final/verimate-logo.png $REPO/docs/brand/flyer/verimate-poster
 NODE_PATH=./node_modules node $SCRIPTS/poster_image.js $REPO/docs/brand/flyer/verimate-poster.png $REPO/docs/brand/flyer/verimate-poster.pptx
 python3 -I $SCRIPTS/story.py . $FONT $REPO/docs/brand/flyer/verimate-ig-story
+# Campaign posters: <width in> <height in> <qr|noqr> "<headline>"
+python3 -I $SCRIPTS/poster_sizes.py . $FONT $REPO/docs/brand/final/verimate-logo.png $REPO/docs/brand/flyer/campaign/verimate-poster-11x17-qr 11 17 qr "Enter the most complete sublet + roommate matching system and win a \$50 gift card."
 node $SCRIPTS/scan.cjs $REPO $REPO/docs/brand/flyer/verimate-flyer.png   # QR self-test
 
 # The -vercel versions: pass the QR link to assets.cjs and the URL line as the last argument
