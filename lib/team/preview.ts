@@ -134,6 +134,42 @@ export function previewRows(now: Date): TeamRow[] {
       source: null,
       cleanliness: "spotless",
     }),
+    // Sublet and roommate matches for the Matches board.
+    finished("p8", "sample.eight@g.syr.edu", "Sample Eight", 8, {
+      study_abroad: "fall-2027",
+      study_abroad_plans: ["fall-2027:florence"],
+      sublet_out_terms: ["fall-2027"],
+      current_home: "Theory",
+      sublet_in_terms: [],
+      roommate_terms: ["spring-2028"],
+    }),
+    finished("p9", "sample.nine@g.syr.edu", "Sample Nine", 12, {
+      sublet_in_terms: ["fall-2027"],
+      areas: ["university-hill"],
+      hobbies: ["gym", "cuse-games", "gaming"],
+    }),
+    finished("p10", "sample.ten@g.syr.edu", "Sample Ten", 14, {
+      sublet_in_terms: ["fall-2027", "spring-2028"],
+      areas: ["westcott"],
+      sleep: "early",
+      cleanliness: "spotless",
+      pets: "no-pets",
+      hobbies: ["reading", "coffee"],
+    }),
+    finished("p11", "sample.eleven@g.syr.edu", "Sample Eleven", 20, {
+      sublet_out_terms: ["spring-2028", "fall-2027"],
+      current_home: "614 Euclid Ave",
+      sublet_in_terms: [],
+      roommate_terms: ["spring-2028"],
+    }),
+    finished("p12", "sample.twelve@g.syr.edu", "Sample Twelve", 22, {
+      sublet_in_terms: [],
+      areas: ["not-sure"],
+      sleep: "early",
+      smoking: "yes",
+      pets: "have-pet",
+      hobbies: ["hiking", "plants"],
+    }),
     finished("p1", "sample.one@g.syr.edu", "Sample One", 50, {
       photo_uploaded: true,
       photo_path: "p1/photo.jpg",

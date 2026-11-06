@@ -83,6 +83,7 @@ import {
   TERMS,
   YEARS,
 } from "@/lib/waitlist/options";
+import { MatchBoard } from "./match-board";
 
 const TEAM_PATH = "/team";
 const TIME_ZONE = "America/New_York";
@@ -391,6 +392,20 @@ function Dashboard({
         </div>
       </section>
 
+      <MatchBoard
+        rows={rows}
+        onPick={(id) => {
+          setFilter("all");
+          setQuery("");
+          setOpen(id);
+          requestAnimationFrame(() =>
+            document
+              .getElementById(`person-${id}`)
+              ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+          );
+        }}
+      />
+
       <section className="flex flex-col gap-3 rounded-xl bg-card p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap gap-1.5">
@@ -668,7 +683,7 @@ function PersonRow({
   const weight = teamRaffleWeight(row);
 
   return (
-    <li>
+    <li id={`person-${row.user_id}`} className="scroll-mt-4">
       <button
         type="button"
         onClick={onToggle}
