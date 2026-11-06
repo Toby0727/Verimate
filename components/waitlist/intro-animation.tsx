@@ -90,11 +90,12 @@ const STROKES = [
 
 export function IntroAnimation() {
   useEffect(() => {
-    // Any visit to the waitlist counts as having seen the intro, even one
-    // where it didn't play (reached by a link, ?intro=0), so a later full
-    // load, like coming back from Google sign-in, doesn't start it.
+    // Any load of the waitlist in this tab counts as having played the
+    // intro, even one where it didn't (reached by a link, ?intro=0), so a
+    // later full load in the same tab, like coming back from Google sign-in,
+    // doesn't start it.
     try {
-      localStorage.setItem(INTRO_SEEN_KEY, "1");
+      sessionStorage.setItem(INTRO_SEEN_KEY, "1");
     } catch {
       // Storage blocked: the intro never plays there anyway.
     }

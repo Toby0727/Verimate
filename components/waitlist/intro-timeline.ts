@@ -5,8 +5,8 @@
 // Why a script in <head>: the intro has to be on screen from the first
 // paint, not pop in once React has loaded. INTRO_SCRIPT runs while the HTML
 // is parsed, so it never waits for the app's JavaScript:
-// - It decides. On "/" only, on a first visit (localStorage), never with
-//   reduced motion, blocked storage, a signed-in visitor or a screen too
+// - It decides. On "/" only, every time the site is opened (once per tab:
+//   sessionStorage), never with reduced motion, blocked storage or a screen too
 //   small for the 342px figure, it sets <html data-intro="play">. `?intro`
 //   replays it, `?intro=0` turns it off. CSS only shows the overlay
 //   (rendered in the server HTML) in that state, and locks page scrolling.
@@ -18,6 +18,9 @@
 // React doesn't run <script> tags it creates on the client, and warns about
 // them in development.
 
+// In sessionStorage: it plays every time someone opens the site (decided
+// 2026-11-06), but only once per tab, so coming back from Google sign-in in
+// the same tab doesn't play it again before the survey.
 export const INTRO_SEEN_KEY = "verimate-intro-seen";
 
 // The timeline, in ms from when it starts. One still page; only the story
@@ -78,10 +81,9 @@ const MIN_W = 344;
 const MIN_H = 530;
 
 // In order:
-// - mark(): remembers the intro as seen. `?intro=0` and a signed-in visit
-//   (Supabase's sb-…-auth-token cookie, not HttpOnly here) count as seen, so
-//   it never starts between Google sign-in and the survey.
-// - data-intro="play" on a first visit to "/" without reduced motion, on a
+// - mark(): remembers the intro as played in this tab. `?intro=0` counts as
+//   played.
+// - data-intro="play" on the first load of "/" in a tab, without reduced motion, on a
 //   screen big enough.
 // - fly(): measures the page logo's check ([data-logo-mark]) and the intro's
 //   check, and sets the translate and scale that land one on the other
@@ -98,4 +100,4 @@ const MIN_H = 530;
 // - data-intro-out when the overlay starts to leave (or on Skip) reveals the
 //   page under it: until then it is hidden from screen readers and the tab
 //   order, and its entrance animation waits.
-export const INTRO_SCRIPT = `(function(){var d=document.documentElement;function mark(){try{localStorage.setItem("${INTRO_SEEN_KEY}","1")}catch(e){}}try{if(location.pathname!=="/")return;var q=new URLSearchParams(location.search).get("intro");if(q==="0"){mark();return}if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;if(innerWidth<${MIN_W}||innerHeight<${MIN_H})return;if(q===null){if(/(^|; )sb-[^=;]*-auth-token/.test(document.cookie)){mark();return}if(localStorage.getItem("${INTRO_SEEN_KEY}"))return;localStorage.setItem("${INTRO_SEEN_KEY}","1")}d.setAttribute("data-intro","play")}catch(e){return}var started=0;function end(){d.setAttribute("data-intro","done")}function out(){d.setAttribute("data-intro-out","")}function fly(){try{var m=document.querySelector("[data-logo-mark]"),w=document.querySelector(".intro-fly"),s=m&&m.ownerSVGElement,f=w&&w.querySelector("svg");if(!s||!f)throw 0;var a=s.getBoundingClientRect(),b=f.getBoundingClientRect();if(!a.height||!b.height)throw 0;d.style.setProperty("--fly-x",a.left-b.left+"px");d.style.setProperty("--fly-y",a.top-b.top+"px");d.style.setProperty("--fly-s",String(a.height/b.height));d.removeAttribute("data-intro-nofly")}catch(e){d.setAttribute("data-intro-nofly","")}}function run(){if(started)return;started=performance.now();fly();d.setAttribute("data-intro-run","");setTimeout(fly,${T.flight - 80});setTimeout(out,${BACKDROP_OUT});setTimeout(function(){if(d.getAttribute("data-intro")==="play")end()},${DONE})}function skip(){if(d.getAttribute("data-intro")!=="play")return;if(started&&performance.now()-started>${OUT_AT})return;out();d.setAttribute("data-intro","skip");setTimeout(function(){end();var f=document.querySelector("main button");if(f)f.focus({preventScroll:true})},${SKIP_MS})}document.addEventListener("click",function(e){var t=e.target;if(t&&t.closest&&t.closest(".intro-skip-button"))skip()});function start(){var el=document.querySelector(".intro-type");if(!el){end();return}try{var s=getComputedStyle(el);document.fonts.load(s.fontWeight+" 1em "+s.fontFamily).then(run,run)}catch(e){run()}setTimeout(run,${FONT_WAIT})}function ready(){if(document.visibilityState!=="hidden"){start();return}document.addEventListener("visibilitychange",function v(){if(document.visibilityState==="hidden")return;document.removeEventListener("visibilitychange",v);start()})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ready);else ready()})();`;
+export const INTRO_SCRIPT = `(function(){var d=document.documentElement;function mark(){try{sessionStorage.setItem("${INTRO_SEEN_KEY}","1")}catch(e){}}try{if(location.pathname!=="/")return;var q=new URLSearchParams(location.search).get("intro");if(q==="0"){mark();return}if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;if(innerWidth<${MIN_W}||innerHeight<${MIN_H})return;if(q===null){if(sessionStorage.getItem("${INTRO_SEEN_KEY}"))return;sessionStorage.setItem("${INTRO_SEEN_KEY}","1")}d.setAttribute("data-intro","play")}catch(e){return}var started=0;function end(){d.setAttribute("data-intro","done")}function out(){d.setAttribute("data-intro-out","")}function fly(){try{var m=document.querySelector("[data-logo-mark]"),w=document.querySelector(".intro-fly"),s=m&&m.ownerSVGElement,f=w&&w.querySelector("svg");if(!s||!f)throw 0;var a=s.getBoundingClientRect(),b=f.getBoundingClientRect();if(!a.height||!b.height)throw 0;d.style.setProperty("--fly-x",a.left-b.left+"px");d.style.setProperty("--fly-y",a.top-b.top+"px");d.style.setProperty("--fly-s",String(a.height/b.height));d.removeAttribute("data-intro-nofly")}catch(e){d.setAttribute("data-intro-nofly","")}}function run(){if(started)return;started=performance.now();fly();d.setAttribute("data-intro-run","");setTimeout(fly,${T.flight - 80});setTimeout(out,${BACKDROP_OUT});setTimeout(function(){if(d.getAttribute("data-intro")==="play")end()},${DONE})}function skip(){if(d.getAttribute("data-intro")!=="play")return;if(started&&performance.now()-started>${OUT_AT})return;out();d.setAttribute("data-intro","skip");setTimeout(function(){end();var f=document.querySelector("main button");if(f)f.focus({preventScroll:true})},${SKIP_MS})}document.addEventListener("click",function(e){var t=e.target;if(t&&t.closest&&t.closest(".intro-skip-button"))skip()});function start(){var el=document.querySelector(".intro-type");if(!el){end();return}try{var s=getComputedStyle(el);document.fonts.load(s.fontWeight+" 1em "+s.fontFamily).then(run,run)}catch(e){run()}setTimeout(run,${FONT_WAIT})}function ready(){if(document.visibilityState!=="hidden"){start();return}document.addEventListener("visibilitychange",function v(){if(document.visibilityState==="hidden")return;document.removeEventListener("visibilitychange",v);start()})}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",ready);else ready()})();`;
