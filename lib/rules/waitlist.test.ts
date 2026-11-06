@@ -7,14 +7,15 @@ import {
   encodeAbroadPlans,
   encodeCustomHobbies,
   firstOpenStep,
+  homeToSave,
   isComplete,
-  isMajorOk,
   isStepDone,
   normalizeReferralCode,
   normalizeSource,
   raffleEntries,
   raffleWeight,
   removeCustomHobby,
+  setAbroadPlace,
   stepsLeft,
   toggle,
   toggleAbroad,
@@ -51,8 +52,7 @@ const COMPLETE: WaitlistAnswers = {
 
 describe("stepsLeft", () => {
   it("counts every step for a new student", () => {
-    // The last step (photo, major, referral code) is all optional.
-    expect(stepsLeft(EMPTY_ANSWERS)).toBe(6);
+    expect(stepsLeft(EMPTY_ANSWERS)).toBe(7);
     expect(firstOpenStep(EMPTY_ANSWERS)).toBe("about");
   });
 
@@ -74,19 +74,12 @@ describe("isStepDone", () => {
     expect(isStepDone("about", { ...COMPLETE, name: null })).toBe(false);
   });
 
-  it("needs a term picked, but no longer where", () => {
+  it("needs a place for every term away", () => {
     expect(
       isStepDone("abroad", {
         ...COMPLETE,
         studyAbroad: "fall-2027",
         studyAbroadPlans: [{ term: "fall-2027", place: null }],
-      }),
-    ).toBe(true);
-    expect(
-      isStepDone("abroad", {
-        ...COMPLETE,
-        studyAbroad: "fall-2027",
-        studyAbroadPlans: [],
       }),
     ).toBe(false);
     expect(
@@ -106,9 +99,9 @@ describe("isStepDone", () => {
   });
 
   it("needs at least one budget", () => {
-    expect(isStepDone("place", { ...COMPLETE, budget: [] })).toBe(false);
+    expect(isStepDone("budget", { ...COMPLETE, budget: [] })).toBe(false);
     expect(
-      isStepDone("place", { ...COMPLETE, budget: ["600-800", "800-1000"] }),
+      isStepDone("budget", { ...COMPLETE, budget: ["600-800", "800-1000"] }),
     ).toBe(true);
   });
 
@@ -120,20 +113,15 @@ describe("isStepDone", () => {
   });
 
   it("doesn't need a photo", () => {
-    expect(isStepDone("profile", { ...COMPLETE, photoPath: null })).toBe(true);
+    expect(isStepDone("about", { ...COMPLETE, photoPath: null })).toBe(true);
   });
 
-  it("needs a year", () => {
-    expect(isStepDone("about", { ...COMPLETE, year: null })).toBe(false);
-  });
-
-  it("treats the major as optional", () => {
-    expect(isComplete({ ...COMPLETE, major: null })).toBe(true);
-    expect(isStepDone("profile", { ...COMPLETE, major: "   " })).toBe(true);
-    expect(isStepDone("profile", { ...COMPLETE, major: "x".repeat(81) })).toBe(
+  it("needs a year and a non-blank major", () => {
+    expect(isStepDone("about", { ...COMPLETE, major: "   " })).toBe(false);
+    expect(isStepDone("about", { ...COMPLETE, major: "x".repeat(81) })).toBe(
       false,
     );
-    expect(isMajorOk("=HYPERLINK()")).toBe(false);
+    expect(isStepDone("about", { ...COMPLETE, year: null })).toBe(false);
   });
 
   it("treats an empty term list as answered (not needed)", () => {
@@ -144,7 +132,7 @@ describe("isStepDone", () => {
   });
 
   it("needs at least one area", () => {
-    expect(isStepDone("place", { ...COMPLETE, areas: [] })).toBe(false);
+    expect(isStepDone("areas", { ...COMPLETE, areas: [] })).toBe(false);
   });
 });
 
@@ -207,16 +195,20 @@ describe("study abroad plans", () => {
     });
   });
 
-  it("round-trips through storage, keeping places from older answers", () => {
-    const plans = [
-      { term: "fall-2027", place: null },
-      { term: "spring-2028", place: "seoul" },
-    ] as const;
-    expect(encodeAbroadPlans([...plans])).toEqual([
-      "fall-2027",
+  it("sets a place for one term and round-trips through storage", () => {
+    const plans = setAbroadPlace(
+      [
+        { term: "fall-2027", place: null },
+        { term: "spring-2028", place: null },
+      ],
+      "spring-2028",
+      "seoul",
+    );
+    expect(encodeAbroadPlans(plans)).toEqual([
+      "fall-2027:",
       "spring-2028:seoul",
     ]);
-    expect(decodeAbroadPlans(encodeAbroadPlans([...plans]))).toEqual(plans);
+    expect(decodeAbroadPlans(encodeAbroadPlans(plans))).toEqual(plans);
   });
 });
 
@@ -225,11 +217,9 @@ describe("referrals", () => {
     expect(normalizeReferralCode(" 3f9-a2c9z ")).toBe("3F9A2C");
   });
 
-  it("blocks the last step only while a code is half typed", () => {
-    expect(isStepDone("profile", { ...COMPLETE, referredBy: "3F9" })).toBe(
-      false,
-    );
-    expect(isStepDone("profile", { ...COMPLETE, referredBy: "3F9A2C" })).toBe(
+  it("blocks step 1 only while a code is half typed", () => {
+    expect(isStepDone("about", { ...COMPLETE, referredBy: "3F9" })).toBe(false);
+    expect(isStepDone("about", { ...COMPLETE, referredBy: "3F9A2C" })).toBe(
       true,
     );
   });
@@ -274,10 +264,33 @@ describe("normalizeSource", () => {
 });
 
 describe("where they live now", () => {
-  it("is no longer asked", () => {
+  const subletting: WaitlistAnswers = {
+    ...COMPLETE,
+    subletOutTerms: ["spring-2027"],
+  };
+
+  it("is asked only when they sublet their place out", () => {
+    expect(isStepDone("timing", COMPLETE)).toBe(true);
+    expect(isStepDone("timing", subletting)).toBe(false);
+    expect(isStepDone("timing", { ...subletting, currentHome: "  " })).toBe(
+      false,
+    );
+    expect(isStepDone("timing", { ...subletting, currentHome: "Theory" })).toBe(
+      true,
+    );
+  });
+
+  it("refuses text a spreadsheet would run as a formula", () => {
     expect(
-      isStepDone("timing", { ...COMPLETE, subletOutTerms: ["spring-2027"] }),
-    ).toBe(true);
+      isStepDone("timing", { ...subletting, currentHome: "=HYPERLINK()" }),
+    ).toBe(false);
+  });
+
+  it("is saved trimmed, and dropped once they stop subletting out", () => {
+    expect(homeToSave({ ...subletting, currentHome: " 614 Euclid " })).toBe(
+      "614 Euclid",
+    );
+    expect(homeToSave({ ...COMPLETE, currentHome: "Theory" })).toBeNull();
   });
 });
 
@@ -353,7 +366,7 @@ describe("hobbies", () => {
     ).toEqual([]);
   });
 
-  it("are the last required step before the raffle", () => {
+  it("are the last step before the raffle", () => {
     expect(firstOpenStep({ ...COMPLETE, hobbies: null })).toBe("hobbies");
   });
 });

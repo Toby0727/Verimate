@@ -12,6 +12,8 @@ const WAITLIST_PATHS = new Set([
   "/team",
   // Share preview image that iMessage / Instagram / Facebook fetch.
   "/opengraph-image.png",
+  // The first-visit intro's sound (components/waitlist/intro-sound.ts).
+  "/intro/intro-sfx.mp3",
 ]);
 
 export async function proxy(request: NextRequest) {

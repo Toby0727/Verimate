@@ -7,6 +7,7 @@ import type { AbroadPlan } from "@/lib/rules/waitlist";
 import { cn } from "@/lib/utils";
 import {
   ABROAD_PLACE_LABELS,
+  ABROAD_PLACES,
   type AbroadPlace,
   STUDY_ABROAD,
   TERM_MONTHS,
@@ -157,18 +158,31 @@ export function IconQuestion({
   );
 }
 
+const PLACE_GROUPS: {
+  label: string;
+  options: readonly Choice<AbroadPlace>[];
+}[] = [
+  { label: "US semesters", options: ABROAD_PLACES.us },
+  { label: "SU Abroad centers", options: ABROAD_PLACES.centers },
+  { label: "Partner programs", options: ABROAD_PLACES.partners },
+  { label: "At sea", options: ABROAD_PLACES.sea },
+  { label: "Other", options: ABROAD_PLACES.other },
+];
+
 type AbroadValue = (typeof STUDY_ABROAD)[number]["value"];
 
 // Study abroad, term by term: "No plans" and "Not sure yet" stand alone;
-// any number of terms can be picked. (It no longer asks where, 2026-11-06.)
+// any number of terms can be picked, and each picked term asks where.
 export function AbroadPlanList({
   studyAbroad,
   plans,
   onToggle,
+  onPlace,
 }: {
   studyAbroad: AbroadValue | null;
   plans: AbroadPlan[] | null;
   onToggle: (value: AbroadValue) => void;
+  onPlace: (term: Term, place: AbroadPlace) => void;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -221,6 +235,34 @@ export function AbroadPlanList({
                 </span>
               )}
             </button>
+            {plan && (
+              <div className="px-4 pb-3">
+                <select
+                  aria-label={`Where for ${option.label}`}
+                  value={plan.place ?? ""}
+                  onChange={(e) =>
+                    onPlace(plan.term, e.target.value as AbroadPlace)
+                  }
+                  className={cn(
+                    "h-11 w-full rounded-lg bg-background px-3 text-[15px] text-foreground",
+                    !plan.place && "text-muted-foreground",
+                  )}
+                >
+                  <option value="" disabled>
+                    Where are you going?
+                  </option>
+                  {PLACE_GROUPS.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.options.map((place) => (
+                        <option key={place.value} value={place.value}>
+                          {place.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         );
       })}

@@ -1,8 +1,10 @@
 "use client";
 
+import { Volume2, VolumeX } from "lucide-react";
 import { type CSSProperties, type ReactNode, useEffect } from "react";
 import { MARK_PATHS } from "@/components/brand/logo";
 import { detectInAppBrowser } from "@/lib/rules/in-app-browser";
+import { useIntroSound } from "./intro-sound";
 import {
   BACKDROP_OUT,
   DONE,
@@ -89,6 +91,7 @@ const STROKES = [
 ];
 
 export function IntroAnimation() {
+  const sound = useIntroSound();
   useEffect(() => {
     // Any load of the waitlist in this tab counts as having played the
     // intro, even one where it didn't (reached by a link, ?intro=0), so a
@@ -159,6 +162,24 @@ export function IntroAnimation() {
 
       <div className="pointer-events-none absolute inset-x-0 top-0">
         <div className="mx-auto flex max-w-[520px] justify-end px-2 pt-4">
+          <button
+            type="button"
+            onClick={sound.toggle}
+            aria-pressed={sound.on}
+            aria-label={
+              sound.on ? "Turn intro sound off" : "Turn intro sound on"
+            }
+            className="intro-hide pointer-events-auto flex min-h-11 items-center px-1"
+            style={at(BACKDROP_OUT)}
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-white text-[#111]">
+              {sound.on ? (
+                <Volume2 aria-hidden="true" className="size-[18px]" />
+              ) : (
+                <VolumeX aria-hidden="true" className="size-[18px]" />
+              )}
+            </span>
+          </button>
           <button
             type="button"
             className="intro-skip-button intro-hide pointer-events-auto flex min-h-11 items-center px-2"
