@@ -117,7 +117,8 @@ describe("signupStatus / stepsDone", () => {
 
   it("counts answered steps", () => {
     expect(stepsDone(EMPTY)).toBe(0);
-    expect(stepsDone(STARTED)).toBe(1);
+    // Step 1, plus the last step, which is all optional.
+    expect(stepsDone(STARTED)).toBe(2);
     expect(stepsDone(FINISHED)).toBe(7);
   });
 });

@@ -8,7 +8,6 @@ import {
   EMPTY_ANSWERS,
   encodeAbroadPlans,
   encodeCustomHobbies,
-  homeToSave,
   isAwayTerm,
   isComplete,
   type WaitlistAnswers,
@@ -300,16 +299,12 @@ export async function saveWaitlist(
         budget: answers.budget,
         areas: answers.areas,
         study_abroad: answers.studyAbroad,
-        // Saved only once every term has a place; the database rejects
-        // half-filled pairs.
-        study_abroad_plans:
-          isAwayTerm(answers.studyAbroad) &&
-          answers.studyAbroadPlans?.every((plan) => plan.place !== null)
-            ? encodeAbroadPlans(answers.studyAbroadPlans)
-            : null,
+        study_abroad_plans: isAwayTerm(answers.studyAbroad)
+          ? encodeAbroadPlans(answers.studyAbroadPlans)
+          : null,
         sublet_out_terms: answers.subletOutTerms,
-        // Where they live now, only while they're subletting their place.
-        current_home: homeToSave(answers),
+        // No longer asked (2026-11-06); an earlier answer is kept as is.
+        current_home: answers.currentHome,
         sublet_in_terms: answers.subletInTerms,
         roommate_terms: answers.roommateTerms,
         drinking: answers.drinking,
