@@ -75,6 +75,7 @@ import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
 import { CurrentHome } from "./current-home";
 import { HobbyPicker } from "./hobby-picker";
+import { IntroAnimation } from "./intro-animation";
 import { MultiChips } from "./multi-chips";
 import { OpenInBrowser, useInAppBrowser } from "./open-in-browser";
 import { PhotoPicker } from "./photo-picker";
@@ -133,6 +134,7 @@ export function WaitlistPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-background">
+      <IntroAnimation />
       <header className="flex items-center justify-between px-4 pt-5 pb-2">
         <Logo className="h-8 w-auto" />
         <RafflePill />

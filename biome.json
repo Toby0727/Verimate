@@ -15,7 +15,8 @@
       "!build",
       "!legacy",
       "!public/vendor",
-      "!.specify"
+      "!.specify",
+      "!docs/brand/intro"
     ]
   },
   "formatter": {

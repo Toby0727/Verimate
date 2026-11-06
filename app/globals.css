@@ -298,3 +298,508 @@
     box-shadow: 0 0 0 6px rgb(248 103 46 / 0);
   }
 }
+
+/* First-visit intro (components/waitlist/intro-animation.tsx), 2026-11-06
+   v4 "meeting point". The overlay is in the server HTML but hidden unless
+   the inline INTRO_SCRIPT set <html data-intro="play">, so it is there from
+   the first paint. Every animation holds on its first frame until the
+   script adds data-intro-run. One timeline: each element's animation starts
+   at its own --t (ms) and leaves at its --u, so frames can be scrubbed with
+   document.getAnimations(). Every animated element sets its own --t;
+   otherwise it would inherit its parent's.
+   Motion rules (from the references in docs/journal.md): three curves, no
+   overshoot; only transform, opacity and stroke-dashoffset animate (plus
+   clip-path for the house widening, offset-distance for the coins and one
+   wiggle on the speech bubbles, asked for after review); nothing
+   blurs, glows, shakes or flashes; nothing toggles visibility with steps()
+   (a finished animation can stop at 99.9999%, see AGENTS.md). */
+.intro {
+  /* Entrances; exits; things that draw or travel on screen. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-move: cubic-bezier(0.65, 0, 0.45, 1);
+  /* The figure (228px) and type under it (about 242px) sit in the middle. */
+  --fig-top: max(64px, calc((100vh - 470px) / 2));
+  display: none;
+  /* Gone at the end even if the script that hides it runs late. */
+  animation: intro-off 1ms linear calc(var(--t) * 1ms) forwards;
+}
+@supports (height: 100svh) {
+  .intro {
+    --fig-top: max(64px, calc((100svh - 470px) / 2));
+  }
+}
+html[data-intro="play"] .intro,
+html[data-intro="skip"] .intro {
+  display: block;
+}
+/* The page underneath doesn't scroll while the intro is up. The scrollbar's
+   space stays reserved (during and after), so the centred column doesn't
+   shift when the scrollbar comes back on desktop. */
+html[data-intro="play"],
+html[data-intro="skip"] {
+  overflow: hidden;
+}
+html[data-intro] {
+  scrollbar-gutter: stable;
+}
+/* Until the overlay starts to leave, the page underneath is hidden from
+   screen readers and the tab order (it's covered anyway), and the raffle
+   card's entrance waits so it plays as the page is revealed. */
+html[data-intro="play"]:not([data-intro-out]) .intro ~ * {
+  visibility: hidden;
+}
+html[data-intro="play"]:not([data-intro-out]) .hype-pop {
+  animation-play-state: paused;
+}
+html[data-intro-out] .intro {
+  pointer-events: none;
+}
+/* The page logo's own check stays hidden while the intro's check flies into
+   its place; it shows (in the same frame the overlay goes) at the end. */
+html[data-intro="play"]:not([data-intro-nofly]) [data-logo-mark] {
+  opacity: 0;
+}
+/* Hold everything on the first frame until the font is ready. */
+html[data-intro="play"]:not([data-intro-run]) .intro,
+html[data-intro="play"]:not([data-intro-run]) .intro * {
+  animation-play-state: paused;
+}
+html[data-intro="skip"] .intro {
+  animation: intro-skip 280ms ease forwards;
+}
+/* The page's own grey, under everything, until the page shows through. */
+.intro-bg {
+  position: absolute;
+  inset: 0;
+  background: #f2f2f4;
+  animation: intro-fade-out 400ms var(--ease-move) calc(var(--t) * 1ms) forwards;
+}
+/* Skip goes with the grey, so it can't be pressed once the page shows. */
+.intro-hide {
+  animation: intro-hide 400ms var(--ease-move) calc(var(--t) * 1ms) forwards;
+}
+
+/* Layout: a fixed 342 × 228 figure, and one slot for type under it. */
+.intro-figure {
+  position: absolute;
+  top: var(--fig-top);
+  left: calc(50% - 171px);
+  width: 342px;
+  height: 228px;
+}
+.intro-copy {
+  position: absolute;
+  top: calc(var(--fig-top) + 296px);
+  left: calc(50% - 171px);
+  display: grid;
+  width: 342px;
+}
+.intro-lines {
+  grid-area: 1 / 1;
+}
+.intro-display {
+  --rise: 800ms;
+  font-weight: 700;
+  font-size: min(60px, 15.4vw);
+  line-height: 0.96;
+  letter-spacing: -0.045em;
+}
+.intro-headline {
+  --rise: 700ms;
+  font-weight: 600;
+  font-size: min(38px, 9.8vw);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+/* A line rises out of its mask, and later leaves upward through it. The
+   mask has room above and below so ascenders and descenders aren't cut. */
+.intro-line {
+  display: block;
+  overflow: hidden;
+  margin: -0.08em 0 -0.32em;
+  padding: 0.08em 0 0.32em;
+  white-space: nowrap;
+}
+.intro-line-in {
+  display: block;
+  animation:
+    intro-rise var(--rise) var(--ease-out) calc(var(--t) * 1ms) both,
+    intro-leave 300ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+
+/* The figure */
+/* What each of the two students needs: a white speech bubble over their
+   block, its tail pointing down at them. It grows out of the tail. */
+.intro-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #bf4306;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 34px;
+  white-space: nowrap;
+  transform-origin: 39px 100%;
+  animation:
+    intro-label-in 500ms var(--ease-out) calc(var(--t) * 1ms) both,
+    intro-wiggle 600ms ease-in-out calc(var(--w) * 1ms),
+    intro-fade-out 200ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+.intro-label::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 34px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #fff;
+  rotate: 45deg;
+}
+.intro-label-right {
+  transform-origin: calc(100% - 39px) 100%;
+}
+.intro-label-right::after {
+  right: 34px;
+  left: auto;
+}
+.intro-badge {
+  display: flex;
+  animation: intro-dot-in 400ms var(--ease-out) calc(var(--t) * 1ms) both;
+}
+.intro-block {
+  position: relative;
+  width: 78px;
+  height: 104px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+}
+.intro-block-in {
+  position: relative;
+  animation: intro-block-in 600ms var(--ease-out) calc(var(--t) * 1ms) both;
+}
+.intro-block-out {
+  animation: intro-fade-out 300ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+/* A student: a small ink figure in the middle of a block. */
+.intro-person {
+  position: absolute;
+  top: 52px;
+  left: 39px;
+  translate: -50% -50%;
+  animation: intro-dot-in 450ms var(--ease-out) calc(var(--t) * 1ms) both;
+}
+.intro-person-leave {
+  animation:
+    intro-dot-in 450ms var(--ease-out) calc(var(--t) * 1ms) both,
+    intro-dot-leave 360ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+.intro-person-fade {
+  animation:
+    intro-dot-in 450ms var(--ease-out) calc(var(--t) * 1ms) both,
+    intro-fade-out 200ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+/* A coin of rent on its way (offset-path set inline). Browsers without
+   offset-path (Safari before 16) just don't show the coins. */
+.intro-coin {
+  display: none;
+}
+@supports (offset-path: path("M0 0")) {
+  .intro-coin {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f8672e;
+    border-radius: 50%;
+    background: #fff;
+    color: #bf4306;
+    font-weight: 800;
+    font-size: 11px;
+    line-height: 1;
+    offset-anchor: center;
+    offset-rotate: 0deg;
+    offset-distance: 0%;
+    opacity: 0;
+    animation: intro-coin 800ms var(--ease-move) calc(var(--t) * 1ms) forwards;
+  }
+}
+.intro-rent {
+  color: #111;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation:
+    intro-rent-in 300ms var(--ease-out) calc(var(--t) * 1ms) both,
+    intro-fade-out 200ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+/* Rent covered: the room fills from the floor up. */
+.intro-fill {
+  position: absolute;
+  inset: 0;
+  background: #f8672e;
+  transform-origin: 50% 100%;
+  animation: intro-fill 650ms var(--ease-move) calc(var(--t) * 1ms) both;
+}
+.intro-room {
+  z-index: 1;
+  animation:
+    intro-slide 480ms var(--ease-move) calc(var(--t) * 1ms) forwards,
+    intro-fade-out 250ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+/* Home: the room widens into the body of a house (124 × 104, wider than
+   tall), and the roof comes down on it. The body sits under the room, the
+   same shape at first, and is invisible until it starts to widen. clip-path
+   is the one non-transform animation: it keeps the corners round while the
+   shape changes, which scaleX can't. */
+.intro-house {
+  position: absolute;
+  top: 0;
+  left: -23px;
+  width: 124px;
+  height: 104px;
+  border-radius: 16px;
+  background: #f8672e;
+  opacity: 0;
+  animation: intro-widen 450ms var(--ease-move) calc(var(--t) * 1ms) forwards;
+}
+.intro-room-shell {
+  animation: intro-fade-out 150ms linear calc(var(--u) * 1ms) forwards;
+}
+.intro-roof {
+  animation: intro-roof 500ms var(--ease-out) calc(var(--t) * 1ms) both;
+}
+/* Lines that draw themselves (paths with pathLength="1"). Hidden until they
+   start, so a round cap doesn't show as a dot. */
+.intro-route,
+.intro-reveal {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+.intro-route {
+  animation:
+    intro-draw 700ms var(--ease-move) calc(var(--t) * 1ms) forwards,
+    intro-fade-out 300ms var(--ease-in) calc(var(--u) * 1ms) forwards;
+}
+.intro-reveal {
+  animation: intro-draw var(--ms) var(--ease-move) calc(var(--t) * 1ms) forwards;
+}
+/* The check flies into the page logo's check. INTRO_SCRIPT measures both
+   and sets --fly-x, --fly-y and --fly-s; without a logo to land on
+   (data-intro-nofly) it fades with the grey instead. */
+.intro-fly {
+  width: 56px;
+  height: 56px;
+  transform-origin: 0 0;
+  animation: intro-fly 500ms var(--ease-move) calc(var(--t) * 1ms) both;
+}
+html[data-intro-nofly] .intro-fly {
+  animation: intro-fade-out 400ms var(--ease-move) calc(var(--u) * 1ms) forwards;
+}
+
+@keyframes intro-off {
+  from,
+  to {
+    visibility: hidden;
+  }
+}
+@keyframes intro-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes intro-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes intro-rise {
+  from {
+    transform: translateY(calc(100% + 0.4em));
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes intro-leave {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(calc(-100% - 0.4em));
+  }
+}
+@keyframes intro-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* The bubble shakes once when its check arrives (rotate, so it adds to the
+   entrance's transform). */
+@keyframes intro-wiggle {
+  15% {
+    rotate: -7deg;
+  }
+  35% {
+    rotate: 6deg;
+  }
+  55% {
+    rotate: -4deg;
+  }
+  75% {
+    rotate: 2deg;
+  }
+  from,
+  to {
+    rotate: 0deg;
+  }
+}
+@keyframes intro-coin {
+  from {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8%,
+  86% {
+    opacity: 1;
+  }
+  to {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+@keyframes intro-block-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-dot-leave {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+@keyframes intro-rent-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-draw {
+  from {
+    opacity: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes intro-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes intro-slide {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateX(132px);
+  }
+}
+@keyframes intro-widen {
+  from {
+    opacity: 1;
+    clip-path: inset(0 23px round 16px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 round 16px);
+  }
+}
+@keyframes intro-roof {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-fly {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(var(--fly-x, 0px), var(--fly-y, 0px))
+      scale(var(--fly-s, 1));
+  }
+}
+/* Hidden by 95%, not only at 100% (see intro-off). */
+@keyframes intro-hide {
+  95%,
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes intro-skip {
+  95%,
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
