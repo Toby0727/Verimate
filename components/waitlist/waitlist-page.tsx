@@ -1,14 +1,21 @@
 "use client";
 
 import {
+  CalendarDays,
+  Camera,
   Cannabis,
   Check,
   Cigarette,
   Gift,
+  Heart,
   Landmark,
   Loader2,
+  type LucideIcon,
+  MapPin,
   Moon,
   PawPrint,
+  Plane,
+  Smile,
   Sparkles,
   Users,
   Wine,
@@ -30,12 +37,10 @@ import {
   isStepDone,
   MAJOR_MAX_LENGTH,
   NAME_MAX_LENGTH,
-  needsCurrentHome,
   normalizeReferralCode,
   normalizeSource,
   raffleBoost,
   raffleEntries,
-  setAbroadPlace,
   stepsLeft,
   toggle,
   toggleAbroad,
@@ -73,7 +78,6 @@ import {
 } from "@/lib/waitlist/options";
 import { AreaListings } from "./area-listings";
 import { AreaMap } from "./area-map";
-import { CurrentHome } from "./current-home";
 import { HobbyPicker } from "./hobby-picker";
 import { IntroAnimation } from "./intro-animation";
 import { MultiChips } from "./multi-chips";
@@ -133,13 +137,15 @@ export function WaitlistPage() {
   }, []);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-background">
+    // One column on phones; on a computer the page widens to 1120px and
+    // the survey gets a side panel with every step and the prize.
+    <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-background lg:max-w-[1120px] lg:px-8">
       <IntroAnimation />
-      <header className="flex items-center justify-between px-4 pt-5 pb-2">
+      <header className="flex items-center justify-between px-4 pt-5 pb-2 lg:px-0 lg:pt-8">
         <Logo className="h-8 w-auto" />
         <RafflePill />
       </header>
-      <main className="flex flex-1 flex-col gap-4 p-4">
+      <main className="flex flex-1 flex-col gap-4 p-4 lg:px-0 lg:py-8">
         {view.kind === "loading" ? (
           <div className="flex flex-1 items-center justify-center text-muted-foreground">
             <Loader2 className="size-5 animate-spin" />
@@ -220,20 +226,20 @@ function Landing() {
   const inApp = useInAppBrowser();
   const [tryAnyway, setTryAnyway] = useState(false);
   return (
-    <div className="flex flex-col gap-8 pt-2">
-      <section className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8 pt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-20 lg:pt-10">
+      <section className="flex flex-col gap-5 lg:gap-7">
         <span className="font-semibold text-[11px] text-verified uppercase tracking-[0.2em]">
           SU & ESF · Launching soon
         </span>
-        <h1 className="font-semibold text-[36px] leading-[1.05] tracking-[-0.03em]">
+        <h1 className="font-semibold text-[36px] leading-[1.05] tracking-[-0.03em] lg:text-[60px]">
           Building the most complete{" "}
           <span className="text-verified">sublet + roommate</span> matching for
           off-campus living.
         </h1>
-        <p className="max-w-[34ch] text-[16px] text-muted-foreground leading-relaxed">
+        <p className="max-w-[34ch] text-[16px] text-muted-foreground leading-relaxed lg:text-[18px]">
           For SU & ESF students. Join the waitlist in about a minute.
         </p>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 lg:max-w-[440px]">
           {inApp && !tryAnyway ? (
             <OpenInBrowser
               browser={inApp}
@@ -254,33 +260,35 @@ function Landing() {
         </div>
       </section>
 
-      <GiftCard />
+      <div className="flex flex-col gap-8">
+        <GiftCard />
 
-      <section className="flex flex-col">
-        <h2 className="pb-3 font-semibold text-[11px] text-muted-foreground uppercase tracking-[0.2em]">
-          What you get for joining
-        </h2>
-        <ol className="flex flex-col border-border border-t">
-          {PERKS.map((perk, i) => (
-            <li
-              key={perk.title}
-              className="grid grid-cols-[2.25rem_1fr] gap-x-3 border-border border-b py-4"
-            >
-              <span className="font-semibold text-[15px] text-verified tabular-nums leading-6">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="flex flex-col gap-1">
-                <span className="font-semibold text-[16px] leading-tight">
-                  {perk.title}
+        <section className="flex flex-col">
+          <h2 className="pb-3 font-semibold text-[11px] text-muted-foreground uppercase tracking-[0.2em]">
+            What you get for joining
+          </h2>
+          <ol className="flex flex-col border-border border-t">
+            {PERKS.map((perk, i) => (
+              <li
+                key={perk.title}
+                className="grid grid-cols-[2.25rem_1fr] gap-x-3 border-border border-b py-4"
+              >
+                <span className="font-semibold text-[15px] text-verified tabular-nums leading-6">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className="text-[14px] text-muted-foreground leading-snug">
-                  {perk.body}
+                <span className="flex flex-col gap-1">
+                  <span className="font-semibold text-[16px] leading-tight">
+                    {perk.title}
+                  </span>
+                  <span className="text-[14px] text-muted-foreground leading-snug">
+                    {perk.body}
+                  </span>
                 </span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
     </div>
   );
 }
@@ -340,15 +348,62 @@ function ErrorCard() {
   );
 }
 
-const STEP_TITLES: Record<WaitlistStep, string> = {
-  about: "About you",
-  budget: "What's your monthly rent budget?",
-  areas: "Where would you like to live?",
-  abroad: "Planning to study abroad?",
-  timing: "When do you need housing help?",
-  lifestyle: "Quick lifestyle check",
-  hobbies: "What are you into?",
+// Each step's short label and icon (side panel), title and one friendly line.
+const STEP_COPY: Record<
+  WaitlistStep,
+  { short: string; icon: LucideIcon; title: string; hint: string }
+> = {
+  about: {
+    short: "The basics",
+    icon: Smile,
+    title: "Let's start with the basics",
+    hint: "Three quick answers and you're rolling.",
+  },
+  place: {
+    short: "Budget & area",
+    icon: MapPin,
+    title: "Where, and for how much?",
+    hint: "Pick your rent range, then tap every area you'd live in.",
+  },
+  abroad: {
+    short: "Study abroad",
+    icon: Plane,
+    title: "Planning to study abroad?",
+    hint: "Away for a term? Someone could take over your room.",
+  },
+  timing: {
+    short: "Timing",
+    icon: CalendarDays,
+    title: "When do you need housing help?",
+    hint: "Tap the terms that apply. Skip what you don't need.",
+  },
+  lifestyle: {
+    short: "Lifestyle",
+    icon: Sparkles,
+    title: "Quick lifestyle check",
+    hint: "No wrong answers. It's how we find people you'll vibe with.",
+  },
+  hobbies: {
+    short: "Hobbies",
+    icon: Heart,
+    title: "What are you into?",
+    hint: "Tap everything you like, or add your own.",
+  },
+  profile: {
+    short: "Your profile",
+    icon: Camera,
+    title: "Last touch: make it yours",
+    hint: "All optional. A photo gets you a bonus raffle entry.",
+  },
 };
+
+// Step 1 greets them by the first name from their Google account.
+function stepTitle(step: WaitlistStep, name: string | null): string {
+  const first = name?.trim().split(/\s+/)[0];
+  return step === "about" && first
+    ? `Hey ${first}! Let's start with the basics`
+    : STEP_COPY[step].title;
+}
 
 function Survey({
   session,
@@ -425,46 +480,170 @@ function Survey({
     }
   }
 
+  const copy = STEP_COPY[step];
+  const left = stepsLeft(session.answers);
+  const entered = session.completedAt !== null;
+  const open = firstOpenStep(session.answers);
+
   return (
-    <>
-      <Progress
-        index={index}
-        // Counts this step until it's saved.
-        left={stepsLeft(session.answers)}
-        entered={session.completedAt !== null}
+    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start lg:gap-14">
+      <StepRail
+        current={index}
+        // Answered steps and the first open one can be jumped to.
+        reachable={
+          open ? WAITLIST_STEPS.indexOf(open) : WAITLIST_STEPS.length - 1
+        }
+        left={left}
+        entered={entered}
+        disabled={saving}
+        onPick={(i) => onStep(WAITLIST_STEPS[i], { ...session, answers })}
       />
 
-      <section className="flex flex-col gap-5 rounded-2xl bg-card p-5">
-        <h1 className="font-semibold text-[22px] leading-tight tracking-tight">
-          {STEP_TITLES[step]}
-        </h1>
-        <StepFields step={step} session={session} answers={answers} set={set} />
-      </section>
+      <div className="flex min-w-0 flex-col gap-4 lg:max-w-[640px]">
+        <div className="lg:hidden">
+          <Progress
+            index={index}
+            // Counts this step until it's saved.
+            left={left}
+            entered={entered}
+          />
+        </div>
 
-      <div className="flex gap-2">
-        {index > 0 ? (
+        <section
+          key={step}
+          className="fade-in-0 slide-in-from-bottom-3 flex animate-in flex-col gap-5 rounded-2xl bg-card p-5 duration-300 motion-reduce:animate-none lg:p-8"
+        >
+          <div className="flex flex-col gap-2">
+            <span className="inline-flex items-center gap-2 font-semibold text-[11px] text-verified uppercase tracking-[0.2em]">
+              <copy.icon className="size-3.5" strokeWidth={2.4} aria-hidden />
+              {copy.short}
+            </span>
+            <h1 className="font-semibold text-[24px] leading-tight tracking-tight lg:text-[30px]">
+              {stepTitle(step, answers.name)}
+            </h1>
+            <p className="text-[14px] text-muted-foreground lg:text-[15px]">
+              {copy.hint}
+            </p>
+          </div>
+          <StepFields
+            step={step}
+            session={session}
+            answers={answers}
+            set={set}
+          />
+        </section>
+
+        <div className="flex gap-2">
+          {index > 0 ? (
+            <Button
+              size="lg"
+              variant="outline"
+              disabled={saving}
+              onClick={() =>
+                onStep(WAITLIST_STEPS[index - 1], { ...session, answers })
+              }
+            >
+              Back
+            </Button>
+          ) : null}
           <Button
             size="lg"
-            variant="outline"
-            disabled={saving}
-            onClick={() =>
-              onStep(WAITLIST_STEPS[index - 1], { ...session, answers })
-            }
+            className="flex-1"
+            disabled={saving || !isStepDone(step, answers)}
+            onClick={next}
           >
-            Back
+            {saving ? <Loader2 className="animate-spin" /> : null}
+            {isLast
+              ? "Submit and enter the raffle"
+              : index === 0
+                ? "Let's go"
+                : "Continue"}
           </Button>
-        ) : null}
-        <Button
-          size="lg"
-          className="flex-1"
-          disabled={saving || !isStepDone(step, answers)}
-          onClick={next}
-        >
-          {saving ? <Loader2 className="animate-spin" /> : null}
-          {isLast ? "Submit and enter the raffle" : "Continue"}
-        </Button>
+        </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+// Computer only: every step down the side, ticked once answered.
+function StepRail({
+  current,
+  reachable,
+  left,
+  entered,
+  disabled,
+  onPick,
+}: {
+  current: number;
+  reachable: number;
+  left: number;
+  entered: boolean;
+  disabled: boolean;
+  onPick: (index: number) => void;
+}) {
+  return (
+    <aside className="hidden flex-col gap-6 lg:sticky lg:top-8 lg:flex">
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-[28px] leading-[1.1] tracking-[-0.02em]">
+          Find your <span className="text-verified">sublet + roommate</span>{" "}
+          match.
+        </span>
+        <span className="text-[14px] text-muted-foreground">
+          {entered
+            ? "You're already in the raffle."
+            : left <= 1
+              ? "Last step to enter the raffle!"
+              : `${left} quick steps to enter the raffle.`}
+        </span>
+      </div>
+      <ol className="flex flex-col gap-1">
+        {WAITLIST_STEPS.map((step, i) => {
+          const here = i === current;
+          // Ticked up to the first open step (the optional last step only
+          // once they're entered).
+          const done = !here && (entered || i < reachable);
+          const locked = i > reachable && !entered;
+          const Icon = STEP_COPY[step].icon;
+          return (
+            <li key={step}>
+              <button
+                type="button"
+                disabled={disabled || here || locked}
+                aria-current={here ? "step" : undefined}
+                onClick={() => onPick(i)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[15px] transition-colors",
+                  here
+                    ? "bg-card font-semibold shadow-sm"
+                    : locked
+                      ? "text-muted-foreground"
+                      : "hover:bg-card/70",
+                )}
+              >
+                <span
+                  className={cn(
+                    "grid size-7 shrink-0 place-items-center rounded-full",
+                    done
+                      ? "bg-verified-fill text-foreground"
+                      : here
+                        ? "bg-foreground text-background"
+                        : "bg-muted",
+                  )}
+                >
+                  {done ? (
+                    <Check className="size-4" strokeWidth={3} aria-hidden />
+                  ) : (
+                    <Icon className="size-3.5" strokeWidth={2.4} aria-hidden />
+                  )}
+                </span>
+                {STEP_COPY[step].short}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <GiftCard />
+    </aside>
   );
 }
 
@@ -541,8 +720,7 @@ function StepFields({
     case "about":
       return (
         <>
-          {session.school === null && <SchoolNudge />}
-          <Question label="Name">
+          <Question label="What should we call you?">
             <Input
               aria-label="Name"
               placeholder="First and last name"
@@ -550,6 +728,14 @@ function StepFields({
               maxLength={NAME_MAX_LENGTH}
               value={answers.name ?? ""}
               onChange={(e) => set({ name: e.target.value || null })}
+            />
+          </Question>
+          <Question label="What year are you?">
+            <ChoiceChips
+              label="Year"
+              options={[...YEARS]}
+              value={answers.year}
+              onChange={(year) => set({ year })}
             />
           </Question>
           <Question label="Gender">
@@ -560,131 +746,75 @@ function StepFields({
               onChange={(gender) => set({ gender })}
             />
           </Question>
-          <PhotoPicker
-            session={session}
-            path={answers.photoPath}
-            onChange={(photoPath) => set({ photoPath })}
-          />
-          <Question label="Year">
-            <ChoiceChips
-              label="Year"
-              options={[...YEARS]}
-              value={answers.year}
-              onChange={(year) => set({ year })}
-            />
-          </Question>
-          <Question label="Major">
-            <Input
-              aria-label="Major"
-              placeholder="e.g. Information Management"
-              maxLength={MAJOR_MAX_LENGTH}
-              value={answers.major ?? ""}
-              onChange={(e) => set({ major: e.target.value || null })}
-            />
-          </Question>
-          <Question label="Referral code (optional)">
-            <Input
-              aria-label="Referral code"
-              placeholder="From a friend, e.g. 3F9A2C"
-              autoCapitalize="characters"
-              autoComplete="off"
-              spellCheck={false}
-              className="font-mono tracking-[0.15em] uppercase"
-              value={answers.referredBy ?? ""}
-              onChange={(e) =>
-                set({
-                  referredBy: normalizeReferralCode(e.target.value) || null,
-                })
+        </>
+      );
+    case "place":
+      return (
+        <>
+          <Question label="Monthly rent, per person. Pick all that work.">
+            <MultiChips
+              label="Budget"
+              options={BUDGETS}
+              value={answers.budget}
+              onToggle={(budget) =>
+                set({ budget: toggle(answers.budget, budget) })
               }
             />
-            <span className="text-[12px] text-muted-foreground">
-              Your friend gets a 10% better chance to win when you finish on
-              your school account.
-            </span>
+          </Question>
+          <Question label="Tap every area on the map that works for you">
+            <AreaMap
+              value={answers.areas}
+              onToggle={(area) =>
+                set({ areas: toggleArea(answers.areas, area) })
+              }
+            />
+            <MultiChips
+              label="Areas"
+              options={AREAS}
+              value={answers.areas}
+              onToggle={(area) =>
+                set({ areas: toggleArea(answers.areas, area) })
+              }
+            />
+            <AreaListings areas={answers.areas} />
           </Question>
         </>
       );
-    case "budget":
-      return (
-        <Question label="Per person, per month. Pick all that work.">
-          <MultiChips
-            label="Budget"
-            options={BUDGETS}
-            value={answers.budget}
-            onToggle={(budget) =>
-              set({ budget: toggle(answers.budget, budget) })
-            }
-          />
-        </Question>
-      );
-    case "areas":
-      return (
-        <Question label="Tap every area on the map that works for you">
-          <AreaMap
-            value={answers.areas}
-            onToggle={(area) => set({ areas: toggleArea(answers.areas, area) })}
-          />
-          <MultiChips
-            label="Areas"
-            options={AREAS}
-            value={answers.areas}
-            onToggle={(area) => set({ areas: toggleArea(answers.areas, area) })}
-          />
-          <AreaListings areas={answers.areas} />
-        </Question>
-      );
     case "abroad":
       return (
-        <Question label="Pick every term you'll be away and where. You may need to sublet your place.">
+        <Question label="Pick every term you'll be away.">
           <AbroadPlanList
             studyAbroad={answers.studyAbroad}
             plans={answers.studyAbroadPlans}
             onToggle={(value) =>
               set(toggleAbroad(answers.studyAbroadPlans, value))
             }
-            onPlace={(term, place) =>
-              set({
-                studyAbroadPlans: setAbroadPlace(
-                  answers.studyAbroadPlans ?? [],
-                  term,
-                  place,
-                ),
-              })
-            }
           />
         </Question>
       );
     case "timing":
       return (
-        <>
-          <TimingGrid
-            away={answers.studyAbroadPlans}
-            columns={[
-              {
-                label: "Sublet my place",
-                value: answers.subletOutTerms,
-                initial: answers.studyAbroadPlans?.map((plan) => plan.term),
-                onChange: (subletOutTerms) => set({ subletOutTerms }),
-              },
-              {
-                label: "Find a sublet",
-                value: answers.subletInTerms,
-                onChange: (subletInTerms) => set({ subletInTerms }),
-              },
-              {
-                label: "Find roommates",
-                value: answers.roommateTerms,
-                onChange: (roommateTerms) => set({ roommateTerms }),
-              },
-            ]}
-          />
-          {needsCurrentHome(answers) ? (
-            <CurrentHome
-              value={answers.currentHome}
-              onChange={(currentHome) => set({ currentHome })}
-            />
-          ) : null}
-        </>
+        <TimingGrid
+          away={answers.studyAbroadPlans}
+          columns={[
+            {
+              label: "Sublet my place",
+              value: answers.subletOutTerms,
+              initial: answers.studyAbroadPlans?.map((plan) => plan.term),
+              onChange: (subletOutTerms) => set({ subletOutTerms }),
+            },
+            {
+              label: "Find a sublet",
+              value: answers.subletInTerms,
+              onChange: (subletInTerms) => set({ subletInTerms }),
+            },
+            {
+              label: "Find roommates",
+              value: answers.roommateTerms,
+              onChange: (roommateTerms) => set({ roommateTerms }),
+            },
+          ]}
+        />
       );
     case "lifestyle":
       return (
@@ -766,6 +896,46 @@ function StepFields({
           />
         </Question>
       );
+    case "profile":
+      return (
+        <>
+          {session.school === null && <SchoolNudge />}
+          <PhotoPicker
+            session={session}
+            path={answers.photoPath}
+            onChange={(photoPath) => set({ photoPath })}
+          />
+          <Question label="Major (optional)">
+            <Input
+              aria-label="Major"
+              placeholder="e.g. Information Management"
+              maxLength={MAJOR_MAX_LENGTH}
+              value={answers.major ?? ""}
+              onChange={(e) => set({ major: e.target.value || null })}
+            />
+          </Question>
+          <Question label="Referral code (optional)">
+            <Input
+              aria-label="Referral code"
+              placeholder="From a friend, e.g. 3F9A2C"
+              autoCapitalize="characters"
+              autoComplete="off"
+              spellCheck={false}
+              className="font-mono tracking-[0.15em] uppercase"
+              value={answers.referredBy ?? ""}
+              onChange={(e) =>
+                set({
+                  referredBy: normalizeReferralCode(e.target.value) || null,
+                })
+              }
+            />
+            <span className="text-[12px] text-muted-foreground">
+              Your friend gets a 10% better chance to win when you finish on
+              your school account.
+            </span>
+          </Question>
+        </>
+      );
   }
 }
 
@@ -801,8 +971,9 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
   }
 
   return (
-    <>
-      <div className="relative">
+    // Prize on the left, everything else on the right on a computer.
+    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[420px_minmax(0,1fr)] lg:items-start lg:gap-10">
+      <div className="relative lg:sticky lg:top-8">
         <Confetti />
         <GiftCard
           entries={raffleEntries(session.answers)}
@@ -811,45 +982,47 @@ function Done({ session, onEdit }: { session: SignedIn; onEdit: () => void }) {
           )}
         />
       </div>
-      <section className="flex flex-col gap-4 rounded-2xl bg-card p-5">
-        <ProfileCard answers={session.answers} school={session.school} />
-        <div className="h-px bg-border" />
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="hype-pop grid size-12 place-items-center rounded-full bg-verified-fill text-white">
-            <Check className="size-6" strokeWidth={3} />
-          </span>
-          <h1 className="font-semibold text-[24px] tracking-tight">
-            You're entered!
-          </h1>
-          <p className="text-[15px] text-muted-foreground">
-            You're on the Verimate waitlist and in the {RAFFLE.prize} raffle
-            with {entriesText(session)}. Entries close {RAFFLE.endsLabel}, and
-            we'll email you the result. Your first month of Verimate is free
-            when we launch.
-          </p>
-        </div>
-      </section>
-      {session.school === null && <SchoolNudge />}
-      <ReferralCard code={session.referralCode} friends={friends} />
+      <div className="flex min-w-0 flex-col gap-4">
+        <section className="flex flex-col gap-4 rounded-2xl bg-card p-5">
+          <ProfileCard answers={session.answers} school={session.school} />
+          <div className="h-px bg-border" />
+          <div className="flex flex-col items-center gap-3 text-center">
+            <span className="hype-pop grid size-12 place-items-center rounded-full bg-verified-fill text-white">
+              <Check className="size-6" strokeWidth={3} />
+            </span>
+            <h1 className="font-semibold text-[24px] tracking-tight">
+              You're entered!
+            </h1>
+            <p className="text-[15px] text-muted-foreground">
+              You're on the Verimate waitlist and in the {RAFFLE.prize} raffle
+              with {entriesText(session)}. Entries close {RAFFLE.endsLabel}, and
+              we'll email you the result. Your first month of Verimate is free
+              when we launch.
+            </p>
+          </div>
+        </section>
+        {session.school === null && <SchoolNudge />}
+        <ReferralCard code={session.referralCode} friends={friends} />
 
-      <div className="flex flex-col gap-2">
-        <Button size="lg" onClick={share}>
-          Share my invite link
-        </Button>
-        <Button size="lg" variant="outline" onClick={onEdit}>
-          Edit my answers
-        </Button>
-        <button
-          type="button"
-          className="py-2 text-[13px] text-muted-foreground underline"
-          onClick={async () => {
-            await signOutOfGoogle();
-            window.location.assign(WAITLIST_PATH);
-          }}
-        >
-          Sign out
-        </button>
+        <div className="flex flex-col gap-2">
+          <Button size="lg" onClick={share}>
+            Share my invite link
+          </Button>
+          <Button size="lg" variant="outline" onClick={onEdit}>
+            Edit my answers
+          </Button>
+          <button
+            type="button"
+            className="py-2 text-[13px] text-muted-foreground underline"
+            onClick={async () => {
+              await signOutOfGoogle();
+              window.location.assign(WAITLIST_PATH);
+            }}
+          >
+            Sign out
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

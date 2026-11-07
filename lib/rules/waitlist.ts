@@ -46,14 +46,14 @@ export type WaitlistAnswers = {
   budget: Budget[] | null;
   areas: Area[] | null;
   studyAbroad: StudyAbroad | null;
-  // One entry per term away, each with where (null until picked). Null when
-  // there's no term away; studyAbroad then holds "no" or "not-sure", and
-  // otherwise the earliest term.
+  // One entry per term away. Null when there's no term away; studyAbroad
+  // then holds "no" or "not-sure", and otherwise the earliest term. The
+  // survey stopped asking where (2026-11-06); older answers keep a place.
   studyAbroadPlans: AbroadPlan[] | null;
   // Empty array means "not needed"; null means not answered yet.
   subletOutTerms: Term[] | null;
   // Where they live now: a building from APARTMENTS or what they typed.
-  // Asked only when they want to sublet their place out (2026-11-05).
+  // Asked 2026-11-05 to 2026-11-06 only; kept for those who answered.
   currentHome: string | null;
   subletInTerms: Term[] | null;
   roommateTerms: Term[] | null;
@@ -98,20 +98,22 @@ export const EMPTY_ANSWERS: WaitlistAnswers = {
   customHobbies: null,
 };
 
+// Step 1 is kept short (name, year, gender) so it's quick to get going;
+// budget and areas share one page; the optional photo, major and referral
+// code are the last page (2026-11-06).
 export const WAITLIST_STEPS = [
   "about",
-  "budget",
-  "areas",
+  "place",
   "abroad",
   "timing",
   "lifestyle",
   "hobbies",
+  "profile",
 ] as const;
 export type WaitlistStep = (typeof WAITLIST_STEPS)[number];
 
 export const NAME_MAX_LENGTH = 80;
 export const MAJOR_MAX_LENGTH = 80;
-export const HOME_MAX_LENGTH = 120;
 
 // Text a spreadsheet would run as a formula when the team exports the data
 // (the database refuses it too, as it does for names and majors).
@@ -124,30 +126,26 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
   switch (step) {
     case "about":
       return (
-        filled(a.name, NAME_MAX_LENGTH) &&
-        (a.referredBy === null || isReferralCode(a.referredBy)) &&
-        a.gender !== null &&
-        a.year !== null &&
-        filled(a.major, MAJOR_MAX_LENGTH)
+        filled(a.name, NAME_MAX_LENGTH) && a.gender !== null && a.year !== null
       );
-    case "budget":
-      return a.budget !== null && a.budget.length > 0;
-    case "areas":
-      return a.areas !== null && a.areas.length > 0;
+    case "place":
+      return (
+        a.budget !== null &&
+        a.budget.length > 0 &&
+        a.areas !== null &&
+        a.areas.length > 0
+      );
     case "abroad":
       return (
         a.studyAbroad !== null &&
         (!isAwayTerm(a.studyAbroad) ||
-          (a.studyAbroadPlans !== null &&
-            a.studyAbroadPlans.length > 0 &&
-            a.studyAbroadPlans.every((plan) => plan.place !== null)))
+          (a.studyAbroadPlans !== null && a.studyAbroadPlans.length > 0))
       );
     case "timing":
       return (
         a.subletOutTerms !== null &&
         a.subletInTerms !== null &&
-        a.roommateTerms !== null &&
-        (!needsCurrentHome(a) || isHomeFilled(a.currentHome))
+        a.roommateTerms !== null
       );
     case "lifestyle":
       return (
@@ -162,23 +160,24 @@ export function isStepDone(step: WaitlistStep, a: WaitlistAnswers): boolean {
       );
     case "hobbies":
       return hobbyCount(a) > 0;
+    case "profile":
+      // Everything here is optional; only a half-typed referral code or a
+      // major the database would refuse holds it up.
+      return (
+        (a.referredBy === null || isReferralCode(a.referredBy)) &&
+        isMajorOk(a.major)
+      );
   }
 }
 
-// "Where do you live now?" shows once they tick any "Sublet my place" term.
-export function needsCurrentHome(a: WaitlistAnswers): boolean {
-  return (a.subletOutTerms?.length ?? 0) > 0;
-}
-
-function isHomeFilled(home: string | null): boolean {
-  return filled(home, HOME_MAX_LENGTH) && !looksLikeFormula(home ?? "");
-}
-
-// What gets saved: their home only while they're subletting out, trimmed.
-export function homeToSave(a: WaitlistAnswers): string | null {
-  if (!needsCurrentHome(a)) return null;
-  const home = a.currentHome?.trim();
-  return home && isHomeFilled(home) ? home : null;
+// Major is optional (2026-11-06): blank is fine, otherwise it must fit and
+// not look like a spreadsheet formula.
+export function isMajorOk(major: string | null): boolean {
+  const text = major?.trim() ?? "";
+  return (
+    text.length === 0 ||
+    (text.length <= MAJOR_MAX_LENGTH && !looksLikeFormula(text))
+  );
 }
 
 export function hobbyCount(a: WaitlistAnswers): number {
@@ -269,18 +268,13 @@ export function toggleAbroad(
   return { studyAbroad: next[0].term, studyAbroadPlans: next };
 }
 
-export function setAbroadPlace(
-  plans: AbroadPlan[],
-  term: Term,
-  place: AbroadPlace,
-): AbroadPlan[] {
-  return plans.map((plan) => (plan.term === term ? { ...plan, place } : plan));
-}
-
-// Stored as "fall-2027:london" so the database can check each pair.
+// Stored as "fall-2027", or "fall-2027:london" for older answers that
+// picked a place, so the database can check each one.
 export function encodeAbroadPlans(plans: AbroadPlan[] | null): string[] | null {
   if (!plans) return null;
-  return plans.map((plan) => `${plan.term}:${plan.place ?? ""}`);
+  return plans.map((plan) =>
+    plan.place ? `${plan.term}:${plan.place}` : plan.term,
+  );
 }
 
 export function decodeAbroadPlans(
